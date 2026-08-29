@@ -60,11 +60,11 @@ class CartItem(models.Model):
         indexes = [
             models.Index(
                 fields=["cart", "created_at"],
-                name="orders_cartitem_cart_id_20a341_idx",
+                name="orders_cartitem_cart_idx",
             ),
             models.Index(
                 fields=["listing"],
-                name="orders_cartitem_listing_6dbd50_idx",
+                name="orders_cartitem_listing_idx",
             ),
         ]
 
@@ -129,15 +129,15 @@ class Order(models.Model):
         indexes = [
             models.Index(
                 fields=["user", "created_at"],
-                name="orders_order_user_id_6c1c55_idx",
+                name="orders_order_user_idx",
             ),
             models.Index(
                 fields=["status", "created_at"],
-                name="orders_order_status_5d8ca5_idx",
+                name="orders_order_status_idx",
             ),
             models.Index(
                 fields=["payment_status", "created_at"],
-                name="orders_order_payment_0f3c14_idx",
+                name="orders_order_payment_idx",
             ),
         ]
         constraints = [
@@ -260,7 +260,7 @@ class OrderStatusLog(models.Model):
         indexes = [
             models.Index(
                 fields=["order", "changed_at"],
-                name="orders_orderstatuslog_order_id_6c3f3d_idx",
+                name="orders_statuslog_order_idx",
             ),
         ]
 
