@@ -26,6 +26,11 @@ import ProfilePage from '../pages/ProfilePage';
 import VendorDashboard from '../pages/vendor/VendorDashboard';
 import VendorListings from '../pages/vendor/VendorListings';
 import VendorInventory from '../pages/vendor/VendorInventory';
+import InventoryAdjustmentPage from '../pages/vendor/InventoryAdjustmentPage';
+import CreateEditListingPage from '../pages/vendor/CreateEditListingPage';
+import VendorApplicationPage from '../pages/VendorApplicationPage';
+import AdminDashboard from '../pages/admin/AdminDashboard';
+import AdminVendorApprovalDashboard from '../pages/admin/AdminVendorApprovalDashboard';
 
 export default function Router() {
   const { isLoading, initializeAuth } = useAuthStore();
@@ -166,12 +171,54 @@ export default function Router() {
           }
         />
         <Route
+          path="/vendor/listings/new"
+          element={
+            <MainLayout>
+              <RoleRoute requiredRole="vendor">
+                <CreateEditListingPage />
+              </RoleRoute>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/vendor/listings/:id/edit"
+          element={
+            <MainLayout>
+              <RoleRoute requiredRole="vendor">
+                <CreateEditListingPage />
+              </RoleRoute>
+            </MainLayout>
+          }
+        />
+        <Route
           path="/vendor/inventory"
           element={
             <MainLayout>
               <RoleRoute requiredRole="vendor">
                 <VendorInventory />
               </RoleRoute>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/vendor/inventory/:id/adjust"
+          element={
+            <MainLayout>
+              <RoleRoute requiredRole="vendor">
+                <InventoryAdjustmentPage />
+              </RoleRoute>
+            </MainLayout>
+          }
+        />
+
+        {/* Vendor Application */}
+        <Route
+          path="/become-vendor"
+          element={
+            <MainLayout>
+              <ProtectedRoute>
+                <VendorApplicationPage />
+              </ProtectedRoute>
             </MainLayout>
           }
         />
@@ -182,7 +229,7 @@ export default function Router() {
           element={
             <MainLayout>
               <RoleRoute requiredRole="admin">
-                <ComingSoonPage title="Admin Dashboard" message="Admin dashboard coming soon." />
+                <AdminDashboard />
               </RoleRoute>
             </MainLayout>
           }
@@ -192,7 +239,7 @@ export default function Router() {
           element={
             <MainLayout>
               <RoleRoute requiredRole="admin">
-                <ComingSoonPage title="Vendor Applications" message="Vendor management coming soon." />
+                <AdminVendorApprovalDashboard />
               </RoleRoute>
             </MainLayout>
           }
@@ -202,7 +249,17 @@ export default function Router() {
           element={
             <MainLayout>
               <RoleRoute requiredRole="admin">
-                <ComingSoonPage title="All Orders" message="Orders monitoring coming soon." />
+                <ComingSoonPage title="Admin Orders" message="Orders monitoring coming soon." />
+              </RoleRoute>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/admin/listings"
+          element={
+            <MainLayout>
+              <RoleRoute requiredRole="admin">
+                <ComingSoonPage title="Listing Moderation" message="Listing management coming soon." />
               </RoleRoute>
             </MainLayout>
           }

@@ -1,71 +1,53 @@
 /**
- * Listings API endpoints - fetch, filter, search, and browse catalog.
+ * Listings API service - browse and manage listings.
  */
 
-import api from './client';
+import client from './client';
+
+const API_BASE = '/api';
 
 /**
- * Fetch listings with optional filters and search.
- * Query parameters: category, status, min_price, max_price, vendor, search, page, page_size
+ * Fetch listings from catalog with pagination and filtering
+ * @param {Object} params - { page?, page_size?, category?, min_price?, max_price?, search?, etc }
  */
 export const fetchListings = async (params = {}) => {
-  const response = await api.get('/api/listings/', { params });
+  const response = await client.get(`${API_BASE}/listings/`, { params });
   return response.data;
 };
 
 /**
- * Fetch a single listing by ID.
+ * Fetch a specific listing detail
+ * @param {string} listingId - UUID of the listing
  */
 export const fetchListingDetail = async (listingId) => {
-  const response = await api.get(`/api/listings/${listingId}/`);
+  const response = await client.get(`${API_BASE}/listings/${listingId}/`);
   return response.data;
 };
 
 /**
- * Search listings by query string.
+ * Create a new listing
+ * @param {Object} data - Listing data with category-specific details
  */
-export const searchListings = async (searchQuery, params = {}) => {
-  const response = await api.get('/api/listings/', {
-    params: { ...params, search: searchQuery },
-  });
+export const createListing = async (data) => {
+  const response = await client.post(`${API_BASE}/listings/`, data);
   return response.data;
 };
 
 /**
- * Filter listings by category/domain.
+ * Update a listing
+ * @param {string} listingId - UUID of the listing
+ * @param {Object} data - Fields to update
  */
-export const filterByCategory = async (category, params = {}) => {
-  const response = await api.get('/api/listings/', {
-    params: { ...params, category_type: category },
-  });
+export const updateListing = async (listingId, data) => {
+  const response = await client.patch(`${API_BASE}/listings/${listingId}/`, data);
   return response.data;
 };
 
 /**
- * Filter listings by price range.
+ * Delete/deactivate a listing
+ * @param {string} listingId - UUID of the listing
  */
-export const filterByPrice = async (minPrice, maxPrice, params = {}) => {
-  const response = await api.get('/api/listings/', {
-    params: { ...params, min_price: minPrice, max_price: maxPrice },
-  });
-  return response.data;
+export const deleteListing = async (listingId) => {
+  await client.delete(`${API_BASE}/listings/${listingId}/`);
 };
 
-/**
- * Filter listings by vendor.
- */
-export const filterByVendor = async (vendorId, params = {}) => {
-  const response = await api.get('/api/listings/', {
-    params: { ...params, vendor_id: vendorId },
-  });
-  return response.data;
-};
-
-export default {
-  fetchListings,
-  fetchListingDetail,
-  searchListings,
-  filterByCategory,
-  filterByPrice,
-  filterByVendor,
-};
