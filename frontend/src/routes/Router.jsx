@@ -31,6 +31,8 @@ import CreateEditListingPage from '../pages/vendor/CreateEditListingPage';
 import VendorApplicationPage from '../pages/VendorApplicationPage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminVendorApprovalDashboard from '../pages/admin/AdminVendorApprovalDashboard';
+import AdminOrders from '../pages/admin/AdminOrders';
+import AdminListings from '../pages/admin/AdminListings';
 
 export default function Router() {
   const { isLoading, initializeAuth } = useAuthStore();
@@ -249,7 +251,7 @@ export default function Router() {
           element={
             <MainLayout>
               <RoleRoute requiredRole="admin">
-                <ComingSoonPage title="Admin Orders" message="Orders monitoring coming soon." />
+                <AdminOrders />
               </RoleRoute>
             </MainLayout>
           }
@@ -259,7 +261,7 @@ export default function Router() {
           element={
             <MainLayout>
               <RoleRoute requiredRole="admin">
-                <ComingSoonPage title="Listing Moderation" message="Listing management coming soon." />
+                <AdminListings />
               </RoleRoute>
             </MainLayout>
           }
