@@ -36,6 +36,7 @@ import AdminListings from '../pages/admin/AdminListings';
 import StudentHostelRequests from '../pages/student/StudentHostelRequests';
 import WardenDashboard from '../pages/warden/WardenDashboard';
 import WardenRequestsManagement from '../pages/warden/WardenRequestsManagement';
+import WardenHostelRequestDetail from '../pages/warden/WardenHostelRequestDetail';
 
 export default function Router() {
   const { isLoading, initializeAuth } = useAuthStore();
@@ -299,6 +300,16 @@ export default function Router() {
             <MainLayout>
               <RoleRoute requiredRole="warden">
                 <WardenRequestsManagement />
+              </RoleRoute>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/warden/requests/:id"
+          element={
+            <MainLayout>
+              <RoleRoute requiredRole="warden">
+                <WardenHostelRequestDetail />
               </RoleRoute>
             </MainLayout>
           }

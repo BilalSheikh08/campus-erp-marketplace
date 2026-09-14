@@ -193,8 +193,8 @@ def transition_hostel_request(request_obj, actor, *, target_status, note=""):
                     f"Unable to reserve stock: {exc}"
                 )
 
-        # Handle inventory restoration on rejection
-        if target_status == HostelRequest.Status.REJECTED and locked.status == HostelRequest.Status.APPROVED:
+        # Handle inventory restoration on cancellation from APPROVED
+        if target_status == HostelRequest.Status.CANCELLED and locked.status == HostelRequest.Status.APPROVED:
             try:
                 inventory = Inventory.objects.select_for_update().get(
                     listing_id=locked.listing_id

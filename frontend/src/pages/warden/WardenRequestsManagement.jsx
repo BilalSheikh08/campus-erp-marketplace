@@ -73,12 +73,12 @@ export default function WardenRequestsManagement() {
 
   const getAllowedActions = (status) => {
     const actions = [];
-    if (status === 'submitted' || status === 'pending_approval') {
-      actions.push({ action: 'approve', label: 'Approve', icon: Check, color: 'bg-green-600 hover:bg-green-700' });
-      actions.push({ action: 'reject', label: 'Reject', icon: X, color: 'bg-red-600 hover:bg-red-700' });
+    if (status === 'pending_approval') {
+      actions.push({ action: 'approved', label: 'Approve', icon: Check, color: 'bg-green-600 hover:bg-green-700' });
+      actions.push({ action: 'rejected', label: 'Reject', icon: X, color: 'bg-red-600 hover:bg-red-700' });
     }
     if (status === 'approved') {
-      actions.push({ action: 'fulfill', label: 'Mark Fulfilled', icon: Package, color: 'bg-purple-600 hover:bg-purple-700' });
+      actions.push({ action: 'fulfilled', label: 'Mark Fulfilled', icon: Package, color: 'bg-purple-600 hover:bg-purple-700' });
     }
     return actions;
   };
