@@ -1,7 +1,6 @@
 """Business logic services for hostel requests."""
 
 from django.db import transaction
-from django.utils import timezone
 
 from apps.inventory.models import Inventory
 from apps.inventory.services import InventoryOperationError, decrease_stock, increase_stock

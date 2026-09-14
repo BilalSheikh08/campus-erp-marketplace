@@ -1,11 +1,10 @@
 """Phase F hostel request tests — creation, ownership, state machine, inventory, audit."""
+from apps.users.models import User
 import pytest
 from decimal import Decimal
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db import transaction
 
-from apps.users.models import User
 from apps.vendors.models import Vendor
 from apps.listings.models import Listing, HostelSupplyDetail
 from apps.inventory.models import Inventory
@@ -148,11 +147,19 @@ def test_audit_log_created_on_transition(api_client, student, warden, hostel_lis
 @pytest.mark.django_db
 def test_warden_cannot_approve_own_unassigned_after_assign(api_client, warden, hostel_listing, student):
     req = submit_hostel_request(student, hostel_listing, 1, "2026-10-01")
-    # Another warden tries to approve unassigned
+    authenticate(api_client, warden)
+    # Warden A claims unassigned request; Warden B must NOT manage assigned request (403).
+    authenticate(api_client, warden)
+    resp_claim = api_client.post(f"/api/hostel-requests/{req.id}/transition/", {
+        "target_status": "pending_approval", "note": "claim"
+    }, format="json")
+    assert resp_claim.status_code == 200
+    req.refresh_from_db()
+    assert req.assigned_warden_id == warden.id
     other_warden = User.objects.create_user(email="other-warden@example.com", password="x", name="Other", role=User.Role.WARDEN)
     authenticate(api_client, other_warden)
-    resp = api_client.post(f"/api/hostel-requests/{req.id}/transition/", {
-        "target_status": "pending_approval", "note": "bad"
+    # Warden B tries to apply a transition on a request assigned to A; must be rejected.
+    resp_trans = api_client.post(f"/api/hostel-requests/{req.id}/transition/", {
+        "target_status": "rejected", "note": "bad"
     }, format="json")
-    # Should succeed because unassigned; then first warden can approve
-    assert resp.status_code in (200, 403)
+    assert resp_trans.status_code == 403
