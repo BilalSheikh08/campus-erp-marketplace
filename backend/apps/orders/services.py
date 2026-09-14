@@ -269,6 +269,8 @@ def _is_admin(user):
     return bool(user and (user.is_superuser or user.role == user.Role.ADMIN))
 
 
+
+
 def _is_order_vendor(user, order):
     return bool(
         IsApprovedVendor.user_is_approved(user)
@@ -301,7 +303,6 @@ def _restore_order_stock(order):
                 f"Unable to restore stock for {item.title_snapshot}: {exc}"
             ) from exc
     order.stock_restored_at = timezone.now()
-
 
 def transition_order(order, actor, *, target_status, note=""):
     """Apply one authorized state transition and its audit log atomically."""

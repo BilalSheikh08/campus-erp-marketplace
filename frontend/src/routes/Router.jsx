@@ -33,6 +33,9 @@ import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminVendorApprovalDashboard from '../pages/admin/AdminVendorApprovalDashboard';
 import AdminOrders from '../pages/admin/AdminOrders';
 import AdminListings from '../pages/admin/AdminListings';
+import StudentHostelRequests from '../pages/student/StudentHostelRequests';
+import WardenDashboard from '../pages/warden/WardenDashboard';
+import WardenRequestsManagement from '../pages/warden/WardenRequestsManagement';
 
 export default function Router() {
   const { isLoading, initializeAuth } = useAuthStore();
@@ -262,6 +265,40 @@ export default function Router() {
             <MainLayout>
               <RoleRoute requiredRole="admin">
                 <AdminListings />
+              </RoleRoute>
+            </MainLayout>
+          }
+        />
+
+        {/* Protected Routes - Student: Hostel Requests */}
+        <Route
+          path="/hostel-requests"
+          element={
+            <MainLayout>
+              <ProtectedRoute>
+                <StudentHostelRequests />
+              </ProtectedRoute>
+            </MainLayout>
+          }
+        />
+
+        {/* Protected Routes - Warden */}
+        <Route
+          path="/warden/dashboard"
+          element={
+            <MainLayout>
+              <RoleRoute requiredRole="warden">
+                <WardenDashboard />
+              </RoleRoute>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/warden/requests"
+          element={
+            <MainLayout>
+              <RoleRoute requiredRole="warden">
+                <WardenRequestsManagement />
               </RoleRoute>
             </MainLayout>
           }

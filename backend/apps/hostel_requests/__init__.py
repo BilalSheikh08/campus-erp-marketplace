@@ -1,0 +1,1 @@
+default_app_config = "hostel_requests.apps.HostelRequestsConfig"
