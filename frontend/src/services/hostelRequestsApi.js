@@ -1,10 +1,10 @@
-import apiClient from './apiClient';
+import api from '../api/client.js';
 
 /**
  * Student: Submit a hostel request
  */
 export const submitHostelRequest = async (data) => {
-  const response = await apiClient.post('/hostel-requests/', data);
+  const response = await api.post('/api/hostel-requests/', data);
   return response.data;
 };
 
@@ -12,7 +12,7 @@ export const submitHostelRequest = async (data) => {
  * Student: List own hostel requests
  */
 export const fetchStudentHostelRequests = async (params = {}) => {
-  const response = await apiClient.get('/student/hostel-requests/', { params });
+  const response = await api.get('/api/hostel-requests/student/', { params });
   return response.data;
 };
 
@@ -20,7 +20,7 @@ export const fetchStudentHostelRequests = async (params = {}) => {
  * Student: Get hostel request detail
  */
 export const fetchHostelRequest = async (id) => {
-  const response = await apiClient.get(`/hostel-requests/${id}/`);
+  const response = await api.get(`/api/hostel-requests/${id}/`);
   return response.data;
 };
 
@@ -28,9 +28,7 @@ export const fetchHostelRequest = async (id) => {
  * Student: Cancel own hostel request
  */
 export const cancelHostelRequest = async (id) => {
-  const response = await apiClient.post(`/hostel-requests/${id}/transition/`, {
-    action: 'cancel',
-  });
+  const response = await api.delete(`/api/hostel-requests/${id}/`);
   return response.data;
 };
 
@@ -38,7 +36,7 @@ export const cancelHostelRequest = async (id) => {
  * Warden: List hostel requests
  */
 export const fetchWardenHostelRequests = async (params = {}) => {
-  const response = await apiClient.get('/warden/hostel-requests/', { params });
+  const response = await api.get('/api/hostel-requests/warden/', { params });
   return response.data;
 };
 
@@ -46,17 +44,17 @@ export const fetchWardenHostelRequests = async (params = {}) => {
  * Warden: Get hostel request detail
  */
 export const fetchWardenHostelRequest = async (id) => {
-  const response = await apiClient.get(`/warden/hostel-requests/${id}/`);
+  const response = await api.get(`/api/hostel-requests/warden/${id}/`);
   return response.data;
 };
 
 /**
  * Warden: Transition hostel request status
  */
-export const transitionHostelRequest = async (id, action, notes = '') => {
-  const response = await apiClient.post(`/hostel-requests/${id}/transition/`, {
-    action,
-    notes,
+export const transitionHostelRequest = async (id, targetStatus, note = '') => {
+  const response = await api.post(`/api/hostel-requests/${id}/transition/`, {
+    target_status: targetStatus,
+    note,
   });
   return response.data;
 };
@@ -65,6 +63,6 @@ export const transitionHostelRequest = async (id, action, notes = '') => {
  * Admin: List all hostel requests
  */
 export const fetchAdminHostelRequests = async (params = {}) => {
-  const response = await apiClient.get('/admin/hostel-requests/', { params });
+  const response = await api.get('/api/hostel-requests/admin/', { params });
   return response.data;
 };

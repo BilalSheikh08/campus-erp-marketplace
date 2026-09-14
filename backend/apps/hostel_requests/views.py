@@ -68,8 +68,8 @@ class HostelRequestListView(generics.ListCreateAPIView):
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
 
-class HostelRequestDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """Retrieve, update, or cancel a hostel request."""
+class HostelRequestDetailView(generics.RetrieveDestroyAPIView):
+    """Retrieve or cancel a hostel request (students only). Status transitions use dedicated endpoint."""
 
     serializer_class = HostelRequestSerializer
     permission_classes = (IsAuthenticated, IsRequestCreator)
@@ -78,13 +78,8 @@ class HostelRequestDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return visible_requests_for(self.request.user)
 
-    def get_permissions(self):
-        if self.request.method in {"GET", "PATCH", "DELETE"}:
-            return [IsAuthenticated(), IsRequestCreator()]
-        return [IsAuthenticated()]
-
     def destroy(self, request, *args, **kwargs):
-        """Cancel the request."""
+        """Cancel the request (DELETE verb)."""
         request_obj = self.get_object()
 
         try:
