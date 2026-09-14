@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Clock,
@@ -32,11 +32,7 @@ export default function WardenHostelRequestDetail() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionForm, setShowRejectionForm] = useState(false);
 
-  useEffect(() => {
-    loadRequest();
-  }, [id]);
-
-  const loadRequest = async () => {
+  const loadRequest = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -47,7 +43,11 @@ export default function WardenHostelRequestDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    loadRequest();
+  }, [loadRequest]);
 
   const getAllowedActions = () => {
     if (!request) return [];
@@ -205,7 +205,7 @@ export default function WardenHostelRequestDetail() {
           <div className="mb-6">
             <h3 className="font-semibold text-gray-900 mb-4">Status History</h3>
             <div className="space-y-3">
-              {request.status_logs.map((log, idx) => (
+              {request.status_logs.map((log) => (
                 <div key={log.id} className="flex gap-4 pb-3 border-b border-gray-200 last:border-0">
                   <div className="text-sm text-gray-600 min-w-fit">
                     {new Date(log.created_at).toLocaleString()}
