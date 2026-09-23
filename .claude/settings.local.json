@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk ls *)",
+      "Bash(rtk find *)",
+      "Bash(python *)",
+      "Bash(docker compose config *)",
+      "Bash(.venv/Scripts/python -m pip install --upgrade pip)",
+      "Bash(.venv/Scripts/python -m pip install -r backend/requirements.txt)",
+      "Bash(npm install *)",
+      "Bash(rtk lint *)",
+      "Bash(npm test *)",
+      "Bash(../.venv/Scripts/python *)",
+      "Bash(rtk npm *)",
+      "Bash(.venv/Scripts/python *)"
+    ]
+  }
+}
