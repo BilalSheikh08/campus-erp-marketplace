@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+backend/venv/
+backend/tests/venv/
+
+# Django generated files
+backend/staticfiles/
+backend/media/
+backend/logs/*
+!backend/logs/.gitkeep
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+
+# Node / Vite
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Local tooling
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+.claude/settings.local.json
+E-Commerce_Project_Campus_ERP_Full_Claude_Conversation.md
