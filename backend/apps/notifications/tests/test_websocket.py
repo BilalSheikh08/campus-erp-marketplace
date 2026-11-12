@@ -1,7 +1,5 @@
 """Channels WebSocket isolation tests for notification delivery."""
 
-import asyncio
-
 import pytest
 from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
@@ -97,8 +95,7 @@ async def test_websocket_delivery_is_user_scoped():
     event = await communicator_a.receive_json_from()
     assert event["type"] == "notification.created"
     assert event["notification"]["user"] == str(user_a.id)
-    with pytest.raises(asyncio.TimeoutError):
-        await communicator_b.receive_json_from(timeout=0.1)
+    assert await communicator_b.receive_nothing(timeout=0.1) is True
 
     await communicator_a.disconnect()
     await communicator_b.disconnect()
