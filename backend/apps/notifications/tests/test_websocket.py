@@ -1,7 +1,5 @@
 """Channels WebSocket isolation tests for notification delivery."""
 
-import asyncio
-
 import pytest
 from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
@@ -47,7 +45,11 @@ def deliver(notification):
 async def test_websocket_auth_syncs_only_authenticated_user():
     user = await create_user("ws-user@example.com", "WebSocket User")
     token = await issue_access_token(user)
-    communicator = WebsocketCommunicator(application, f"/ws/notifications/?token={token}")
+    communicator = WebsocketCommunicator(
+        application,
+        f"/ws/notifications/?token={token}",
+        headers=[(b"origin", b"http://localhost")],
+    )
     connected, _ = await communicator.connect()
     assert connected is True
     message = await communicator.receive_json_from()
@@ -59,7 +61,11 @@ async def test_websocket_auth_syncs_only_authenticated_user():
 @pytest.mark.asyncio
 @pytest.mark.django_db(transaction=True)
 async def test_websocket_rejects_missing_authentication():
-    communicator = WebsocketCommunicator(application, "/ws/notifications/")
+    communicator = WebsocketCommunicator(
+        application,
+        "/ws/notifications/",
+        headers=[(b"origin", b"http://localhost")],
+    )
     connected, _ = await communicator.connect()
     assert connected is False
 
@@ -71,8 +77,13 @@ async def test_websocket_delivery_is_user_scoped():
     user_b = await create_user("ws-b@example.com", "B")
     token_a = await issue_access_token(user_a)
     token_b = await issue_access_token(user_b)
-    communicator_a = WebsocketCommunicator(application, f"/ws/notifications/?token={token_a}")
-    communicator_b = WebsocketCommunicator(application, f"/ws/notifications/?token={token_b}")
+    headers = [(b"origin", b"http://localhost")]
+    communicator_a = WebsocketCommunicator(
+        application, f"/ws/notifications/?token={token_a}", headers=headers
+    )
+    communicator_b = WebsocketCommunicator(
+        application, f"/ws/notifications/?token={token_b}", headers=headers
+    )
     assert (await communicator_a.connect())[0] is True
     assert (await communicator_b.connect())[0] is True
     await communicator_a.receive_json_from()
@@ -84,8 +95,7 @@ async def test_websocket_delivery_is_user_scoped():
     event = await communicator_a.receive_json_from()
     assert event["type"] == "notification.created"
     assert event["notification"]["user"] == str(user_a.id)
-    with pytest.raises(asyncio.TimeoutError):
-        await communicator_b.receive_json_from(timeout=0.1)
+    assert await communicator_b.receive_nothing(timeout=0.1) is True
 
     await communicator_a.disconnect()
     await communicator_b.disconnect()

@@ -3,7 +3,7 @@
 from decimal import Decimal
 
 import pytest
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -182,10 +182,13 @@ def test_single_active_reservation_per_listing_at_database_level(seller, buyer):
         role=User.Role.STUDENT,
     )
     with pytest.raises(IntegrityError):
-        BookTransaction.objects.create(
-            listing=listing,
-            buyer=second_buyer,
-            seller=detail.seller,
-            status=BookTransaction.Status.CONFIRMED,
-        )
+        with transaction.atomic():
+            BookTransaction.objects.bulk_create([
+                BookTransaction(
+                    listing=listing,
+                    buyer=second_buyer,
+                    seller=detail.seller,
+                    status=BookTransaction.Status.CONFIRMED,
+                )
+            ])
     assert first.status == BookTransaction.Status.RESERVED

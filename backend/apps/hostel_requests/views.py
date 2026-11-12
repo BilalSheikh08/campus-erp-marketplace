@@ -1,7 +1,8 @@
 """API views for hostel request management."""
 
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -103,7 +104,17 @@ class HostelRequestTransitionView(APIView):
     permission_classes = (IsAuthenticated, IsRequestWardenOrAdmin)
 
     def post(self, request, pk):
-        request_obj = self.get_queryset(request).get(pk=pk)
+        request_obj = get_object_or_404(
+            HostelRequest.objects.select_related(
+                "student", "listing", "assigned_warden"
+            ),
+            pk=pk,
+        )
+        if (
+            request.user.role == request.user.Role.WARDEN
+            and request_obj.assigned_warden_id not in (None, request.user.pk)
+        ):
+            raise PermissionDenied("This request is assigned to another Warden.")
 
         serializer = HostelRequestTransitionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -120,10 +131,6 @@ class HostelRequestTransitionView(APIView):
 
         response_serializer = HostelRequestSerializer(updated, context={"request": request})
         return Response(response_serializer.data)
-
-    def get_queryset(self, request):
-        return visible_requests_for(request.user)
-
 
 class WardenHostelRequestsView(generics.ListAPIView):
     """List hostel requests visible to the authenticated warden."""

@@ -1,4 +1,6 @@
-# CAMPUS ERP MARKETPLACE - COMPLETE FEATURE GAP ANALYSIS
+# HISTORICAL FEATURE GAP ANALYSIS (August 29, 2026)
+
+> This snapshot predates the Phase G implementation and does not describe the current code. Use [README.md](README.md) for delivered features and [PHASE_H_PRODUCT_READINESS.md](PHASE_H_PRODUCT_READINESS.md) for the current readiness phase.
 
 **Analysis Date:** August 29, 2026
 **Project Status:** Phase A, B, C Complete | Phase D-7 Planned

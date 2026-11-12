@@ -15,6 +15,8 @@ export const useAuthStore = create((set) => ({
   isLoading: false,
   error: null,
 
+  setUser: (user) => set({ user }),
+
   // Actions
   /**
    * Initialize auth state from stored tokens and fetch current user.

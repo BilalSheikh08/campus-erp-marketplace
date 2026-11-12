@@ -1,233 +1,135 @@
-/**
- * User profile page - manage personal information.
- */
+/** Manage the authenticated user's profile and password. */
 
 import { useEffect, useState } from 'react';
-import { User, Mail, Phone, Building2 } from 'lucide-react';
+import { Building2, Mail, Phone, User } from 'lucide-react';
+import * as authAPI from '../api/auth';
 import useAuthStore from '../store/authStore';
-import LoadingSpinner from '../components/common/LoadingSpinner';
 import Alert from '../components/shared/Alert';
 import Button from '../components/shared/Button';
 import Input from '../components/shared/Input';
 
-export default function ProfilePage() {
-  const { user } = useAuthStore();
-  const [isEditing, setIsEditing] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
+const errorMessage = (error) => {
+  const data = error.response?.data;
+  if (typeof data?.detail === 'string') return data.detail;
+  if (data && typeof data === 'object') {
+    return Object.values(data).flat().join(' ');
+  }
+  return 'We could not save your changes. Please try again.';
+};
 
-  const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    phone_number: '',
-    hostel_room: '',
-  });
+export default function ProfilePage() {
+  const { user, setUser } = useAuthStore();
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [form, setForm] = useState({ name: '', phone: '', hostel_room: '' });
+  const [password, setPassword] = useState({ old: '', next: '', confirmation: '' });
 
   useEffect(() => {
     if (user) {
-      setFormData({
-        first_name: user.first_name || '',
-        last_name: user.last_name || '',
-        phone_number: user.phone_number || '',
-        hostel_room: user.hostel_room || '',
-      });
+      setForm({ name: user.name || '', phone: user.phone || '', hostel_room: user.hostel_room || '' });
     }
   }, [user]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+  const updateForm = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+  const updatePassword = (event) => setPassword((current) => ({ ...current, [event.target.name]: event.target.value }));
+
+  const saveProfile = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setError('');
+    setSuccess('');
+    try {
+      const updated = await authAPI.updateProfile({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        hostel_room: form.hostel_room.trim(),
+      });
+      setUser(updated);
+      setEditing(false);
+      setSuccess('Profile saved.');
+    } catch (requestError) {
+      setError(errorMessage(requestError));
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleSave = async () => {
-    // Note: Backend profile update endpoint exists but not yet exposed in orders.js
-    // For now, show placeholder message
-    setSuccessMessage('Profile updates coming soon - backend endpoint ready');
-    setTimeout(() => setSuccessMessage(null), 3000);
+  const savePassword = async (event) => {
+    event.preventDefault();
+    setPasswordSaving(true);
+    setError('');
+    setSuccess('');
+    try {
+      await authAPI.changePassword(password.old, password.next, password.confirmation);
+      setPassword({ old: '', next: '', confirmation: '' });
+      setSuccess('Password changed.');
+    } catch (requestError) {
+      setError(errorMessage(requestError));
+    } finally {
+      setPasswordSaving(false);
+    }
   };
 
-  if (!user) {
-    return <LoadingSpinner message="Loading profile..." />;
-  }
+  if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
-          <p className="text-gray-600">Manage your personal information</p>
-        </div>
+    <main className="min-h-screen bg-gray-50 py-8">
+      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+        <header className="mb-8">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">My Profile</h1>
+          <p className="text-gray-600">Keep your contact details up to date.</p>
+        </header>
 
-        {/* Alerts */}
-        {error && (
-          <div className="mb-6">
-            <Alert type="error" message={error} dismissible onClose={() => setError(null)} />
-          </div>
-        )}
-        {successMessage && (
-          <div className="mb-6">
-            <Alert type="success" message={successMessage} dismissible onClose={() => setSuccessMessage(null)} />
-          </div>
-        )}
+        {error && <div className="mb-5"><Alert type="error" message={error} dismissible onClose={() => setError('')} /></div>}
+        {success && <div className="mb-5"><Alert type="success" message={success} dismissible onClose={() => setSuccess('')} /></div>}
 
-        {/* Profile Card */}
-        <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
-          {/* Avatar Section */}
-          <div className="flex items-center gap-6 mb-8 pb-8 border-b">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-              <User className="h-8 w-8 text-white" />
-            </div>
+        <section className="mb-6 rounded-lg bg-white p-8 shadow-sm">
+          <div className="mb-7 flex items-center gap-5 border-b pb-7">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary"><User className="h-8 w-8 text-white" /></div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                {user.first_name || user.email.split('@')[0]}
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
               <p className="text-gray-600">{user.email}</p>
-              <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                {user.role?.charAt(0).toUpperCase() + user.role?.slice(1)} Account
-              </span>
+              <span className="mt-2 inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-medium capitalize text-blue-800">{user.role} account</span>
             </div>
           </div>
 
-          {/* Form */}
-          {isEditing ? (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="First Name"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleChange}
-                  placeholder="Enter first name"
-                />
-                <Input
-                  label="Last Name"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleChange}
-                  placeholder="Enter last name"
-                />
+          {editing ? (
+            <form onSubmit={saveProfile} className="space-y-5">
+              <Input label="Full name" name="name" value={form.name} onChange={updateForm} required maxLength={150} />
+              <Input label="Phone number" name="phone" value={form.phone} onChange={updateForm} placeholder="Optional" />
+              {user.role === 'student' && <Input label="Hostel room" name="hostel_room" value={form.hostel_room} onChange={updateForm} placeholder="Optional" />}
+              <Input label="Email" type="email" value={user.email} disabled />
+              <div className="flex gap-3">
+                <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</Button>
+                <Button type="button" variant="ghost" onClick={() => { setForm({ name: user.name || '', phone: user.phone || '', hostel_room: user.hostel_room || '' }); setEditing(false); }}>Cancel</Button>
               </div>
-
-              <Input
-                label="Email"
-                type="email"
-                value={user.email}
-                disabled
-                placeholder="Your email"
-              />
-
-              <Input
-                label="Phone Number"
-                name="phone_number"
-                value={formData.phone_number}
-                onChange={handleChange}
-                placeholder="Enter phone number"
-              />
-
-              {user.role === 'student' && (
-                <Input
-                  label="Hostel Room"
-                  name="hostel_room"
-                  value={formData.hostel_room}
-                  onChange={handleChange}
-                  placeholder="e.g., A-101"
-                />
-              )}
-
-              <div className="flex gap-4 pt-4">
-                <Button
-                  onClick={handleSave}
-                  className="flex-1"
-                >
-                  Save Changes
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setIsEditing(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
+            </form>
           ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">First Name</label>
-                  <p className="text-lg text-gray-900 mt-1">{formData.first_name || '—'}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Last Name</label>
-                  <p className="text-lg text-gray-900 mt-1">{formData.last_name || '—'}</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email
-                </label>
-                <p className="text-lg text-gray-900 mt-1">{user.email}</p>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  Phone Number
-                </label>
-                <p className="text-lg text-gray-900 mt-1">{formData.phone_number || '—'}</p>
-              </div>
-
-              {user.role === 'student' && (
-                <div>
-                  <label className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <Building2 className="h-4 w-4" />
-                    Hostel Room
-                  </label>
-                  <p className="text-lg text-gray-900 mt-1">{formData.hostel_room || '—'}</p>
-                </div>
-              )}
-
-              <Button
-                onClick={() => setIsEditing(true)}
-                className="w-full"
-              >
-                Edit Profile
-              </Button>
+            <div className="space-y-5">
+              <div><p className="text-sm font-medium text-gray-600">Full name</p><p className="mt-1 text-lg text-gray-900">{user.name || '—'}</p></div>
+              <div><p className="flex items-center gap-2 text-sm font-medium text-gray-600"><Mail className="h-4 w-4" />Email</p><p className="mt-1 text-lg text-gray-900">{user.email}</p></div>
+              <div><p className="flex items-center gap-2 text-sm font-medium text-gray-600"><Phone className="h-4 w-4" />Phone</p><p className="mt-1 text-lg text-gray-900">{user.phone || '—'}</p></div>
+              {user.role === 'student' && <div><p className="flex items-center gap-2 text-sm font-medium text-gray-600"><Building2 className="h-4 w-4" />Hostel room</p><p className="mt-1 text-lg text-gray-900">{user.hostel_room || '—'}</p></div>}
+              <Button type="button" onClick={() => { setError(''); setEditing(true); }}>Edit profile</Button>
             </div>
           )}
-        </div>
+          <p className="mt-6 border-t pt-5 text-sm text-gray-500">Account created {new Date(user.date_joined).toLocaleDateString()}</p>
+        </section>
 
-        {/* Account Info Card */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Account Information</h3>
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Account Type</span>
-              <span className="font-medium text-gray-900">
-                {user.role?.charAt(0).toUpperCase() + user.role?.slice(1)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Account Created</span>
-              <span className="font-medium text-gray-900">
-                {new Date(user.created_at).toLocaleDateString()}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Last Updated</span>
-              <span className="font-medium text-gray-900">
-                {new Date(user.updated_at).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-        </div>
+        <section className="rounded-lg bg-white p-8 shadow-sm">
+          <h2 className="mb-2 text-xl font-semibold text-gray-900">Change password</h2>
+          <p className="mb-5 text-sm text-gray-600">Use your current password to set a new one.</p>
+          <form onSubmit={savePassword} className="space-y-4">
+            <Input label="Current password" name="old" type="password" autoComplete="current-password" value={password.old} onChange={updatePassword} required />
+            <Input label="New password" name="next" type="password" autoComplete="new-password" value={password.next} onChange={updatePassword} minLength={8} required />
+            <Input label="Confirm new password" name="confirmation" type="password" autoComplete="new-password" value={password.confirmation} onChange={updatePassword} minLength={8} required />
+            <Button type="submit" disabled={passwordSaving}>{passwordSaving ? 'Updating…' : 'Update password'}</Button>
+          </form>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
