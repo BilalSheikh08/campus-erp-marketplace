@@ -4,14 +4,194 @@
 
 :root {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  color: #0f172a;
-  background: #f8fafc;
+  color: #202a23;
+  background: #f4f2eb;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --campus-ink: #202a23;
+  --campus-muted: #6d756d;
+  --campus-paper: #f4f2eb;
+  --campus-surface: #fffefa;
+  --campus-line: #e3e2d9;
+  --campus-forest: #28513f;
+  --campus-forest-dark: #17392c;
+  --campus-forest-soft: #e8eee8;
+  --campus-citrus: #e4a75d;
+  --campus-coral: #c96548;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+  background: var(--campus-paper);
 }
 
 body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  color: var(--campus-ink);
+  background: var(--campus-paper);
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+a {
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+::selection {
+  color: #fffefa;
+  background: var(--campus-forest);
+}
+
+:focus-visible {
+  outline: 3px solid #dc9d57;
+  outline-offset: 3px;
+}
+
+input,
+select,
+textarea {
+  color: var(--campus-ink);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #92998f;
+}
+
+/* Shared palette bridge: existing screens inherit the new campus identity. */
+.text-slate-900,
+.text-gray-900 { color: var(--campus-ink) !important; }
+.text-slate-700,
+.text-slate-600,
+.text-gray-700,
+.text-gray-600 { color: var(--campus-muted) !important; }
+.bg-slate-50,
+.bg-gray-50 { background-color: var(--campus-paper) !important; }
+.bg-white { background-color: var(--campus-surface) !important; }
+.border-slate-100,
+.border-slate-200,
+.border-gray-100,
+.border-gray-200 { border-color: var(--campus-line) !important; }
+.text-indigo-700,
+.text-indigo-600,
+.text-indigo-500 { color: var(--campus-forest) !important; }
+.bg-indigo-50 { background-color: var(--campus-forest-soft) !important; }
+.bg-indigo-600 { background-color: var(--campus-forest) !important; }
+.border-indigo-100 { border-color: #cfdbd0 !important; }
+header.sticky {
+  border-color: var(--campus-line);
+  background: rgb(255 254 250 / 94%);
+  box-shadow: 0 1px 0 rgb(32 42 35 / 3%);
+}
+
+main input:not([type='checkbox']):not([type='radio']),
+main select,
+main textarea {
+  border-color: var(--campus-line);
+  border-radius: 0.75rem;
+  background-color: var(--campus-surface);
+}
+
+main input:focus,
+main select:focus,
+main textarea:focus {
+  border-color: var(--campus-forest);
+  outline: 2px solid rgb(40 81 63 / 14%);
+  outline-offset: 1px;
+}
+
+.campus-page {
+  min-height: 55vh;
+  background: var(--campus-paper);
+}
+
+.campus-container {
+  width: min(100% - 2rem, 78rem);
+  margin-inline: auto;
+}
+
+.campus-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--campus-forest);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.campus-section-title {
+  color: var(--campus-ink);
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+}
+
+.campus-header-link[aria-current='page'] {
+  color: var(--campus-forest);
+  background: var(--campus-forest-soft);
+}
+
+.campus-mark {
+  background: var(--campus-forest);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 16%);
+}
+
+.campus-header nav a:hover {
+  color: var(--campus-forest);
+  background: var(--campus-forest-soft);
+}
+
+.auth-page {
+  background-color: var(--campus-paper);
+  background-image: radial-gradient(ellipse at 12% 18%, rgb(228 167 93 / 14%), transparent 30%), radial-gradient(ellipse at 88% 82%, rgb(40 81 63 / 10%), transparent 34%);
+}
+
+.auth-mark {
+  color: #fffefa;
+  background: var(--campus-forest);
+  box-shadow: 0 8px 20px rgb(40 81 63 / 18%);
+}
+
+.auth-form {
+  border-color: var(--campus-line);
+  background: var(--campus-surface);
+  box-shadow: 0 24px 64px -44px rgb(32 42 35 / 34%);
+}
+
+.campus-footer {
+  color: #d7ded7;
+  background: #1b3027;
+}
+
+.campus-footer a:hover { color: #f0bd7d; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

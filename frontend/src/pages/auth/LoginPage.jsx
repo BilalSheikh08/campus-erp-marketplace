@@ -72,16 +72,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4">
+    <div className="auth-page flex items-center justify-center min-h-screen px-4 py-10">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">C</span>
+        <div className="mb-8 text-left">
+          <div className="mb-4 flex justify-start">
+            <div className="auth-mark flex h-12 w-12 items-center justify-center rounded-2xl">
+              <span className="text-xl font-bold">C</span>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <p className="campus-eyebrow mb-3">Your campus account</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
             Welcome Back
           </h1>
           <p className="text-gray-600">
@@ -102,7 +103,7 @@ export default function LoginPage() {
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="auth-form rounded-2xl border p-6 shadow-sm space-y-4 sm:p-8">
           <Input
             label="Email"
             type="email"

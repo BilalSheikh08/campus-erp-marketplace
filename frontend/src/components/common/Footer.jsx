@@ -1,158 +1,56 @@
-/**
- * Comprehensive Application Footer Component.
- * Displays campus platform branding, domain links, portal shortcuts,
- * support contact, and real-time operational status.
- */
-
+import { ArrowUpRight, BookOpen, Building2, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Clock,
-  ShieldCheck,
-  Heart,
-} from 'lucide-react';
+
+const campusLinks = [
+  { to: '/marketplace', label: 'Campus marketplace' },
+  { to: '/marketplace/canteen', label: 'Canteen' },
+  { to: '/marketplace/stationery', label: 'Stationery' },
+  { to: '/marketplace/hostel_supply', label: 'Hostel supplies' },
+];
+
+const accountLinks = [
+  { to: '/books', label: 'Used books' },
+  { to: '/become-vendor', label: 'Become a vendor' },
+  { to: '/about', label: 'About the platform' },
+  { to: '/contact', label: 'Contact support' },
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-950 text-slate-400 border-t border-slate-900 pt-16 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-800/80">
-          {/* Col 1 & 2: Platform Mission */}
-          <div className="lg:col-span-2">
-            <Link to="/" className="inline-flex items-center gap-2.5 mb-4 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md">
-                <span className="font-extrabold text-lg">C</span>
-              </div>
-              <span className="font-extrabold text-white text-xl tracking-tight">
-                Campus<span className="text-indigo-400">ERP</span> Hub
-              </span>
+    <footer className="campus-footer mt-auto">
+      <div className="mx-auto max-w-7xl px-4 pb-8 pt-12 sm:px-6 lg:px-8">
+        <div className="grid gap-10 border-b border-white/15 pb-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_.8fr_.8fr]">
+          <div className="max-w-md">
+            <Link to="/" className="inline-flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e4a75d] text-[#203a2d]"><Building2 className="h-5 w-5" /></span>
+              <span className="text-lg font-bold tracking-tight text-white">Campus<span className="text-[#e4a75d]">ERP</span></span>
             </Link>
-            <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-sm">
-              An enterprise-grade hybrid ERP and marketplace connecting university students, campus merchants, and residence authorities through high-concurrency transactional workflows.
+            <p className="mt-4 text-sm leading-6 text-[#bdc9bf]">
+              One campus account for everyday shopping, student book exchange, and hostel supply requests.
             </p>
-
-            {/* Live Status Pill */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span className="text-slate-300 font-medium">All Services Operational</span>
-              <span className="text-slate-600">•</span>
-              <span className="text-indigo-400 font-mono">99.9% Uptime</span>
-            </div>
+            <Link to="/marketplace" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-[#f0bd7d]">
+              Explore the marketplace <ArrowUpRight className="h-4 w-4" />
+            </Link>
           </div>
 
-          {/* Col 3: Marketplaces */}
-          <div>
-            <h4 className="text-white font-bold text-sm tracking-wider uppercase mb-4">
-              Marketplaces
-            </h4>
-            <ul className="space-y-2.5 text-sm">
-              <li>
-                <Link to="/marketplace/canteen" className="hover:text-white transition-colors">
-                  🍽️ Canteen Express
-                </Link>
-              </li>
-              <li>
-                <Link to="/marketplace/stationery" className="hover:text-white transition-colors">
-                  📚 Stationery Depot
-                </Link>
-              </li>
-              <li>
-                <Link to="/marketplace/hostel_supply" className="hover:text-white transition-colors">
-                  🏠 Hostel Supplies
-                </Link>
-              </li>
-              <li>
-                <Link to="/books" className="hover:text-white transition-colors">
-                  📖 Used Books Exchange
-                </Link>
-              </li>
-              <li>
-                <Link to="/marketplace" className="hover:text-indigo-400 font-semibold text-indigo-400 transition-colors">
-                  Browse All Catalog &rarr;
-                </Link>
-              </li>
+          <nav aria-label="Campus services">
+            <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-[#e4a75d]">Campus services</h2>
+            <ul className="mt-4 space-y-3 text-sm text-[#d7ded7]">
+              {campusLinks.map((item) => <li key={item.to}><Link to={item.to}>{item.label}</Link></li>)}
             </ul>
-          </div>
+          </nav>
 
-          {/* Col 4: Role Portals */}
-          <div>
-            <h4 className="text-white font-bold text-sm tracking-wider uppercase mb-4">
-              Campus Portals
-            </h4>
-            <ul className="space-y-2.5 text-sm">
-              <li>
-                <Link to="/login" className="hover:text-white transition-colors">
-                  Student Portal
-                </Link>
-              </li>
-              <li>
-                <Link to="/become-vendor" className="hover:text-white transition-colors">
-                  Vendor Onboarding
-                </Link>
-              </li>
-              <li>
-                <Link to="/login" className="hover:text-white transition-colors">
-                  Warden Approvals
-                </Link>
-              </li>
-              <li>
-                <Link to="/login" className="hover:text-white transition-colors">
-                  University Admin
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="hover:text-white transition-colors">
-                  Architecture & Docs
-                </Link>
-              </li>
+          <nav aria-label="Platform links">
+            <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-[#e4a75d]">More</h2>
+            <ul className="mt-4 space-y-3 text-sm text-[#d7ded7]">
+              {accountLinks.map((item) => <li key={item.to}><Link to={item.to}>{item.label}</Link></li>)}
             </ul>
-          </div>
-
-          {/* Col 5: Support & Counter Info */}
-          <div>
-            <h4 className="text-white font-bold text-sm tracking-wider uppercase mb-4">
-              Help & Counters
-            </h4>
-            <div className="space-y-3 text-xs sm:text-sm">
-              <div className="flex items-start gap-2.5">
-                <MapPin className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
-                <span>Central Campus Food Court & Student Center</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Clock className="h-4 w-4 text-indigo-400 shrink-0" />
-                <span>Counters: 08:00 – 21:00 Daily</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Mail className="h-4 w-4 text-indigo-400 shrink-0" />
-                <a href="mailto:support@campus.university.edu" className="hover:text-white transition-colors">
-                  support@campus.university.edu
-                </a>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Phone className="h-4 w-4 text-indigo-400 shrink-0" />
-                <span>Campus Helpline: Ext. 4402</span>
-              </div>
-            </div>
-          </div>
+          </nav>
         </div>
 
-        {/* Bottom Bar: Copyright & Security Note */}
-        <div className="mt-8 pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span>Secure Enterprise Architecture • Django REST Framework + Channels + React</span>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <span>&copy; {new Date().getFullYear()} Campus ERP Marketplace. Engineered with</span>
-            <Heart className="h-3.5 w-3.5 text-red-500 inline fill-red-500" />
-            <span>for University Commerce.</span>
-          </div>
+        <div className="flex flex-col gap-3 pt-6 text-xs text-[#a9b8ac] sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} Campus ERP Marketplace</p>
+          <p className="flex items-center gap-2"><ShoppingBag className="h-3.5 w-3.5" /> Campus commerce, made more convenient <BookOpen className="ml-1 h-3.5 w-3.5" /></p>
         </div>
       </div>
     </footer>

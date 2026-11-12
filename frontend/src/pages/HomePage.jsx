@@ -391,99 +391,81 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* 1. Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950 text-white pt-20 pb-28">
-        {/* Ambient background decoration */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-4xl mx-auto">
-            {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs sm:text-sm font-semibold mb-8 backdrop-blur-md">
-              <Sparkles className="h-4 w-4 text-indigo-400" />
-              <span>Next-Gen Campus Commerce • One Engine, Four Skins</span>
-            </div>
-
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight sm:leading-none mb-6">
-              Everything Campus, in <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">One Unified Hub</span>
+      <section className="relative overflow-hidden bg-[#f4f2eb] py-12 sm:py-20 lg:py-24">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:px-8">
+          <div className="max-w-2xl">
+            <span className="campus-eyebrow"><span className="h-2 w-2 rounded-full bg-[#c96548]" />Campus life, a little easier</span>
+            <h1 className="mt-6 text-5xl font-semibold leading-[1.02] tracking-[-0.06em] text-[#202a23] sm:text-6xl lg:text-[4.5rem]">
+              Good days start <span className="font-serif italic font-medium text-[#28513f]">on campus.</span>
             </h1>
-
-            {/* Sub-headline */}
-            <p className="text-lg sm:text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Order canteen meals ahead of the rush, grab examination stationery, submit warden-approved hostel requisitions, and exchange second-hand books with zero hassle.
+            <p className="mt-6 max-w-xl text-lg leading-8 text-[#6d756d]">
+              Lunch before the rush. Supplies when you need them. A second life for last semester’s books. Your campus essentials, together in one place.
             </p>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link to="/marketplace">
-                <Button size="lg" className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-base rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 group">
-                  <span>Explore Marketplace</span>
-                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <Button size="lg" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#28513f] px-6 py-3 text-white shadow-none hover:bg-[#17392c] sm:w-auto">
+                  Find what you need <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link to="/books">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white border-white/20 font-semibold text-base rounded-2xl backdrop-blur-sm">
-                  Browse Used Books
-                </Button>
-              </Link>
-              <Link to="/login">
-                <Button variant="ghost" size="lg" className="w-full sm:w-auto px-6 py-4 text-slate-300 hover:text-white font-medium text-base">
-                  Sign In &rarr;
-                </Button>
+              <Link to="/books" className="inline-flex items-center justify-center rounded-xl border border-[#d4d8ce] px-6 py-3 text-sm font-semibold text-[#28513f] hover:bg-white">
+                Browse student books
               </Link>
             </div>
+            <div className="mt-9 flex items-center gap-3 border-t border-[#e3e2d9] pt-5 text-sm text-[#6d756d]">
+              <ShieldCheck className="h-5 w-5 text-[#28513f]" />
+              <span>Built around campus roles, real stock, and clear order updates.</span>
+            </div>
+          </div>
 
-            {/* Trust Indicators */}
-            <div className="mt-14 pt-10 border-t border-slate-800/80 flex flex-wrap justify-center items-center gap-6 sm:gap-12 text-xs sm:text-sm text-slate-400">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-indigo-400" />
-                <span>Verified Campus Roles</span>
+          <div className="relative mx-auto w-full max-w-xl">
+            <div className="absolute -right-5 -top-5 h-28 w-28 rounded-full border border-[#d7d9cd] sm:-right-8 sm:-top-8 sm:h-40 sm:w-40" />
+            <div className="relative overflow-hidden rounded-[1.75rem] bg-[#214634] p-6 text-white shadow-[0_28px_70px_-38px_rgba(23,57,44,.7)] sm:p-8">
+              <div className="flex items-center justify-between border-b border-white/15 pb-5">
+                <div>
+                  <p className="text-xs font-medium tracking-wide text-[#c4d2c4]">YOUR CAMPUS, TODAY</p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight">A better kind of busy.</h2>
+                </div>
+                <span className="rounded-full border border-white/20 px-3 py-1 text-xs text-[#e7bd85]">Campus hub</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-amber-400" />
-                <span>Row-Locked Concurrency</span>
+              <div className="mt-3 divide-y divide-white/15">
+                <Link to="/marketplace/canteen" className="group flex items-center gap-4 py-5 hover:translate-x-1">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e4a75d] text-[#233a2e]"><ShoppingCart className="h-5 w-5" /></span>
+                  <span className="min-w-0 flex-1"><span className="block font-semibold">Pick up lunch</span><span className="mt-1 block text-sm text-[#c4d2c4]">Order from the campus canteen</span></span>
+                  <ArrowRight className="h-4 w-4 text-[#c4d2c4] transition-transform group-hover:translate-x-1" />
+                </Link>
+                <Link to="/marketplace/stationery" className="group flex items-center gap-4 py-5 hover:translate-x-1">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8eee8] text-[#28513f]"><Package className="h-5 w-5" /></span>
+                  <span className="min-w-0 flex-1"><span className="block font-semibold">Get class-ready</span><span className="mt-1 block text-sm text-[#c4d2c4]">Find everyday academic supplies</span></span>
+                  <ArrowRight className="h-4 w-4 text-[#c4d2c4] transition-transform group-hover:translate-x-1" />
+                </Link>
+                <Link to="/books" className="group flex items-center gap-4 py-5 hover:translate-x-1">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#d8a995] text-[#452b24]"><BookOpen className="h-5 w-5" /></span>
+                  <span className="min-w-0 flex-1"><span className="block font-semibold">Pass a book along</span><span className="mt-1 block text-sm text-[#c4d2c4]">Buy and sell with fellow students</span></span>
+                  <ArrowRight className="h-4 w-4 text-[#c4d2c4] transition-transform group-hover:translate-x-1" />
+                </Link>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-emerald-400" />
-                <span>Instant Pickup Tokens</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-purple-400" />
-                <span>Direct P2P Exchange</span>
+              <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/8 px-4 py-3 text-xs text-[#d7e0d6]">
+                <Home className="h-4 w-4 text-[#e4a75d]" /> Hostel requests go straight to your warden’s queue.
               </div>
             </div>
+            <p className="relative mt-4 text-right text-xs tracking-wide text-[#858c80]">Food · supplies · residence · books</p>
           </div>
         </div>
       </section>
 
-      {/* 2. Key Metrics Showcase */}
-      <section className="relative -mt-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCounter
-            icon={ShoppingCart}
-            value="4"
-            label="Integrated Domains"
-            subtext="Canteen, Stationery, Hostel, Books"
-          />
-          <StatCounter
-            icon={Users}
-            value="1,200+"
-            label="Campus Members"
-            subtext="Students, Wardens & Vendors"
-          />
-          <StatCounter
-            icon={Zap}
-            value="100%"
-            label="Concurrency Safe"
-            subtext="Select-for-update row locks"
-          />
-          <StatCounter
-            icon={ShieldCheck}
-            value="0%"
-            label="Commission on Books"
-            subtext="Fair student textbook reuse"
-          />
+      <section className="border-y border-[#e3e2d9] bg-[#fffefa]">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-y divide-[#e3e2d9] px-4 sm:grid-cols-4 sm:divide-y-0 sm:px-6 lg:px-8">
+          {[
+            [ShoppingCart, 'Order ahead', 'Canteen & campus shops'],
+            [Package, 'Know the stock', 'Live inventory updates'],
+            [Home, 'Request supplies', 'Warden-reviewed workflow'],
+            [BookOpen, 'Reuse textbooks', 'Student-to-student exchange'],
+          ].map(([Icon, title, detail]) => (
+            <div key={title} className="flex min-h-28 items-center gap-3 px-3 py-5 sm:px-5">
+              <Icon className="h-5 w-5 shrink-0 text-[#28513f]" />
+              <div><p className="font-semibold text-[#202a23]">{title}</p><p className="mt-1 text-xs text-[#6d756d]">{detail}</p></div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -520,7 +502,7 @@ export default function HomePage() {
                 Built to withstand real campus peak hours.
               </h2>
               <p className="mt-4 text-slate-600 text-sm sm:text-base leading-relaxed">
-                Most campus apps fail when 500 students order lunch at 12:45 PM. Campus ERP was architected with high-concurrency database row locking and immutable price snapshots.
+              Ordering, stock changes, and requests follow clear workflows, with each role seeing the work that belongs to them.
               </p>
 
               <div className="mt-8 space-y-4">
@@ -584,8 +566,8 @@ export default function HomePage() {
                   <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60">
                     <div className="text-amber-400 font-mono text-xs mb-1">01 / CANTEEN</div>
                     <div className="text-base font-bold text-white mb-2">Queue Elimination</div>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      Pre-ordering with kitchen token dispatch keeps the dining hall moving at 3x speed.
+                <p className="text-xs text-slate-400 leading-relaxed">
+                      Browse canteen listings, place an order, and follow its status from your account.
                     </p>
                   </div>
 
