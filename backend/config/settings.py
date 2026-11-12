@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.admin_panel.apps.AdminPanelConfig",
     "apps.core.apps.CoreConfig",
     "apps.hostel_requests.apps.HostelRequestsConfig",
+    "apps.support.apps.SupportConfig",
 ]
 
 MIDDLEWARE = [

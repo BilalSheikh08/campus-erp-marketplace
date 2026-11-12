@@ -91,6 +91,13 @@ The project follows **one engine, four skins**. Listings, vendor controls, inven
 - Nginx WebSocket proxy configuration
 - Redis-backed channel layer in Compose
 
+### Product readiness work
+
+- Profile details and password changes use the existing authenticated APIs
+- Vendor listing pages are scoped to the signed-in vendor and support create, edit, and deactivation
+- Contact inquiries are persisted and can be reviewed in Django Admin
+- Cart and order URLs match the paths used by the frontend (`/api/cart/` and `/api/orders/`)
+
 Full peer-to-peer chat/messaging and AI recommendation features remain intentionally out of scope for the current semester build.
 
 ## Local setup — Windows PowerShell
@@ -175,6 +182,7 @@ npm test -- --runInBand
 /api/notifications/
 /api/books/
 /api/analytics/
+/api/support/inquiries/
 /health/
 /api/health/
 ```

@@ -1,411 +1,148 @@
-/**
- * Create/Edit listing page - vendors can create and modify listings.
- */
+/** Create or update a listing using the shared catalog API schema. */
 
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import useAuthStore from '../../store/authStore';
-import { createListing, updateListing, fetchListingDetail } from '../../api/listings';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { createListing, fetchListingDetail, updateListing } from '../../api/listings';
+import { fetchVendorProfile } from '../../api/vendors';
 import Alert from '../../components/shared/Alert';
 import Button from '../../components/shared/Button';
 import Input from '../../components/shared/Input';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
-const CATEGORIES = [
-  { value: 'canteen', label: 'Canteen' },
-  { value: 'stationery', label: 'Stationery' },
-  { value: 'hostel_supply', label: 'Hostel Supply' },
-  { value: 'book', label: 'Book' },
-];
-
-const CATEGORY_FIELDS = {
-  canteen: ['prep_time_minutes', 'is_vegetarian', 'contains_nuts'],
-  stationery: ['brand', 'quantity_per_unit', 'color'],
-  hostel_supply: ['color', 'size', 'material'],
-  book: ['author', 'subject', 'edition', 'condition'],
+const CATEGORY_LABELS = { canteen: 'Canteen', stationery: 'Stationery', hostel_supply: 'Hostel supply' };
+const DETAIL_KEY = { canteen: 'canteen_detail', stationery: 'stationery_detail', hostel_supply: 'hostel_supply_detail' };
+const INITIAL_FORM = {
+  title: '', description: '', price: '', image_url: '',
+  is_veg: true, prep_time_minutes: '', available_from: '', available_to: '',
+  sku: '', unit: 'piece', barcode: '', request_only: false, supply_category: '',
+};
+const getError = (error) => {
+  const data = error.response?.data;
+  if (typeof data?.detail === 'string') return data.detail;
+  if (data && typeof data === 'object') return Object.values(data).flat().join(' ');
+  return 'Could not save the listing. Please try again.';
 };
 
 export default function CreateEditListingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
-
-  const isEdit = Boolean(id);
-  const [isLoading, setIsLoading] = useState(isEdit);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
-
-  const [formData, setFormData] = useState({
-    title: '',
-    category_type: 'canteen',
-    price: '',
-    description: '',
-    status: 'active',
-    // Category-specific fields
-    prep_time_minutes: '',
-    is_vegetarian: false,
-    contains_nuts: false,
-    brand: '',
-    quantity_per_unit: '',
-    color: '',
-    size: '',
-    material: '',
-    author: '',
-    subject: '',
-    edition: '',
-    condition: 'good',
-  });
+  const editing = Boolean(id);
+  const [vendor, setVendor] = useState(null);
+  const [category, setCategory] = useState('');
+  const [form, setForm] = useState(INITIAL_FORM);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isEdit) {
-      loadListing();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
-  const loadListing = async () => {
-    try {
-      const data = await fetchListingDetail(id);
-      setFormData(prev => ({
-        ...prev,
-        ...data,
-      }));
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to load listing');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setError(null);
-
-    try {
-      // Build submit data based on category
-      const submitData = {
-        title: formData.title,
-        category_type: formData.category_type,
-        price: parseFloat(formData.price),
-        description: formData.description,
-        status: formData.status,
-      };
-
-      // Add category-specific detail fields
-      const detailKey = `${formData.category_type}_detail`;
-      const detailData = {};
-
-      CATEGORY_FIELDS[formData.category_type]?.forEach(field => {
-        if (formData[field] !== undefined && formData[field] !== '') {
-          detailData[field] = formData[field];
+    let active = true;
+    const load = async () => {
+      try {
+        const profile = await fetchVendorProfile();
+        if (!active) return;
+        setVendor(profile);
+        if (!editing) {
+          setCategory(profile.vendor_type);
+          return;
         }
-      });
-
-      if (Object.keys(detailData).length > 0) {
-        submitData[detailKey] = detailData;
+        const listing = await fetchListingDetail(id);
+        if (!active) return;
+        const detail = listing[DETAIL_KEY[listing.category_type]] || {};
+        setCategory(listing.category_type);
+        setForm({ ...INITIAL_FORM, ...listing, ...detail, price: String(listing.price || ''), image_url: listing.image_url || '' });
+      } catch (requestError) {
+        if (active) setError(getError(requestError));
+      } finally {
+        if (active) setLoading(false);
       }
+    };
+    load();
+    return () => { active = false; };
+  }, [editing, id]);
 
-      if (isEdit) {
-        await updateListing(id, submitData);
-        setSuccessMessage('Listing updated successfully');
-      } else {
-        await createListing(submitData);
-        setSuccessMessage('Listing created successfully');
-      }
+  const change = (event) => {
+    const { name, value, type, checked } = event.target;
+    setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
+  };
 
-      setTimeout(() => navigate('/vendor/listings'), 2000);
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to save listing');
+  const submit = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setError('');
+    const detailKey = DETAIL_KEY[category];
+    const detail = category === 'canteen'
+      ? { is_veg: form.is_veg, prep_time_minutes: form.prep_time_minutes || null, available_from: form.available_from || null, available_to: form.available_to || null }
+      : category === 'stationery'
+        ? { sku: form.sku.trim(), unit: form.unit.trim(), barcode: form.barcode.trim() || null }
+        : { request_only: form.request_only, supply_category: form.supply_category.trim() };
+    const payload = {
+      title: form.title.trim(),
+      description: form.description.trim(),
+      price: form.price,
+      image_url: form.image_url.trim() || null,
+      [detailKey]: detail,
+      ...(!editing && { category_type: category }),
+    };
+    try {
+      if (editing) await updateListing(id, payload);
+      else await createListing(payload);
+      navigate('/vendor/listings', { state: { notice: editing ? 'Listing updated.' : 'Listing created.' } });
+    } catch (requestError) {
+      setError(getError(requestError));
     } finally {
-      setIsSaving(false);
+      setSaving(false);
     }
   };
 
-  if (!user || user.role !== 'vendor') {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-2xl mx-auto px-4">
-          <Alert type="error" message="Access denied. Vendors only." />
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return <LoadingSpinner message="Loading listing..." />;
-  }
-
-  const categoryFields = CATEGORY_FIELDS[formData.category_type] || [];
+  if (loading) return <LoadingSpinner message="Loading listing form…" />;
+  const approved = vendor?.approval_status === 'approved';
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
-          <button
-            onClick={() => navigate('/vendor/listings')}
-            className="p-2 hover:bg-gray-200 rounded-lg transition"
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-600" />
-          </button>
+    <main className="min-h-screen bg-gray-50 py-8">
+      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+        <button type="button" onClick={() => navigate('/vendor/listings')} className="mb-5 flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"><ArrowLeft className="h-4 w-4" />Back to listings</button>
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">{editing ? 'Edit listing' : 'Create listing'}</h1>
+        <p className="mb-7 text-gray-600">{CATEGORY_LABELS[category] || 'Marketplace'} product</p>
+        {error && <div className="mb-5"><Alert type="error" message={error} dismissible onClose={() => setError('')} /></div>}
+        {!approved && <div className="mb-5"><Alert type="error" message="Your vendor account must be approved before you can manage listings." /></div>}
+
+        <form onSubmit={submit} className="space-y-6 rounded-lg bg-white p-6 shadow-sm sm:p-8">
+          <Input label="Product title" name="title" value={form.title} onChange={change} required maxLength={150} />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Input label="Price (₹)" name="price" type="number" min="0" step="0.01" value={form.price} onChange={change} required />
+            <Input label="Product image URL" name="image_url" type="url" value={form.image_url} onChange={change} placeholder="Optional https://…" />
+          </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {isEdit ? 'Edit Listing' : 'Create Listing'}
-            </h1>
+            <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="description">Description</label>
+            <textarea id="description" name="description" value={form.description} onChange={change} rows={4} maxLength={5000} className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
           </div>
-        </div>
 
-        {error && (
-          <div className="mb-6">
-            <Alert type="error" message={error} dismissible onClose={() => setError(null)} />
+          {category === 'canteen' && <div className="space-y-4 border-t pt-5">
+            <h2 className="font-semibold text-gray-900">Food details</h2>
+            <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" name="is_veg" checked={Boolean(form.is_veg)} onChange={change} className="h-4 w-4 rounded" />Vegetarian</label>
+            <Input label="Preparation time (minutes)" name="prep_time_minutes" type="number" min="1" value={form.prep_time_minutes ?? ''} onChange={change} placeholder="Optional" />
+            <div className="grid gap-4 sm:grid-cols-2"><Input label="Available from" name="available_from" type="time" value={form.available_from || ''} onChange={change} /><Input label="Available until" name="available_to" type="time" value={form.available_to || ''} onChange={change} /></div>
+          </div>}
+
+          {category === 'stationery' && <div className="space-y-4 border-t pt-5">
+            <h2 className="font-semibold text-gray-900">Stationery details</h2>
+            <Input label="SKU" name="sku" value={form.sku} onChange={change} required maxLength={64} />
+            <div className="grid gap-4 sm:grid-cols-2"><Input label="Unit (e.g. piece, pack)" name="unit" value={form.unit} onChange={change} required maxLength={30} /><Input label="Barcode" name="barcode" value={form.barcode || ''} onChange={change} placeholder="Optional" maxLength={64} /></div>
+          </div>}
+
+          {category === 'hostel_supply' && <div className="space-y-4 border-t pt-5">
+            <h2 className="font-semibold text-gray-900">Hostel supply details</h2>
+            <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" name="request_only" checked={Boolean(form.request_only)} onChange={change} className="h-4 w-4 rounded" />Students must request this item through the warden</label>
+            <Input label="Supply category" name="supply_category" value={form.supply_category || ''} onChange={change} placeholder="Optional" maxLength={100} />
+          </div>}
+
+          <div className="flex gap-3 border-t pt-5">
+            <Button type="submit" disabled={saving || !approved}>{saving ? 'Saving…' : editing ? 'Save changes' : 'Create listing'}</Button>
+            <Button type="button" variant="ghost" onClick={() => navigate('/vendor/listings')}>Cancel</Button>
           </div>
-        )}
-
-        {successMessage && (
-          <div className="mb-6">
-            <Alert type="success" message={successMessage} dismissible onClose={() => setSuccessMessage(null)} />
-          </div>
-        )}
-
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Info */}
-            <div className="border-b pb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
-
-              <Input
-                label="Product Title"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="Enter product name"
-                required
-              />
-
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
-                  </label>
-                  <select
-                    name="category_type"
-                    value={formData.category_type}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    required
-                  >
-                    {CATEGORIES.map(cat => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <Input
-                  label="Price (₹)"
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={handleChange}
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="Describe your product..."
-                  rows="3"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Category-Specific Fields */}
-            {categoryFields.length > 0 && (
-              <div className="border-b pb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  {CATEGORIES.find(c => c.value === formData.category_type)?.label} Details
-                </h2>
-
-                <div className="space-y-4">
-                  {formData.category_type === 'canteen' && (
-                    <>
-                      <Input
-                        label="Preparation Time (minutes)"
-                        name="prep_time_minutes"
-                        type="number"
-                        value={formData.prep_time_minutes}
-                        onChange={handleChange}
-                      />
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          name="is_vegetarian"
-                          checked={formData.is_vegetarian}
-                          onChange={handleChange}
-                          className="w-4 h-4 rounded border-gray-300"
-                        />
-                        <span className="text-sm text-gray-700">Vegetarian</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          name="contains_nuts"
-                          checked={formData.contains_nuts}
-                          onChange={handleChange}
-                          className="w-4 h-4 rounded border-gray-300"
-                        />
-                        <span className="text-sm text-gray-700">Contains Nuts</span>
-                      </label>
-                    </>
-                  )}
-
-                  {formData.category_type === 'stationery' && (
-                    <>
-                      <Input
-                        label="Brand"
-                        name="brand"
-                        value={formData.brand}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Quantity Per Unit"
-                        name="quantity_per_unit"
-                        value={formData.quantity_per_unit}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Color"
-                        name="color"
-                        value={formData.color}
-                        onChange={handleChange}
-                      />
-                    </>
-                  )}
-
-                  {formData.category_type === 'hostel_supply' && (
-                    <>
-                      <Input
-                        label="Color"
-                        name="color"
-                        value={formData.color}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Size"
-                        name="size"
-                        value={formData.size}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Material"
-                        name="material"
-                        value={formData.material}
-                        onChange={handleChange}
-                      />
-                    </>
-                  )}
-
-                  {formData.category_type === 'book' && (
-                    <>
-                      <Input
-                        label="Author"
-                        name="author"
-                        value={formData.author}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Subject"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Edition"
-                        name="edition"
-                        value={formData.edition}
-                        onChange={handleChange}
-                      />
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Condition
-                        </label>
-                        <select
-                          name="condition"
-                          value={formData.condition}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        >
-                          <option value="like_new">Like New</option>
-                          <option value="good">Good</option>
-                          <option value="fair">Fair</option>
-                          <option value="poor">Poor</option>
-                        </select>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Submit Buttons */}
-            <div className="flex gap-4">
-              <Button
-                type="submit"
-                disabled={isSaving}
-                className="flex-1"
-              >
-                {isSaving ? 'Saving...' : isEdit ? 'Update Listing' : 'Create Listing'}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => navigate('/vendor/listings')}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </div>
+        </form>
       </div>
-    </div>
+    </main>
   );
 }

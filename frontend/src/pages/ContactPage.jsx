@@ -1,248 +1,105 @@
-/**
- * Contact & Campus Directory Page.
- * Provides on-campus counter locations, operating hours, phone extensions,
- * and an interactive message inquiry form.
- */
-
 import { useState } from 'react';
-import {
-  Phone,
-  MapPin,
-  Clock,
-  Send,
-  Building,
-  HelpCircle,
-  MessageSquare,
-} from 'lucide-react';
+import { Building, HelpCircle, MessageSquare, Send } from 'lucide-react';
+import { submitContactInquiry } from '../api/support';
+import Alert from '../components/shared/Alert';
 import Button from '../components/shared/Button';
 import Input from '../components/shared/Input';
-import Alert from '../components/shared/Alert';
+
+const departments = [
+  { value: 'general', title: 'Campus ERP Helpdesk', description: 'Account access, platform issues, and general feedback.' },
+  { value: 'canteen', title: 'Canteen Operations', description: 'Meal orders, dietary information, and pickup questions.' },
+  { value: 'stationery', title: 'Stationery', description: 'Product availability and academic materials.' },
+  { value: 'hostel', title: 'Hostel Office', description: 'Hostel supply requests and warden workflows.' },
+  { value: 'vendor', title: 'Vendor Onboarding', description: 'Vendor applications and marketplace listings.' },
+];
+
+const initialForm = { name: '', email: '', studentId: '', department: 'general', message: '' };
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    studentId: '',
-    department: 'general',
-    message: '',
-  });
-
-  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState(initialForm);
+  const [reference, setReference] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const departments = [
-    {
-      title: '🍽️ Canteen Operations',
-      location: 'Central Student Food Court, Ground Floor',
-      hours: 'Mon - Sun: 07:30 – 21:30',
-      contact: 'Ext. 4401 • canteen@campus.university.edu',
-      description: 'Inquiries regarding meal pre-orders, dietary options, and pickup tokens.',
-    },
-    {
-      title: '📚 Academic Stationery Depot',
-      location: 'Main Library Building, East Wing Entrance',
-      hours: 'Mon - Fri: 08:30 – 18:00 (Sat: 09:00 – 14:00)',
-      contact: 'Ext. 4402 • stationery@campus.university.edu',
-      description: 'Official blue books, lab manuals, electronics, and drafting equipment.',
-    },
-    {
-      title: '🏠 Chief Warden & Hostel Office',
-      location: 'Hostel Block A, Administrative Floor Room 104',
-      hours: 'Mon - Fri: 09:00 – 17:00',
-      contact: 'Ext. 4403 • hosteldesk@campus.university.edu',
-      description: 'Room requisitions, equipment allotment, and resident verification.',
-    },
-    {
-      title: '💻 ERP & Platform IT Helpdesk',
-      location: 'University Computing Center, 1st Floor',
-      hours: '24/7 Digital Support • In-person: 09:00 – 17:00',
-      contact: 'Ext. 4404 • it-support@campus.university.edu',
-      description: 'Account login issues, vendor permits, and platform bug reports.',
-    },
-  ];
+  const update = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const submit = async (event) => {
+    event.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-      setFormData({
-        name: '',
-        email: '',
-        studentId: '',
-        department: 'general',
-        message: '',
+    setError('');
+    setReference('');
+    try {
+      const inquiry = await submitContactInquiry({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        student_id: form.studentId.trim(),
+        department: form.department,
+        message: form.message.trim(),
       });
-    }, 600);
+      setReference(inquiry.id);
+      setForm(initialForm);
+    } catch (requestError) {
+      const data = requestError.response?.data;
+      setError(data?.detail || Object.values(data || {}).flat().join(' ') || 'We could not submit your inquiry. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <section className="bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="text-indigo-400 font-bold text-xs uppercase tracking-widest bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
-            Support & Directory
-          </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mt-4 mb-4">
-            Campus Help & Department Directory
-          </h1>
-          <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Need assistance with a canteen order, hostel requisition, or vendor permit? Find campus counters or reach out below.
-          </p>
-        </div>
+    <main className="min-h-screen bg-slate-50">
+      <section className="bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 px-4 py-16 text-center text-white sm:px-6">
+        <span className="rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest text-indigo-300">Support</span>
+        <h1 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl">How can we help?</h1>
+        <p className="mx-auto mt-4 max-w-2xl text-slate-300">Choose a campus team and send a message. Your inquiry will be saved for the support team to review.</p>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Left: Department Contacts Grid */}
-          <div className="lg:col-span-7">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <Building className="h-6 w-6 text-indigo-600" />
-              <span>Campus Service Counters</span>
-            </h2>
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-12 lg:px-8">
+        <section className="lg:col-span-7">
+          <h2 className="mb-6 flex items-center gap-2 text-2xl font-bold text-slate-900"><Building className="h-6 w-6 text-indigo-600" />Support teams</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {departments.map((department) => (
+              <article key={department.value} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h3 className="mb-2 font-bold text-slate-900">{department.title}</h3>
+                <p className="text-sm text-slate-600">{department.description}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-6 flex items-start gap-3 rounded-2xl border border-indigo-100 bg-indigo-50 p-5 text-sm text-indigo-900">
+            <HelpCircle className="mt-0.5 h-5 w-5 shrink-0 text-indigo-600" />
+            <p>Order and hostel request updates are also available in your account notifications.</p>
+          </div>
+        </section>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {departments.map((dept, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow"
-                >
-                  <h3 className="font-bold text-slate-900 text-lg mb-2">{dept.title}</h3>
-                  <p className="text-xs text-slate-600 mb-4">{dept.description}</p>
-
-                  <div className="space-y-2 text-xs text-slate-500 border-t border-slate-100 pt-3">
-                    <div className="flex items-start gap-2">
-                      <MapPin className="h-3.5 w-3.5 text-indigo-500 shrink-0 mt-0.5" />
-                      <span>{dept.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
-                      <span>{dept.hours}</span>
-                    </div>
-                    <div className="flex items-center gap-2 font-medium text-slate-700">
-                      <Phone className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
-                      <span>{dept.contact}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+        <section className="lg:col-span-5">
+          <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600"><MessageSquare className="h-5 w-5" /></div>
+              <div><h2 className="text-xl font-bold text-slate-900">Send an inquiry</h2><p className="text-xs text-slate-500">We’ll provide a reference after submission.</p></div>
             </div>
-
-            {/* Quick Tips */}
-            <div className="mt-8 bg-indigo-50/70 border border-indigo-100 rounded-3xl p-6 flex items-start gap-4">
-              <HelpCircle className="h-6 w-6 text-indigo-600 shrink-0 mt-0.5" />
+            {reference && <div className="mb-5"><Alert type="success" title="Inquiry received" message={`Your support reference is ${reference}.`} dismissible onClose={() => setReference('')} /></div>}
+            {error && <div className="mb-5"><Alert type="error" message={error} dismissible onClose={() => setError('')} /></div>}
+            <form onSubmit={submit} className="space-y-4">
+              <Input label="Your name" name="name" value={form.name} onChange={update} required maxLength={150} />
+              <Input label="Email address" name="email" type="email" value={form.email} onChange={update} required />
+              <Input label="Student / staff ID (optional)" name="studentId" value={form.studentId} onChange={update} maxLength={64} />
               <div>
-                <h4 className="font-bold text-indigo-900 text-sm mb-1">
-                  Immediate Counter Pickup Guidelines
-                </h4>
-                <p className="text-xs text-indigo-800/80 leading-relaxed">
-                  When picking up food from the canteen or materials from stationery, always present your digital order token found on your <span className="font-semibold underline">Order Details</span> page.
-                </p>
+                <label htmlFor="department" className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">Department</label>
+                <select id="department" name="department" value={form.department} onChange={update} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  {departments.map((department) => <option key={department.value} value={department.value}>{department.title}</option>)}
+                </select>
               </div>
-            </div>
-          </div>
-
-          {/* Right: Support Inquiry Form */}
-          <div className="lg:col-span-5">
-            <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
-                  <MessageSquare className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">Submit an Inquiry</h3>
-                  <p className="text-xs text-slate-500">We respond to student requests within 24 hours.</p>
-                </div>
+              <div>
+                <label htmlFor="message" className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">Message</label>
+                <textarea id="message" name="message" value={form.message} onChange={update} rows={5} maxLength={5000} required placeholder="Describe your question or feedback…" className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
               </div>
-
-              {submitted && (
-                <div className="mb-6">
-                  <Alert
-                    type="success"
-                    title="Inquiry Received"
-                    message="Your message has been dispatched to the respective campus department coordinator. You will receive an email update shortly."
-                    onClose={() => setSubmitted(false)}
-                  />
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <Input
-                  label="Your Full Name"
-                  placeholder="e.g. Alex Sharma"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-
-                <Input
-                  label="Campus Email Address"
-                  type="email"
-                  placeholder="e.g. alex.student@campus.university.edu"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-
-                <Input
-                  label="Student / Staff ID (Optional)"
-                  placeholder="e.g. STU-2026-9481"
-                  value={formData.studentId}
-                  onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-                />
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Target Department
-                  </label>
-                  <select
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  >
-                    <option value="general">General Campus ERP Helpdesk</option>
-                    <option value="canteen">Canteen & Dining Hall</option>
-                    <option value="stationery">Stationery & Academic Materials</option>
-                    <option value="hostel">Hostel Requisitions & Wardens</option>
-                    <option value="vendor">Vendor Onboarding & Permits</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Message / Request Details
-                  </label>
-                  <textarea
-                    rows={4}
-                    required
-                    placeholder="Describe your question, order issue, or feedback..."
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-semibold rounded-xl flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20"
-                >
-                  {loading ? (
-                    <span>Submitting...</span>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4" />
-                      <span>Send Campus Inquiry</span>
-                    </>
-                  )}
-                </Button>
-              </form>
-            </div>
+              <Button type="submit" disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-semibold shadow-md shadow-indigo-600/20 hover:bg-indigo-500">
+                {loading ? 'Submitting…' : <><Send className="h-4 w-4" />Submit inquiry</>}
+              </Button>
+            </form>
           </div>
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
