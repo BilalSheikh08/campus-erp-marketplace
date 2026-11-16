@@ -1,18 +1,24 @@
 """Public catalog browsing and owner-controlled Listing lifecycle APIs."""
 
+import os
 from decimal import Decimal, InvalidOperation
 from uuid import UUID
+import uuid
 
+from django.conf import settings
 from django.db.models import Q
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.core.permissions import IsOwnerOrAdmin
 
-from .models import Listing
-from .serializers import ListingSerializer
+from .models import Listing, Review
+from .serializers import ListingSerializer, ReviewSerializer
 
 
 class ListingPagination(PageNumberPagination):
@@ -171,3 +177,64 @@ class ListingDetailView(ListingQuerysetMixin, generics.RetrieveUpdateDestroyAPIV
                 detail.is_available = False
                 detail.save(update_fields=["is_available"])
         instance.save(update_fields=["status", "updated_at"])
+
+
+class ListingReviewListCreateView(APIView):
+    """List reviews for a listing or create/update a review by an authenticated user."""
+
+    def get_permissions(self):
+        if self.request.method in {"GET", "HEAD", "OPTIONS"}:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request, pk):
+        listing = generics.get_object_or_404(Listing, pk=pk)
+        reviews = listing.reviews.select_related("user").all()
+        return Response(ReviewSerializer(reviews, many=True).data)
+
+    def post(self, request, pk):
+        listing = generics.get_object_or_404(Listing, pk=pk)
+        rating = request.data.get("rating")
+        comment = request.data.get("comment", "")
+
+        try:
+            rating = int(rating)
+            if not 1 <= rating <= 5:
+                raise ValueError()
+        except (TypeError, ValueError):
+            raise ValidationError({"rating": "Rating must be an integer between 1 and 5."})
+
+        review, _ = Review.objects.update_or_create(
+            listing=listing,
+            user=request.user,
+            defaults={"rating": rating, "comment": comment},
+        )
+        return Response(ReviewSerializer(review).data, status=status.HTTP_201_CREATED)
+
+
+class ImageUploadView(APIView):
+    """Upload an image file and return its public URL."""
+
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        file_obj = request.FILES.get("image") or request.FILES.get("file")
+        if not file_obj:
+            raise ValidationError({"image": "No image file provided."})
+
+        ext = os.path.splitext(file_obj.name)[1].lower()
+        if ext not in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
+            raise ValidationError({"image": "Allowed formats: JPG, PNG, WEBP, GIF."})
+
+        filename = f"upload_{uuid.uuid4().hex[:12]}{ext}"
+        upload_dir = os.path.join(settings.MEDIA_ROOT, "uploads")
+        os.makedirs(upload_dir, exist_ok=True)
+        file_path = os.path.join(upload_dir, filename)
+
+        with open(file_path, "wb+") as destination:
+            for chunk in file_obj.chunks():
+                destination.write(chunk)
+
+        url = f"/{settings.MEDIA_URL}uploads/{filename}"
+        return Response({"url": url, "filename": filename}, status=status.HTTP_201_CREATED)

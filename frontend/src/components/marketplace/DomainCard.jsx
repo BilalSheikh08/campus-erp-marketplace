@@ -9,41 +9,36 @@ export default function DomainCard({
   features,
   badge,
   icon: Icon,
-  gradient,
-  borderAccent,
   path,
   ctaText = 'Explore Marketplace',
 }) {
   return (
-    <div className={`relative flex flex-col justify-between p-8 rounded-3xl bg-white border ${borderAccent || 'border-slate-200'} shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group`}>
-      {/* Background ambient glow */}
-      <div className={`absolute -right-16 -top-16 w-44 h-44 rounded-full bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-20 transition-opacity blur-2xl pointer-events-none`} />
-
+    <div className="flex flex-col justify-between p-6 sm:p-7 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-200 group">
       <div>
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform duration-300`}>
-            {Icon && <Icon className="h-7 w-7" />}
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+            {Icon && <Icon className="h-6 w-6 text-blue-400" />}
           </div>
           {badge && (
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-700 tracking-wide uppercase">
+            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
               {badge}
             </span>
           )}
         </div>
 
-        <h3 className="text-2xl font-bold text-slate-900 mb-1 group-hover:text-indigo-600 transition-colors">
+        <h3 className="text-xl font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
           {title}
         </h3>
-        {subtitle && <p className="text-xs font-medium text-indigo-600 mb-3">{subtitle}</p>}
-        <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+        {subtitle && <p className="text-xs font-semibold text-blue-600 mb-2">{subtitle}</p>}
+        <p className="text-xs text-slate-600 mb-5 leading-relaxed">
           {description}
         </p>
 
         {features && features.length > 0 && (
-          <ul className="space-y-2 mb-8 border-t border-slate-100 pt-4">
+          <ul className="space-y-2 mb-6 border-t border-slate-100 pt-3 text-xs">
             {features.map((feat, idx) => (
-              <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-600">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+              <li key={idx} className="flex items-center gap-2 text-slate-600">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                 <span>{feat}</span>
               </li>
             ))}
@@ -53,10 +48,10 @@ export default function DomainCard({
 
       <Link
         to={path}
-        className="inline-flex items-center justify-between w-full px-5 py-3 rounded-xl bg-slate-50 hover:bg-indigo-600 hover:text-white text-slate-800 font-semibold text-sm transition-all duration-200 group/btn"
+        className="inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 font-semibold text-xs transition-all border border-slate-200 group/btn"
       >
         <span>{ctaText}</span>
-        <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+        <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
       </Link>
     </div>
   );
@@ -69,8 +64,6 @@ DomainCard.propTypes = {
   features: PropTypes.arrayOf(PropTypes.string),
   badge: PropTypes.string,
   icon: PropTypes.elementType,
-  gradient: PropTypes.string,
-  borderAccent: PropTypes.string,
   path: PropTypes.string.isRequired,
   ctaText: PropTypes.string,
 };

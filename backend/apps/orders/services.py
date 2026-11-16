@@ -1,5 +1,6 @@
 """Transactional cart, checkout, and order state services."""
 
+import random
 from collections import defaultdict
 from decimal import Decimal
 
@@ -216,6 +217,7 @@ def checkout_cart(user, *, payment_method, pickup_slot=""):
                 except PaymentStrategyError as exc:
                     raise OrderOperationError(str(exc)) from exc
 
+                pickup_pin = f"{random.randint(1000, 9999)}"
                 order = Order.objects.create(
                     user=user,
                     total_amount=total,
@@ -224,6 +226,7 @@ def checkout_cart(user, *, payment_method, pickup_slot=""):
                     payment_method=payment_method,
                     payment_status=payment.status,
                     payment_reference=payment.reference,
+                    pickup_pin=pickup_pin,
                 )
                 for cart_item, listing, subtotal in line_values:
                     OrderItem.objects.create(
@@ -343,6 +346,9 @@ def transition_order(order, actor, *, target_status, note=""):
             ) or (
                 target_status == Order.Status.READY
                 and locked.status == Order.Status.CONFIRMED
+            ) or (
+                target_status == Order.Status.COMPLETED
+                and locked.status == Order.Status.READY
             )
 
         if not authorized:

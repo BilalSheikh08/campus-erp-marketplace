@@ -3,7 +3,18 @@
  */
 
 export const formatPrice = (price) => {
-  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  let val = price;
+  if (typeof val === 'function') {
+    try {
+      val = val();
+    } catch {
+      val = 0;
+    }
+  }
+  const numPrice = typeof val === 'string' ? parseFloat(val) : Number(val);
+  if (numPrice === null || numPrice === undefined || Number.isNaN(numPrice)) {
+    return '₹0.00';
+  }
   return `₹${numPrice.toFixed(2)}`;
 };
 

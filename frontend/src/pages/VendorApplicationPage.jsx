@@ -1,29 +1,28 @@
 /**
- * Vendor application page - students can apply to become vendors.
+ * Campus Commons - Vendor Concessionaire Application
+ * Students and merchants applying for campus vending permits.
  */
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Store, CheckCircle, Sparkles } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import { applyAsVendor, fetchVendorProfile } from '../api/vendors';
-import LoadingSpinner from '../components/common/LoadingSpinner';
 import Alert from '../components/shared/Alert';
 import Button from '../components/shared/Button';
 import Input from '../components/shared/Input';
 
 const VENDOR_TYPES = [
-  { value: 'canteen', label: 'Canteen - Food & Beverages' },
-  { value: 'stationery', label: 'Stationery - Books & Supplies' },
-  { value: 'hostel_supply', label: 'Hostel Supply - Essentials' },
+  { value: 'canteen', label: 'Canteen Dining - Meals, Snacks & Beverages' },
+  { value: 'stationery', label: 'Academic Stationery - Blue Books & Drafters' },
+  { value: 'hostel_supply', label: 'Hostel Logistics - Room Necessities' },
 ];
 
 export default function VendorApplicationPage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
-  const [step, setStep] = useState('form'); // form, loading, success, error
-  const [hasExistingApplication, setHasExistingApplication] = useState(false);
+  const [step, setStep] = useState('form');
   const [existingVendor, setExistingVendor] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -36,15 +35,12 @@ export default function VendorApplicationPage() {
   });
 
   useEffect(() => {
-    // Check if user already has a vendor application
     const checkExistingApplication = async () => {
       try {
         const vendor = await fetchVendorProfile();
         setExistingVendor(vendor);
-        setHasExistingApplication(true);
         setStep('existing');
-      } catch (err) {
-        // No existing vendor profile - user can apply
+      } catch {
         setStep('form');
       }
     };
@@ -56,7 +52,7 @@ export default function VendorApplicationPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -68,28 +64,26 @@ export default function VendorApplicationPage() {
     setError(null);
 
     try {
-      const result = await applyAsVendor(formData);
-      setExistingVendor(result);
+      await applyAsVendor(formData);
       setStep('success');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to submit application');
-      setStep('form');
+      setError(err.response?.data?.detail || 'Failed to submit vendor application');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (!user) {
-    return <LoadingSpinner message="Loading..." />;
-  }
-
-  if (user.role !== 'student') {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-2xl mx-auto px-4">
-          <Alert type="error" message="Only students can apply to become vendors." />
-          <Button onClick={() => navigate('/')} className="mt-4">
-            Go Home
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <div className="bg-white p-8 rounded-3xl border border-slate-200 text-center max-w-md shadow-sm">
+          <Store className="h-12 w-12 text-blue-600 mx-auto mb-3" />
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Authentication Required</h2>
+          <p className="text-xs text-slate-500 mb-6">
+            Please sign in to your student account to apply for a campus vendor permit.
+          </p>
+          <Button variant="blue" onClick={() => navigate('/login')} className="w-full font-bold">
+            Sign In Now
           </Button>
         </div>
       </div>
@@ -97,186 +91,138 @@ export default function VendorApplicationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-slate-50 text-slate-900 py-10 pb-24">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Become a Vendor</h1>
-          <p className="text-gray-600">Apply to start selling on Campus ERP Marketplace</p>
+        <div className="mb-8 pb-6 border-b border-slate-200 text-center">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold mb-2 border border-blue-200">
+            <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+            <span>Commercial Concession Licensing</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            Apply as Campus Merchant
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Operate official canteen stalls, sell examination supplies, or manage hostel equipment.
+          </p>
         </div>
 
-        {/* Existing Application */}
+        {error && (
+          <div className="mb-6">
+            <Alert type="error" message={error} dismissible onClose={() => setError(null)} />
+          </div>
+        )}
+
         {step === 'existing' && existingVendor && (
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Building2 className="h-6 w-6 text-blue-600" />
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm text-center">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-4 border border-amber-200">
+              <Store className="h-8 w-8" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Application Already on File</h2>
+            <p className="text-xs sm:text-sm text-slate-600 mb-6">
+              You have an active permit application for <strong>{existingVendor.business_name}</strong> under review by University Administration.
+            </p>
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-2 mb-6">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Business Unit:</span>
+                <span className="font-bold text-slate-900">{existingVendor.business_name}</span>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Application Submitted</h2>
-                <p className="text-gray-600 mt-1">You already have a vendor application</p>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Concession Category:</span>
+                <span className="font-semibold text-slate-900 capitalize">{existingVendor.vendor_type}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Status:</span>
+                <span className="font-bold text-amber-600 capitalize">{existingVendor.status || 'Pending Review'}</span>
               </div>
             </div>
-
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="text-sm font-medium text-gray-600">Business Name</label>
-                <p className="text-lg text-gray-900 mt-1">{existingVendor.business_name}</p>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-600">Business Type</label>
-                <p className="text-lg text-gray-900 mt-1">
-                  {VENDOR_TYPES.find(t => t.value === existingVendor.vendor_type)?.label}
-                </p>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-600">Status</label>
-                <div className="mt-1">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    existingVendor.approval_status === 'approved' ? 'bg-green-100 text-green-800' :
-                    existingVendor.approval_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {existingVendor.approval_status?.charAt(0).toUpperCase() + existingVendor.approval_status?.slice(1)}
-                  </span>
-                </div>
-              </div>
-
-              {existingVendor.approval_status === 'approved' && (
-                <Alert
-                  type="success"
-                  message="Congratulations! Your vendor application has been approved. You can now create listings."
-                />
-              )}
-
-              {existingVendor.approval_status === 'rejected' && existingVendor.rejection_reason && (
-                <Alert
-                  type="error"
-                  message={`Application rejected: ${existingVendor.rejection_reason}`}
-                />
-              )}
-
-              {existingVendor.approval_status === 'pending' && (
-                <Alert
-                  type="info"
-                  message="Your application is under review. We'll notify you once a decision is made."
-                />
-              )}
-            </div>
-
-            <Button onClick={() => navigate('/')} variant="ghost" className="w-full">
-              Back Home
+            <Button variant="outline" onClick={() => navigate('/')} className="w-full font-bold">
+              Return to Homepage
             </Button>
           </div>
         )}
 
-        {/* Application Form */}
-        {step === 'form' && !hasExistingApplication && (
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            {error && (
-              <div className="mb-6">
-                <Alert type="error" message={error} dismissible onClose={() => setError(null)} />
-              </div>
-            )}
+        {step === 'success' && (
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm text-center">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-200">
+              <CheckCircle className="h-8 w-8" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Permit Application Submitted!</h2>
+            <p className="text-xs sm:text-sm text-slate-600 mb-6">
+              University administrators will review your credentials and business details. You will receive an alert once approved.
+            </p>
+            <Button variant="blue" onClick={() => navigate('/')} className="w-full font-bold">
+              Back to Campus Commons
+            </Button>
+          </div>
+        )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+        {step === 'form' && (
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <Input
-                label="Business Name"
+                label="Commercial Stall / Business Name"
                 name="business_name"
                 value={formData.business_name}
                 onChange={handleChange}
-                placeholder="e.g., ABC Canteen"
+                placeholder="e.g. Campus Corner Cafe"
                 required
               />
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Business Type *
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Concession Domain
                 </label>
                 <select
                   name="vendor_type"
                   value={formData.vendor_type}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  required
+                  className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
                 >
-                  {VENDOR_TYPES.map(type => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
+                  {VENDOR_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="Tell us about your business..."
-                  rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
-
               <Input
-                label="Contact Number"
+                label="Direct Counter Phone Number"
                 name="contact_number"
                 value={formData.contact_number}
                 onChange={handleChange}
-                placeholder="e.g., +91-9876543210"
+                placeholder="+91 98765 43210"
+                required
               />
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex gap-2">
-                  <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-blue-800">
-                    Once approved, you&apos;ll be able to create and manage product listings, track orders, and build your vendor store.
-                  </p>
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Business Description &amp; Offerings
+                </label>
+                <textarea
+                  name="description"
+                  rows={4}
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Detail your menu items, preparation times, or equipment quality..."
+                  required
+                  className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition placeholder:text-slate-400"
+                />
               </div>
 
-              <div className="flex gap-4">
+              <div className="pt-4">
                 <Button
                   type="submit"
+                  variant="blue"
+                  size="lg"
+                  loading={isSubmitting}
                   disabled={isSubmitting}
-                  className="flex-1"
+                  className="w-full py-3.5 rounded-2xl font-bold"
                 >
-                  {isSubmitting ? 'Submitting...' : 'Submit Application'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => navigate('/')}
-                  className="flex-1"
-                >
-                  Cancel
+                  Submit Vending Permit Application
                 </Button>
               </div>
             </form>
-          </div>
-        )}
-
-        {/* Success State */}
-        {step === 'success' && (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <div className="mb-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h2>
-            <p className="text-gray-600 mb-6">
-              Thank you for your application. Our team will review it and get back to you soon.
-            </p>
-            <Button onClick={() => navigate('/')} className="w-full">
-              Return Home
-            </Button>
           </div>
         )}
       </div>

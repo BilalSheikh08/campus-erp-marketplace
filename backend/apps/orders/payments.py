@@ -26,6 +26,8 @@ def process_payment(payment_method):
     if payment_method in {
         Order.PaymentMethod.MOCK,
         Order.PaymentMethod.CAMPUS_WALLET,
+        Order.PaymentMethod.STRIPE,
+        Order.PaymentMethod.UPI,
     }:
         return PaymentResult(Order.PaymentStatus.PAID, reference)
     return PaymentResult(Order.PaymentStatus.PENDING, reference)

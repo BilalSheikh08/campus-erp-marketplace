@@ -1,7 +1,10 @@
-/** Manage the authenticated user's profile and password. */
+/**
+ * Campus Commons - Student & User Profile Management
+ * Personal account details, room assignments, and password security.
+ */
 
 import { useEffect, useState } from 'react';
-import { Building2, Mail, Phone, User } from 'lucide-react';
+import { Building2, Mail, Phone, User, KeyRound } from 'lucide-react';
 import * as authAPI from '../api/auth';
 import useAuthStore from '../store/authStore';
 import Alert from '../components/shared/Alert';
@@ -49,7 +52,7 @@ export default function ProfilePage() {
       });
       setUser(updated);
       setEditing(false);
-      setSuccess('Profile saved.');
+      setSuccess('Profile details updated successfully.');
     } catch (requestError) {
       setError(errorMessage(requestError));
     } finally {
@@ -63,9 +66,13 @@ export default function ProfilePage() {
     setError('');
     setSuccess('');
     try {
-      await authAPI.changePassword(password.old, password.next, password.confirmation);
+      await authAPI.changePassword({
+        old_password: password.old,
+        new_password: password.next,
+        new_password_confirmation: password.confirmation,
+      });
       setPassword({ old: '', next: '', confirmation: '' });
-      setSuccess('Password changed.');
+      setSuccess('Your password has been changed securely.');
     } catch (requestError) {
       setError(errorMessage(requestError));
     } finally {
@@ -73,63 +80,160 @@ export default function ProfilePage() {
     }
   };
 
-  if (!user) return null;
-
   return (
-    <main className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-        <header className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">My Profile</h1>
-          <p className="text-gray-600">Keep your contact details up to date.</p>
-        </header>
+    <div className="min-h-screen bg-slate-50 py-10 pb-24 text-slate-900">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 pb-6 border-b border-slate-200">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Account &amp; Profile</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Manage your personal contact details, campus address, and security credentials.
+          </p>
+        </div>
 
-        {error && <div className="mb-5"><Alert type="error" message={error} dismissible onClose={() => setError('')} /></div>}
-        {success && <div className="mb-5"><Alert type="success" message={success} dismissible onClose={() => setSuccess('')} /></div>}
+        {error && (
+          <div className="mb-6">
+            <Alert type="error" message={error} dismissible onClose={() => setError('')} />
+          </div>
+        )}
+        {success && (
+          <div className="mb-6">
+            <Alert type="success" message={success} dismissible onClose={() => setSuccess('')} />
+          </div>
+        )}
 
-        <section className="mb-6 rounded-lg bg-white p-8 shadow-sm">
-          <div className="mb-7 flex items-center gap-5 border-b pb-7">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary"><User className="h-8 w-8 text-white" /></div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
-              <p className="text-gray-600">{user.email}</p>
-              <span className="mt-2 inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-medium capitalize text-blue-800">{user.role} account</span>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          {/* User Profile Card */}
+          <div className="md:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center justify-between pb-6 border-b border-slate-100">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold text-xl shadow-sm">
+                  {user?.name ? user.name[0].toUpperCase() : <User className="h-6 w-6" />}
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">{user?.name}</h2>
+                  <p className="text-xs text-slate-400">{user?.email}</p>
+                  <span className="inline-block mt-1 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                    {user?.role}
+                  </span>
+                </div>
+              </div>
+
+              {!editing && (
+                <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+                  Edit Profile
+                </Button>
+              )}
             </div>
+
+            {editing ? (
+              <form onSubmit={saveProfile} className="mt-6 space-y-4">
+                <Input
+                  label="Full Name"
+                  name="name"
+                  value={form.name}
+                  onChange={updateForm}
+                  required
+                />
+                <Input
+                  label="Phone Number"
+                  name="phone"
+                  value={form.phone}
+                  onChange={updateForm}
+                  placeholder="+91 98765 43210"
+                />
+                <Input
+                  label="Hostel Room / Block"
+                  name="hostel_room"
+                  value={form.hostel_room}
+                  onChange={updateForm}
+                  placeholder="Block B-302"
+                />
+                <div className="flex gap-2 pt-2">
+                  <Button type="submit" variant="blue" loading={saving} disabled={saving} className="font-bold">
+                    Save Changes
+                  </Button>
+                  <Button variant="ghost" onClick={() => setEditing(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <div className="mt-6 space-y-4 text-xs">
+                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <Mail className="h-4 w-4 text-slate-400" />
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Campus Email</span>
+                    <span className="font-semibold text-slate-800">{user?.email}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <Phone className="h-4 w-4 text-slate-400" />
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Phone Contact</span>
+                    <span className="font-semibold text-slate-800">{user?.phone || 'Not provided'}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <Building2 className="h-4 w-4 text-slate-400" />
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Hostel Room</span>
+                    <span className="font-semibold text-slate-800">{user?.hostel_room || 'Not assigned'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          {editing ? (
-            <form onSubmit={saveProfile} className="space-y-5">
-              <Input label="Full name" name="name" value={form.name} onChange={updateForm} required maxLength={150} />
-              <Input label="Phone number" name="phone" value={form.phone} onChange={updateForm} placeholder="Optional" />
-              {user.role === 'student' && <Input label="Hostel room" name="hostel_room" value={form.hostel_room} onChange={updateForm} placeholder="Optional" />}
-              <Input label="Email" type="email" value={user.email} disabled />
-              <div className="flex gap-3">
-                <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</Button>
-                <Button type="button" variant="ghost" onClick={() => { setForm({ name: user.name || '', phone: user.phone || '', hostel_room: user.hostel_room || '' }); setEditing(false); }}>Cancel</Button>
+          {/* Change Password Card */}
+          <div className="md:col-span-5 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 mb-6">
+              <KeyRound className="h-5 w-5 text-blue-600" />
+              <h2 className="text-base font-bold text-slate-900">Change Password</h2>
+            </div>
+
+            <form onSubmit={savePassword} className="space-y-4">
+              <Input
+                label="Current Password"
+                type="password"
+                name="old"
+                value={password.old}
+                onChange={updatePassword}
+                required
+              />
+              <Input
+                label="New Password"
+                type="password"
+                name="next"
+                value={password.next}
+                onChange={updatePassword}
+                required
+              />
+              <Input
+                label="Confirm New Password"
+                type="password"
+                name="confirmation"
+                value={password.confirmation}
+                onChange={updatePassword}
+                required
+              />
+
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  variant="blue"
+                  loading={passwordSaving}
+                  disabled={passwordSaving || !password.old || !password.next}
+                  className="w-full font-bold py-2.5 rounded-xl shadow-xs"
+                >
+                  Update Password
+                </Button>
               </div>
             </form>
-          ) : (
-            <div className="space-y-5">
-              <div><p className="text-sm font-medium text-gray-600">Full name</p><p className="mt-1 text-lg text-gray-900">{user.name || '—'}</p></div>
-              <div><p className="flex items-center gap-2 text-sm font-medium text-gray-600"><Mail className="h-4 w-4" />Email</p><p className="mt-1 text-lg text-gray-900">{user.email}</p></div>
-              <div><p className="flex items-center gap-2 text-sm font-medium text-gray-600"><Phone className="h-4 w-4" />Phone</p><p className="mt-1 text-lg text-gray-900">{user.phone || '—'}</p></div>
-              {user.role === 'student' && <div><p className="flex items-center gap-2 text-sm font-medium text-gray-600"><Building2 className="h-4 w-4" />Hostel room</p><p className="mt-1 text-lg text-gray-900">{user.hostel_room || '—'}</p></div>}
-              <Button type="button" onClick={() => { setError(''); setEditing(true); }}>Edit profile</Button>
-            </div>
-          )}
-          <p className="mt-6 border-t pt-5 text-sm text-gray-500">Account created {new Date(user.date_joined).toLocaleDateString()}</p>
-        </section>
-
-        <section className="rounded-lg bg-white p-8 shadow-sm">
-          <h2 className="mb-2 text-xl font-semibold text-gray-900">Change password</h2>
-          <p className="mb-5 text-sm text-gray-600">Use your current password to set a new one.</p>
-          <form onSubmit={savePassword} className="space-y-4">
-            <Input label="Current password" name="old" type="password" autoComplete="current-password" value={password.old} onChange={updatePassword} required />
-            <Input label="New password" name="next" type="password" autoComplete="new-password" value={password.next} onChange={updatePassword} minLength={8} required />
-            <Input label="Confirm new password" name="confirmation" type="password" autoComplete="new-password" value={password.confirmation} onChange={updatePassword} minLength={8} required />
-            <Button type="submit" disabled={passwordSaving}>{passwordSaving ? 'Updating…' : 'Update password'}</Button>
-          </form>
-        </section>
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -12,6 +12,8 @@ class CartItemSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source="listing.title", read_only=True)
     category_type = serializers.CharField(source="listing.category_type", read_only=True)
     listing_status = serializers.CharField(source="listing.status", read_only=True)
+    image_url = serializers.CharField(source="listing.image_url", read_only=True, allow_null=True)
+    vendor_name = serializers.SerializerMethodField()
     unit_price = serializers.DecimalField(
         source="listing.price",
         max_digits=10,
@@ -28,6 +30,8 @@ class CartItemSerializer(serializers.ModelSerializer):
             "title",
             "category_type",
             "listing_status",
+            "image_url",
+            "vendor_name",
             "quantity",
             "unit_price",
             "subtotal",
@@ -38,6 +42,11 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     def get_subtotal(self, instance):
         return instance.listing.price * instance.quantity
+
+    def get_vendor_name(self, instance):
+        if instance.listing and instance.listing.vendor:
+            return instance.listing.vendor.business_name
+        return None
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -165,6 +174,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "payment_status",
             "payment_reference",
             "payment_ref",
+            "pickup_pin",
             "stock_restored_at",
             "items",
             "status_logs",

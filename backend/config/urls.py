@@ -1,5 +1,7 @@
 """Project URL configuration."""
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import include, path
@@ -10,7 +12,33 @@ def health_check(request):
     return JsonResponse({"status": "ok", "service": "campus-erp-backend"})
 
 
+def root_view(request):
+    """Return a welcoming API status response for root requests."""
+    return JsonResponse({
+        "status": "ok",
+        "service": "campus-erp-backend",
+        "message": "Campus ERP & Marketplace API is active.",
+        "frontend_url": "http://localhost:5173/",
+        "admin_url": "/admin/",
+        "endpoints": {
+            "health": "/health/",
+            "auth": "/api/auth/",
+            "listings": "/api/listings/",
+            "orders": "/api/orders/",
+            "cart": "/api/cart/",
+            "books": "/api/books/",
+            "hostel_requests": "/api/hostel-requests/",
+            "vendors": "/api/vendors/",
+            "inventory": "/api/inventory/",
+            "notifications": "/api/notifications/",
+            "analytics": "/api/analytics/",
+            "support": "/api/support/",
+        },
+    })
+
+
 urlpatterns = [
+    path("", root_view, name="api-root"),
     path("admin/", admin.site.urls),
     path("health/", health_check, name="health-check"),
     path("api/health/", health_check, name="api-health-check"),
@@ -24,4 +52,4 @@ urlpatterns = [
     path("api/books/", include("apps.books.urls")),
     path("api/analytics/", include("apps.analytics.urls")),
     path("api/support/", include("apps.support.urls")),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

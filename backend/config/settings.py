@@ -142,13 +142,13 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/day",
-        "user": "1000/day",
-        "auth_login": "5/minute",
-        "auth_register": "3/hour",
-        "auth_refresh": "30/minute",
-        "auth_logout": "30/minute",
-        "auth_password_change": "5/hour",
+        "anon": "1000/day" if DEBUG else "100/day",
+        "user": "5000/day" if DEBUG else "1000/day",
+        "auth_login": "120/minute" if DEBUG else "5/minute",
+        "auth_register": "100/hour" if DEBUG else "3/hour",
+        "auth_refresh": "120/minute" if DEBUG else "30/minute",
+        "auth_logout": "120/minute" if DEBUG else "30/minute",
+        "auth_password_change": "50/hour" if DEBUG else "5/hour",
     },
 }
 

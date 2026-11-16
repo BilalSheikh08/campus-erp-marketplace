@@ -1,5 +1,6 @@
 """API serializers for second-hand books and transactions."""
 
+from decimal import Decimal
 from rest_framework import serializers
 
 from apps.listings.models import BookDetail, Listing
@@ -41,7 +42,7 @@ class BookSerializer(serializers.ModelSerializer):
 class BookCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=150)
     description = serializers.CharField(required=False, allow_blank=True)
-    price = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=0)
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal("0.00"))
     image_url = serializers.URLField(required=False, allow_blank=True, allow_null=True)
     condition = serializers.ChoiceField(choices=BookDetail.Condition.choices)
     author = serializers.CharField(max_length=150, required=False, allow_blank=True)

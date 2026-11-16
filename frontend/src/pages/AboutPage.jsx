@@ -1,5 +1,6 @@
 /**
- * About Page - comprehensive platform documentation and technical overview.
+ * Campus Commons - Platform Architecture & Engineering Overview
+ * Deep-dive into technical architecture, four domains, and platform mission.
  */
 
 import { Link } from 'react-router-dom';
@@ -8,9 +9,8 @@ import {
   Zap,
   Layers,
   Database,
-  ArrowRight,
   Code2,
-  CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 import Button from '../components/shared/Button';
 
@@ -18,158 +18,114 @@ export default function AboutPage() {
   const pillars = [
     {
       icon: Layers,
-      title: 'One Engine, Four Skins',
+      title: 'Unified Campus Engine',
       description:
-        'Rather than deploying separate fragmented applications for dining, supplies, and accommodation, our architecture unifies listings, orders, carts, inventory, permissions, and audit logs into a single enterprise engine.',
+        'Rather than maintaining fragmented silos for dining, stationery, and dorm logistics, our clearinghouse unifies listings, orders, atomic inventory, and verification into one integrated platform.',
     },
     {
       icon: Zap,
-      title: 'Transactional Concurrency',
+      title: 'Atomic Stock Protection',
       description:
-        'Campus rush hours create immense transaction density. We employ database-level row locking with select_for_update() to prevent overselling, race conditions, or duplicate book claims.',
+        'High lunch break traffic creates heavy concurrency. Database row-level locks ensure that meal portions and course textbook listings cannot be double-booked or oversold.',
     },
     {
       icon: Database,
-      title: 'Immutable Order & Audit Trails',
+      title: 'Immutable Audit Trail',
       description:
-        'Every checkout takes a point-in-time price snapshot. Order and hostel requisition status changes are persisted in unalterable audit logs for administrative compliance.',
+        'Every checkout preserves an immutable price snapshot and timeline audit log. Every status change from preparation to pickup is permanently recorded.',
     },
     {
       icon: ShieldCheck,
-      title: 'Role-Isolated Governance',
+      title: 'Role-Based Governance',
       description:
-        'Granular permissions divide Students, Campus Vendors, Hostel Wardens, and University Administrators. Cross-user object mutations strictly return HTTP 403 Forbidden.',
+        'Strict permissions separate Students, Campus Merchants, Residence Wardens, and SuperAdmins, ensuring end-to-end data isolation and security.',
     },
   ];
 
   const techStack = [
-    { name: 'Django 5.0 & DRF 3.15', role: 'High-performance Python backend & REST API' },
-    { name: 'Django Channels & Redis', role: 'Real-time WebSocket notification pipeline' },
-    { name: 'PostgreSQL & Docker', role: 'ACID-compliant relational database storage' },
-    { name: 'React 18 & Vite', role: 'Ultra-fast, modular Single Page Application' },
-    { name: 'Tailwind CSS', role: 'Modern, responsive utility-first design system' },
-    { name: 'Zustand & Axios', role: 'Lightweight reactive state & automatic JWT refresh' },
+    { name: 'Django 5.0 & DRF', role: 'Enterprise Python backend & REST API' },
+    { name: 'PostgreSQL 16', role: 'ACID transactional database with row-level locks' },
+    { name: 'React 18 & Vite', role: 'Fast, modular single-page interface' },
+    { name: 'Tailwind CSS', role: 'Design token architecture with accessible contrast' },
+    { name: 'Zustand & Axios', role: 'Client state management & JWT lifecycle' },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header / Hero */}
-      <section className="bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto text-center">
-          <span className="text-indigo-400 font-bold text-xs uppercase tracking-widest bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
-            About Campus ERP
-          </span>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mt-6 mb-6">
-            The Digital Backbone of Campus Commerce
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-24">
+      {/* Header Banner */}
+      <section className="bg-gradient-to-b from-slate-950 via-[#0A1128] to-slate-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center space-y-4">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-semibold text-slate-300">
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+            <span>Platform Blueprint</span>
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+            Architecture &amp; Mission
           </h1>
-          <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            Eliminating canteen lunch lines, replacing paper hostel registers, and empowering students to circulate textbooks—engineered as a single high-concurrency university ecosystem.
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Engineered to streamline campus daily life: eliminating long lunch queues, guaranteeing authentic course stationery, and facilitating trusted peer exchange.
           </p>
         </div>
       </section>
 
-      {/* Origin & Problem Solved */}
-      <section className="py-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200/80 shadow-sm">
-          <div className="max-w-3xl">
-            <span className="text-indigo-600 font-bold text-xs uppercase tracking-widest">
-              The Vision
-            </span>
-            <h2 className="text-3xl font-extrabold text-slate-900 mt-2 mb-6">
-              Why Campus ERP was created
-            </h2>
-            <p className="text-slate-600 leading-relaxed mb-4">
-              Traditional universities juggle fragmented systems: food pre-ordering is nonexistent or crowded around a single register; stationery supplies require multiple cash trips; hostel equipment requests are buried in manual paper ledgers; and student book resale is scattered across unreliable messaging groups.
-            </p>
-            <p className="text-slate-600 leading-relaxed">
-              Campus ERP solves this by unifying four distinct university domains around one battle-tested transaction engine. By pairing real-time notifications with server-authoritative inventory checks, students and staff enjoy effortless campus life with zero administrative friction.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Architectural Pillars */}
-      <section className="py-16 bg-white border-y border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-indigo-600 font-bold text-xs uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-              Core Engineering
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4">
-              Architectural Principles
-            </h2>
-            <p className="mt-3 text-slate-600">
-              Designed with enterprise security and rock-solid consistency at its foundation.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {pillars.map((pillar, idx) => {
-              const Icon = pillar.icon;
-              return (
-                <div
-                  key={idx}
-                  className="p-8 rounded-3xl bg-slate-50/70 border border-slate-200 hover:border-indigo-300 transition-colors"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center mb-6 shadow-md shadow-indigo-600/20">
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">{pillar.title}</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{pillar.description}</p>
+      {/* 4 Architectural Pillars */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {pillars.map((pil, idx) => {
+            const Icon = pil.icon;
+            return (
+              <div
+                key={idx}
+                className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 border border-blue-200">
+                  <Icon className="h-6 w-6" />
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Tech Stack Matrix */}
-      <section className="py-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 text-indigo-600 font-bold text-xs uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-            <Code2 className="h-4 w-4" />
-            <span>Modern Technology Stack</span>
-          </div>
-          <h2 className="text-3xl font-extrabold text-slate-900 mt-4">
-            Powered by Leading Technologies
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {techStack.map((tech, idx) => (
-            <div
-              key={idx}
-              className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-start gap-4"
-            >
-              <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-bold text-slate-900 text-base">{tech.name}</h4>
-                <p className="text-xs text-slate-500 mt-0.5">{tech.role}</p>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">{pil.title}</h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{pil.description}</p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-20 bg-indigo-900 text-white text-center">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
-            Experience the Marketplace Today
-          </h2>
-          <p className="text-indigo-200 mb-8 max-w-xl mx-auto text-base">
-            Start browsing available products, textbooks, and campus supplies right now.
+      {/* Technology Stack Grid */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+        <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <Code2 className="h-6 w-6 text-blue-600" />
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+              Core Technical Stack
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {techStack.map((tech, idx) => (
+              <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <p className="font-bold text-slate-900 text-sm">{tech.name}</p>
+                <p className="text-xs text-slate-500 mt-1">{tech.role}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Box */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center">
+        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 border border-slate-800">
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">Ready to explore?</h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto mb-6">
+            Browse live campus listings or create an account to start pre-ordering.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="flex justify-center gap-3">
             <Link to="/marketplace">
-              <Button size="lg" className="bg-white text-indigo-900 hover:bg-indigo-50 font-bold rounded-2xl flex items-center gap-2">
-                <span>Browse Products</span>
-                <ArrowRight className="h-5 w-5" />
+              <Button variant="blue" size="lg" className="px-6 font-bold">
+                Enter Marketplace
               </Button>
             </Link>
             <Link to="/contact">
-              <Button variant="secondary" size="lg" className="bg-indigo-800 text-white border-white/20 rounded-2xl">
-                Contact Campus Support
+              <Button variant="outline" size="lg" className="px-6 font-bold bg-slate-800 text-white border-slate-700 hover:bg-slate-700">
+                Contact Directory
               </Button>
             </Link>
           </div>

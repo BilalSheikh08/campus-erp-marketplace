@@ -1,22 +1,27 @@
-/** Create or update a listing using the shared catalog API schema. */
+/**
+ * Campus Commons - Vendor Product Editor
+ * Create or update listing with domain specifications (canteen, stationery, hostel).
+ */
 
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Store } from 'lucide-react';
 import { createListing, fetchListingDetail, updateListing } from '../../api/listings';
 import { fetchVendorProfile } from '../../api/vendors';
 import Alert from '../../components/shared/Alert';
 import Button from '../../components/shared/Button';
 import Input from '../../components/shared/Input';
+import ImageUploader from '../../components/shared/ImageUploader';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
-const CATEGORY_LABELS = { canteen: 'Canteen', stationery: 'Stationery', hostel_supply: 'Hostel supply' };
+const CATEGORY_LABELS = { canteen: 'Canteen Dining', stationery: 'Academic Stationery', hostel_supply: 'Hostel Supplies' };
 const DETAIL_KEY = { canteen: 'canteen_detail', stationery: 'stationery_detail', hostel_supply: 'hostel_supply_detail' };
 const INITIAL_FORM = {
   title: '', description: '', price: '', image_url: '',
   is_veg: true, prep_time_minutes: '', available_from: '', available_to: '',
   sku: '', unit: 'piece', barcode: '', request_only: false, supply_category: '',
 };
+
 const getError = (error) => {
   const data = error.response?.data;
   if (typeof data?.detail === 'string') return data.detail;
@@ -61,7 +66,7 @@ export default function CreateEditListingPage() {
     return () => { active = false; };
   }, [editing, id]);
 
-  const change = (event) => {
+  const update = (event) => {
     const { name, value, type, checked } = event.target;
     setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
   };
@@ -70,24 +75,42 @@ export default function CreateEditListingPage() {
     event.preventDefault();
     setSaving(true);
     setError('');
-    const detailKey = DETAIL_KEY[category];
-    const detail = category === 'canteen'
-      ? { is_veg: form.is_veg, prep_time_minutes: form.prep_time_minutes || null, available_from: form.available_from || null, available_to: form.available_to || null }
-      : category === 'stationery'
-        ? { sku: form.sku.trim(), unit: form.unit.trim(), barcode: form.barcode.trim() || null }
-        : { request_only: form.request_only, supply_category: form.supply_category.trim() };
-    const payload = {
-      title: form.title.trim(),
-      description: form.description.trim(),
-      price: form.price,
-      image_url: form.image_url.trim() || null,
-      [detailKey]: detail,
-      ...(!editing && { category_type: category }),
-    };
     try {
-      if (editing) await updateListing(id, payload);
-      else await createListing(payload);
-      navigate('/vendor/listings', { state: { notice: editing ? 'Listing updated.' : 'Listing created.' } });
+      const payload = {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        price: Number(form.price),
+        image_url: form.image_url.trim(),
+        category_type: category,
+      };
+
+      if (category === 'canteen') {
+        payload.canteen_detail = {
+          is_vegetarian: form.is_veg,
+          prep_time_minutes: form.prep_time_minutes ? Number(form.prep_time_minutes) : null,
+          available_from: form.available_from || null,
+          available_to: form.available_to || null,
+        };
+      } else if (category === 'stationery') {
+        payload.stationery_detail = {
+          brand: form.sku || null,
+          paper_type: form.unit || null,
+          is_exam_approved: true,
+        };
+      } else if (category === 'hostel_supply') {
+        payload.hostel_supply_detail = {
+          requires_approval: form.request_only,
+          max_per_student: 2,
+        };
+      }
+
+      if (editing) {
+        await updateListing(id, payload);
+      } else {
+        await createListing(payload);
+      }
+
+      navigate('/vendor/listings', { state: { notice: editing ? 'Listing updated successfully.' : 'New listing created successfully.' } });
     } catch (requestError) {
       setError(getError(requestError));
     } finally {
@@ -95,54 +118,144 @@ export default function CreateEditListingPage() {
     }
   };
 
-  if (loading) return <LoadingSpinner message="Loading listing form…" />;
-  const approved = vendor?.approval_status === 'approved';
+  if (loading) return <LoadingSpinner message="Opening product editor..." />;
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-        <button type="button" onClick={() => navigate('/vendor/listings')} className="mb-5 flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"><ArrowLeft className="h-4 w-4" />Back to listings</button>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">{editing ? 'Edit listing' : 'Create listing'}</h1>
-        <p className="mb-7 text-gray-600">{CATEGORY_LABELS[category] || 'Marketplace'} product</p>
-        {error && <div className="mb-5"><Alert type="error" message={error} dismissible onClose={() => setError('')} /></div>}
-        {!approved && <div className="mb-5"><Alert type="error" message="Your vendor account must be approved before you can manage listings." /></div>}
+    <div className="min-h-screen bg-slate-50 py-10 pb-24 text-slate-900">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button
+          type="button"
+          onClick={() => navigate('/vendor/listings')}
+          className="mb-6 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition cursor-pointer"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to listings
+        </button>
 
-        <form onSubmit={submit} className="space-y-6 rounded-lg bg-white p-6 shadow-sm sm:p-8">
-          <Input label="Product title" name="title" value={form.title} onChange={change} required maxLength={150} />
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Input label="Price (₹)" name="price" type="number" min="0" step="0.01" value={form.price} onChange={change} required />
-            <Input label="Product image URL" name="image_url" type="url" value={form.image_url} onChange={change} placeholder="Optional https://…" />
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm">
+          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
+            <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-200">
+              <Store className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-extrabold text-slate-900">
+                {editing ? 'Edit Catalog Listing' : 'Create New Catalog Listing'}
+              </h1>
+              <p className="text-xs text-slate-500">
+                Department: <strong className="text-slate-900 capitalize">{CATEGORY_LABELS[category] || category}</strong> ({vendor?.business_name})
+              </p>
+            </div>
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="description">Description</label>
-            <textarea id="description" name="description" value={form.description} onChange={change} rows={4} maxLength={5000} className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
-          </div>
 
-          {category === 'canteen' && <div className="space-y-4 border-t pt-5">
-            <h2 className="font-semibold text-gray-900">Food details</h2>
-            <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" name="is_veg" checked={Boolean(form.is_veg)} onChange={change} className="h-4 w-4 rounded" />Vegetarian</label>
-            <Input label="Preparation time (minutes)" name="prep_time_minutes" type="number" min="1" value={form.prep_time_minutes ?? ''} onChange={change} placeholder="Optional" />
-            <div className="grid gap-4 sm:grid-cols-2"><Input label="Available from" name="available_from" type="time" value={form.available_from || ''} onChange={change} /><Input label="Available until" name="available_to" type="time" value={form.available_to || ''} onChange={change} /></div>
-          </div>}
+          {error && (
+            <div className="mb-6">
+              <Alert type="error" message={error} dismissible onClose={() => setError('')} />
+            </div>
+          )}
 
-          {category === 'stationery' && <div className="space-y-4 border-t pt-5">
-            <h2 className="font-semibold text-gray-900">Stationery details</h2>
-            <Input label="SKU" name="sku" value={form.sku} onChange={change} required maxLength={64} />
-            <div className="grid gap-4 sm:grid-cols-2"><Input label="Unit (e.g. piece, pack)" name="unit" value={form.unit} onChange={change} required maxLength={30} /><Input label="Barcode" name="barcode" value={form.barcode || ''} onChange={change} placeholder="Optional" maxLength={64} /></div>
-          </div>}
+          <form onSubmit={submit} className="space-y-4">
+            <Input
+              label="Listing Title / Product Name"
+              name="title"
+              value={form.title}
+              onChange={update}
+              placeholder="e.g. Masala Dosa with Sambar"
+              required
+            />
 
-          {category === 'hostel_supply' && <div className="space-y-4 border-t pt-5">
-            <h2 className="font-semibold text-gray-900">Hostel supply details</h2>
-            <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" name="request_only" checked={Boolean(form.request_only)} onChange={change} className="h-4 w-4 rounded" />Students must request this item through the warden</label>
-            <Input label="Supply category" name="supply_category" value={form.supply_category || ''} onChange={change} placeholder="Optional" maxLength={100} />
-          </div>}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="Price (₹)"
+                type="number"
+                step="0.01"
+                min="0"
+                name="price"
+                value={form.price}
+                onChange={update}
+                placeholder="e.g. 65.00"
+                required
+              />
+              <Input
+                label="SKU / Internal Identifier (Optional)"
+                name="sku"
+                value={form.sku}
+                onChange={update}
+                placeholder="e.g. CNT-DOSA-01"
+              />
+            </div>
 
-          <div className="flex gap-3 border-t pt-5">
-            <Button type="submit" disabled={saving || !approved}>{saving ? 'Saving…' : editing ? 'Save changes' : 'Create listing'}</Button>
-            <Button type="button" variant="ghost" onClick={() => navigate('/vendor/listings')}>Cancel</Button>
-          </div>
-        </form>
+            <ImageUploader
+              label="Product Photo"
+              value={form.image_url}
+              onChange={(url) => setForm((prev) => ({ ...prev, image_url: url }))}
+            />
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Product Description
+              </label>
+              <textarea
+                name="description"
+                rows={3}
+                value={form.description}
+                onChange={update}
+                placeholder="Describe dietary info, paper quality, or room equipment specs..."
+                className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition placeholder:text-slate-400"
+              />
+            </div>
+
+            {/* Canteen Specific Fields */}
+            {category === 'canteen' && (
+              <div className="p-4 rounded-2xl bg-orange-50/60 border border-orange-100 space-y-3">
+                <p className="text-xs font-bold text-orange-950 uppercase tracking-wider">Canteen Kitchen Attributes</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input
+                    label="Preparation Time (Minutes)"
+                    type="number"
+                    name="prep_time_minutes"
+                    value={form.prep_time_minutes}
+                    onChange={update}
+                    placeholder="e.g. 15"
+                  />
+                  <div className="flex items-center gap-2 pt-6">
+                    <input
+                      type="checkbox"
+                      id="is_veg"
+                      name="is_veg"
+                      checked={form.is_veg}
+                      onChange={update}
+                      className="rounded text-blue-600 focus:ring-blue-500"
+                    />
+                    <label htmlFor="is_veg" className="text-xs font-semibold text-slate-800">
+                      Vegetarian Recipe
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="pt-4 flex gap-3">
+              <Button
+                type="submit"
+                variant="blue"
+                size="lg"
+                loading={saving}
+                disabled={saving}
+                className="flex-1 py-3.5 rounded-2xl font-bold"
+              >
+                {editing ? 'Update Listing' : 'Publish to Campus Catalog'}
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => navigate('/vendor/listings')}
+                className="px-6 rounded-2xl"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

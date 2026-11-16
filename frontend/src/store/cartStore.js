@@ -22,10 +22,21 @@ const useCartStore = create((set, get) => ({
   checkoutError: null,
 
   // Getters
-  itemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
+  itemCount: () =>
+    Array.isArray(get().items)
+      ? get().items.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0)
+      : 0,
   subtotal: () =>
-    get().items.reduce((sum, item) => sum + parseFloat(item.unit_price) * item.quantity, 0),
-  totalAmount: () => get().subtotal(), // Same for now, can add taxes/fees later
+    Array.isArray(get().items)
+      ? get().items.reduce(
+          (sum, item) =>
+            sum +
+            Number(item.unit_price ?? item.price_at_addition ?? item.listing?.price ?? 0) *
+              (Number(item.quantity) || 1),
+          0
+        )
+      : 0,
+  totalAmount: () => (typeof get().subtotal === 'function' ? get().subtotal() : 0),
 
   // Actions - Fetch cart
   fetchCart: async () => {

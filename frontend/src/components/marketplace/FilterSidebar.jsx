@@ -1,132 +1,131 @@
-/**
- * Filter sidebar for marketplace browsing.
- * Filters by category, price range, and availability.
- */
-
-import { X } from 'lucide-react';
 import PropTypes from 'prop-types';
-import Button from '../shared/Button';
-import Input from '../shared/Input';
-
-const CATEGORIES = [
-  { value: 'canteen', label: '🍽️ Canteen' },
-  { value: 'stationery', label: '📚 Stationery' },
-  { value: 'hostel_supply', label: '🏠 Hostel Supplies' },
-  { value: 'book', label: '📖 Used Books' },
-];
+import { Filter, RotateCcw } from 'lucide-react';
 
 export default function FilterSidebar({
-  filters,
-  onFilterChange,
-  onClearFilters,
-  isOpen = true,
-  onClose,
+  domains = [],
+  selectedDomain = 'all',
+  onDomainChange,
+  stockStatuses = [],
+  selectedStockStatus = 'all',
+  onStockStatusChange,
+  minPrice = '',
+  maxPrice = '',
+  onMinPriceChange,
+  onMaxPriceChange,
+  onResetFilters,
 }) {
-  const handleCategoryChange = (category) => {
-    onFilterChange({
-      ...filters,
-      category: filters.category === category ? null : category,
-    });
-  };
-
-  const handlePriceChange = (type, value) => {
-    const numValue = value === '' ? null : parseFloat(value);
-    onFilterChange({
-      ...filters,
-      [type === 'min' ? 'minPrice' : 'maxPrice']: numValue,
-    });
-  };
-
   return (
-    <>
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 lg:hidden z-40"
-          onClick={onClose}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div
-        className={`fixed lg:relative inset-y-0 left-0 w-64 bg-white border-r border-gray-200 p-4 overflow-y-auto z-50 lg:z-auto transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6 lg:hidden">
-          <h2 className="font-semibold text-gray-900">Filters</h2>
-          <button onClick={onClose}>
-            <X className="h-5 w-5" />
-          </button>
+    <aside className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-6">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-slate-800" />
+          <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800">Catalog Filters</h3>
         </div>
+        <button
+          type="button"
+          onClick={onResetFilters}
+          className="text-xs font-semibold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 transition cursor-pointer"
+        >
+          <RotateCcw className="h-3 w-3" />
+          Reset
+        </button>
+      </div>
 
-        {/* Category Filter */}
-        <div className="mb-6">
-          <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-            Category
-          </h3>
-          <div className="space-y-2">
-            {CATEGORIES.map(cat => (
-              <label key={cat.value} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={filters.category === cat.value}
-                  onChange={() => handleCategoryChange(cat.value)}
-                  className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <span className="text-sm text-gray-700">{cat.label}</span>
-              </label>
+      {/* Domain Category Filter */}
+      {domains.length > 0 && (
+        <div>
+          <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+            Campus Department
+          </h4>
+          <div className="space-y-1">
+            {domains.map((dom) => (
+              <button
+                key={dom.value}
+                type="button"
+                onClick={() => onDomainChange(dom.value)}
+                className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition flex items-center justify-between cursor-pointer ${
+                  selectedDomain === dom.value
+                    ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <span>{dom.label}</span>
+                {dom.count !== undefined && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono ${
+                    selectedDomain === dom.value ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {dom.count}
+                  </span>
+                )}
+              </button>
             ))}
           </div>
         </div>
+      )}
 
-        {/* Price Range Filter */}
-        <div className="mb-6">
-          <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">
-            Price Range
-          </h3>
-          <div className="space-y-2">
-            <Input
-              type="number"
-              placeholder="Min price"
-              value={filters.minPrice || ''}
-              onChange={e => handlePriceChange('min', e.target.value)}
-              className="text-sm"
-            />
-            <Input
-              type="number"
-              placeholder="Max price"
-              value={filters.maxPrice || ''}
-              onChange={e => handlePriceChange('max', e.target.value)}
-              className="text-sm"
-            />
+      {/* Stock Availability */}
+      {stockStatuses.length > 0 && (
+        <div>
+          <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+            Availability
+          </h4>
+          <div className="space-y-1">
+            {stockStatuses.map((st) => (
+              <button
+                key={st.value}
+                type="button"
+                onClick={() => onStockStatusChange(st.value)}
+                className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition flex items-center justify-between cursor-pointer ${
+                  selectedStockStatus === st.value
+                    ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <span>{st.label}</span>
+              </button>
+            ))}
           </div>
         </div>
+      )}
 
-        {/* Clear Filters */}
-        {(filters.category || filters.minPrice || filters.maxPrice) && (
-          <Button
-            variant="ghost"
-            className="w-full text-sm"
-            onClick={onClearFilters}
-          >
-            Clear Filters
-          </Button>
-        )}
+      {/* Price Range */}
+      <div>
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+          Budget (₹)
+        </h4>
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            type="number"
+            min="0"
+            placeholder="Min"
+            value={minPrice}
+            onChange={(e) => onMinPriceChange(e.target.value)}
+            className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition"
+          />
+          <input
+            type="number"
+            min="0"
+            placeholder="Max"
+            value={maxPrice}
+            onChange={(e) => onMaxPriceChange(e.target.value)}
+            className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition"
+          />
+        </div>
       </div>
-    </>
+    </aside>
   );
 }
 
 FilterSidebar.propTypes = {
-  filters: PropTypes.shape({
-    category: PropTypes.string,
-    minPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    maxPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  }).isRequired,
-  onFilterChange: PropTypes.func.isRequired,
-  onClearFilters: PropTypes.func.isRequired,
-  isOpen: PropTypes.bool,
-  onClose: PropTypes.func,
+  domains: PropTypes.array,
+  selectedDomain: PropTypes.string,
+  onDomainChange: PropTypes.func.isRequired,
+  stockStatuses: PropTypes.array,
+  selectedStockStatus: PropTypes.string,
+  onStockStatusChange: PropTypes.func.isRequired,
+  minPrice: PropTypes.string,
+  maxPrice: PropTypes.string,
+  onMinPriceChange: PropTypes.func.isRequired,
+  onMaxPriceChange: PropTypes.func.isRequired,
+  onResetFilters: PropTypes.func.isRequired,
 };

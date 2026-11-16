@@ -45,6 +45,8 @@ pnpm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+.claude/
+.codex-draft/
+frontend-design-extracted/
 
-.claude/settings.local.json
 E-Commerce_Project_Campus_ERP_Full_Claude_Conversation.md

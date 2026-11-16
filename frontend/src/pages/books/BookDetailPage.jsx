@@ -1,13 +1,20 @@
+/**
+ * Campus Commons - Student Textbook Details & Reservation
+ * Direct peer-to-peer textbook handoff and escrow reservation.
+ */
+
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, BookOpen, CheckCircle2, Clock, ShoppingBag } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import { fetchBook, reserveBook } from '../../services/booksApi';
 import Alert from '../../components/shared/Alert';
 import Button from '../../components/shared/Button';
+import SafeImage from '../../components/shared/SafeImage';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
-const conditionLabel = (value) => value ? value.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '—';
+const conditionLabel = (value) =>
+  value ? value.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '—';
 
 export default function BookDetailPage() {
   const { id } = useParams();
@@ -30,7 +37,9 @@ export default function BookDetailPage() {
     }
   }, [id]);
 
-  useEffect(() => { loadBook(); }, [loadBook]);
+  useEffect(() => {
+    loadBook();
+  }, [loadBook]);
 
   const runAction = async (action) => {
     setActionLoading(true);
@@ -38,65 +47,169 @@ export default function BookDetailPage() {
     setMessage('');
     try {
       const result = await action();
-      setMessage(result?.status === 'confirmed' ? 'Sale confirmed successfully.' : 'Book action completed successfully.');
+      setMessage(
+        result?.status === 'confirmed'
+          ? 'Sale confirmed successfully.'
+          : 'Book reserved successfully! Coordinate with seller for handoff.'
+      );
       await loadBook();
     } catch (err) {
-      const detail = err.response?.data?.detail || err.response?.data?.[Object.keys(err.response?.data || {})[0]]?.[0];
+      const detail =
+        err.response?.data?.detail ||
+        err.response?.data?.[Object.keys(err.response?.data || {})[0]]?.[0];
       setError(detail || 'The action could not be completed.');
     } finally {
       setActionLoading(false);
     }
   };
 
-  if (loading) return <LoadingSpinner message="Loading book..." />;
-  if (!book) return <div className="max-w-4xl mx-auto px-4 py-10"><Alert type="error" message={error || 'Book not found.'} /></div>;
+  if (loading) return <LoadingSpinner message="Loading book details..." />;
+  if (!book)
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <Alert type="error" message={error || 'Book not found.'} />
+      </div>
+    );
 
   const isSeller = user?.id === book.seller_id;
   const canReserve = user?.role === 'student' && !isSeller && book.status === 'active' && book.is_available;
   const isAvailable = book.status === 'active' && book.is_available;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-slate-50 py-10 pb-24 text-slate-900">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button type="button" onClick={() => navigate(-1)} className="mb-6 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"><ArrowLeft className="h-4 w-4" /> Back</button>
-        {error && <div className="mb-4"><Alert type="error" message={error} dismissible onClose={() => setError('')} /></div>}
-        {message && <div className="mb-4"><Alert type="success" message={message} dismissible onClose={() => setMessage('')} /></div>}
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="mb-6 inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition cursor-pointer"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to listings
+        </button>
 
-        <div className="bg-white rounded-2xl shadow-sm border overflow-hidden grid grid-cols-1 md:grid-cols-2">
-          <div className="min-h-96 bg-gray-100 flex items-center justify-center p-8">
-            {book.image_url ? <img src={book.image_url} alt={book.title} className="max-h-96 w-full object-contain rounded-lg" /> : <BookOpen className="h-32 w-32 text-gray-300" />}
+        {error && (
+          <div className="mb-4">
+            <Alert type="error" message={error} dismissible onClose={() => setError('')} />
           </div>
-          <div className="p-8">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-primary mb-2">Second-Hand Book</p>
-                <h1 className="text-3xl font-bold text-gray-900">{book.title}</h1>
+        )}
+        {message && (
+          <div className="mb-4">
+            <Alert type="success" message={message} dismissible onClose={() => setMessage('')} />
+          </div>
+        )}
+
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-2">
+          {/* Book Image Cover with SafeImage */}
+          <div className="min-h-96 bg-slate-50 flex items-center justify-center p-8 border-b md:border-b-0 md:border-r border-slate-200">
+            <div className="w-full max-w-xs aspect-[3/4] relative rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-white">
+              <SafeImage
+                src={book.image_url}
+                alt={book.title}
+                domain="book"
+                category="book"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+
+          {/* Book Details */}
+          <div className="p-8 sm:p-10 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-200">
+                  Student P2P Exchange
+                </span>
+                <span
+                  className={`text-xs px-3 py-1 rounded-full font-bold border ${
+                    isAvailable
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-slate-100 text-slate-600 border-slate-200'
+                  }`}
+                >
+                  {isAvailable ? 'Available' : 'Reserved / Sold'}
+                </span>
               </div>
-              <span className="text-2xl font-bold text-primary">₹{Number(book.price || 0).toFixed(2)}</span>
+
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
+                {book.title}
+              </h1>
+              <p className="text-xs text-slate-500 mt-1 mb-4">
+                {book.author ? `by ${book.author}` : 'Author unspecified'}
+              </p>
+
+              {/* Price Block */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 mb-6 flex items-baseline justify-between">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Student Price</span>
+                  <div className="text-3xl font-mono font-extrabold text-slate-900 mt-0.5">
+                    ₹{Number(book.price || 0).toFixed(2)}
+                  </div>
+                </div>
+                <span className="text-xs text-purple-700 font-bold bg-purple-50 px-3 py-1 rounded-xl border border-purple-200">
+                  Condition: {conditionLabel(book.condition)}
+                </span>
+              </div>
+
+              {/* Meta Specifications */}
+              <div className="space-y-2.5 text-xs border-y border-slate-100 py-4 mb-6">
+                {book.subject && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Subject / Course:</span>
+                    <span className="font-semibold text-slate-900">{book.subject}</span>
+                  </div>
+                )}
+                {book.edition && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Edition:</span>
+                    <span className="font-semibold text-slate-900">{book.edition}</span>
+                  </div>
+                )}
+                {book.isbn && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">ISBN:</span>
+                    <span className="font-mono text-slate-900">{book.isbn}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Seller:</span>
+                  <span className="font-semibold text-blue-600">
+                    {book.seller_name || 'Verified Student Peer'}
+                  </span>
+                </div>
+              </div>
+
+              {book.description && (
+                <div className="mb-6">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                    Seller Notes
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    {book.description}
+                  </p>
+                </div>
+              )}
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-2">
-              <span className="rounded-full bg-indigo-50 text-indigo-700 px-3 py-1 text-sm">{conditionLabel(book.condition)}</span>
-              {book.subject && <span className="rounded-full bg-gray-100 text-gray-700 px-3 py-1 text-sm">{book.subject}</span>}
-              <span className={`rounded-full px-3 py-1 text-sm ${isAvailable ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{isAvailable ? 'Available' : 'Unavailable'}</span>
-            </div>
-
-            <dl className="mt-8 grid grid-cols-2 gap-4 text-sm">
-              <div><dt className="text-gray-500">Author</dt><dd className="font-medium text-gray-900 mt-1">{book.author || '—'}</dd></div>
-              <div><dt className="text-gray-500">Edition</dt><dd className="font-medium text-gray-900 mt-1">{book.edition || '—'}</dd></div>
-              <div><dt className="text-gray-500">Seller</dt><dd className="font-medium text-gray-900 mt-1">{book.seller_name}</dd></div>
-            </dl>
-
-            <div className="mt-8">
-              <h2 className="font-semibold text-gray-900">Description</h2>
-              <p className="mt-2 text-gray-600 whitespace-pre-wrap">{book.description || 'No description provided.'}</p>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              {canReserve && <Button loading={actionLoading} onClick={() => runAction(() => reserveBook(book.id))} className="gap-2"><ShoppingBag className="h-4 w-4" /> Reserve book</Button>}
-              {!user && isAvailable && <Link to="/login"><Button className="gap-2"><ShoppingBag className="h-4 w-4" /> Sign in to reserve</Button></Link>}
-              {isSeller && isAvailable && <Link to="/books/my-listings"><Button variant="secondary" className="gap-2"><Clock className="h-4 w-4" /> Manage my listings</Button></Link>}
-              {!isAvailable && <span className="inline-flex items-center gap-2 text-sm font-medium text-gray-500"><CheckCircle2 className="h-4 w-4" /> This book is no longer available</span>}
+            {/* Actions */}
+            <div className="pt-6 border-t border-slate-100">
+              {canReserve ? (
+                <Button
+                  onClick={() => runAction(() => reserveBook(book.id))}
+                  loading={actionLoading}
+                  variant="blue"
+                  size="lg"
+                  className="w-full py-3.5 rounded-2xl font-bold"
+                >
+                  Reserve Book for Campus Handoff
+                </Button>
+              ) : isSeller ? (
+                <p className="text-xs text-slate-500 text-center py-2 bg-slate-100 rounded-xl">
+                  You are the seller of this textbook listing.
+                </p>
+              ) : (
+                <Button disabled size="lg" className="w-full py-3.5 rounded-2xl bg-slate-200 text-slate-500 font-bold">
+                  Book Currently Reserved or Sold
+                </Button>
+              )}
             </div>
           </div>
         </div>

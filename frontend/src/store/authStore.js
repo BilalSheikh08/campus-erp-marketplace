@@ -12,7 +12,7 @@ export const useAuthStore = create((set) => ({
   // State
   user: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: Boolean(getTokens().access),
   error: null,
 
   setUser: (user) => set({ user }),

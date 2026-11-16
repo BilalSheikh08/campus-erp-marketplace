@@ -1,10 +1,11 @@
 """Shared catalog listings and domain-specific listing details."""
 
+from decimal import Decimal
 import uuid
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Q
 
@@ -55,7 +56,7 @@ class Listing(models.Model):
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(0)],
+        validators=[MinValueValidator(Decimal("0.00"))],
     )
     category_type = models.CharField(max_length=30, choices=Category.choices)
     status = models.CharField(
@@ -113,6 +114,15 @@ class Listing(models.Model):
                 raise ValidationError(
                     {"category_type": "The listing domain does not match the Vendor type."}
                 )
+
+    @property
+    def average_rating(self):
+        avg = self.reviews.aggregate(models.Avg("rating"))["rating__avg"]
+        return round(float(avg), 1) if avg is not None else None
+
+    @property
+    def reviews_count(self):
+        return self.reviews.count()
 
     def save(self, *args, **kwargs):
         self.category_type = self.LEGACY_CATEGORY_ALIASES.get(
@@ -262,3 +272,38 @@ class BookDetail(ListingDetailBase):
         super().clean()
         if self.seller_id is not None and self.seller.role != self.seller.Role.STUDENT:
             raise ValidationError({"seller": "Only Students can sell books."})
+
+
+class Review(models.Model):
+    """User review and star rating for a catalog listing."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    listing = models.ForeignKey(
+        Listing,
+        on_delete=models.CASCADE,
+        related_name="reviews",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="listing_reviews",
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Rating between 1 and 5 stars",
+    )
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["listing", "user"],
+                name="listings_review_listing_user_unique",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.rating}★ by {self.user.email} on {self.listing.title}"

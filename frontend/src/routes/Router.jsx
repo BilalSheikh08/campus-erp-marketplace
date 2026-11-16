@@ -3,14 +3,14 @@
  */
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import useAuthStore from '../store/authStore';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import ProtectedRoute from './ProtectedRoute';
 import RoleRoute from './RoleRoute';
 
-// Pages
+// Core Pages (Eager)
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
@@ -23,30 +23,34 @@ import CartPage from '../pages/CartPage';
 import OrdersPage from '../pages/OrdersPage';
 import OrderDetailPage from '../pages/OrderDetailPage';
 import ProfilePage from '../pages/ProfilePage';
-import VendorDashboard from '../pages/vendor/VendorDashboard';
-import VendorListings from '../pages/vendor/VendorListings';
-import VendorInventory from '../pages/vendor/VendorInventory';
-import InventoryAdjustmentPage from '../pages/vendor/InventoryAdjustmentPage';
-import CreateEditListingPage from '../pages/vendor/CreateEditListingPage';
-import VendorApplicationPage from '../pages/VendorApplicationPage';
-import AdminDashboard from '../pages/admin/AdminDashboard';
-import AdminVendorApprovalDashboard from '../pages/admin/AdminVendorApprovalDashboard';
-import AdminOrders from '../pages/admin/AdminOrders';
-import AdminListings from '../pages/admin/AdminListings';
-import StudentHostelRequests from '../pages/student/StudentHostelRequests';
-import WardenDashboard from '../pages/warden/WardenDashboard';
-import WardenRequestsManagement from '../pages/warden/WardenRequestsManagement';
-import WardenHostelRequestDetail from '../pages/warden/WardenHostelRequestDetail';
-import NotificationsPage from '../pages/NotificationsPage';
 import BookBrowsePage from '../pages/books/BookBrowsePage';
 import BookDetailPage from '../pages/books/BookDetailPage';
-import BookCreatePage from '../pages/books/BookCreatePage';
-import BookMyListingsPage from '../pages/books/BookMyListingsPage';
-import BookTransactionsPage from '../pages/books/BookTransactionsPage';
-import VendorAnalyticsPage from '../pages/analytics/VendorAnalyticsPage';
-import AdminAnalyticsPage from '../pages/analytics/AdminAnalyticsPage';
-import AboutPage from '../pages/AboutPage';
-import ContactPage from '../pages/ContactPage';
+import VendorApplicationPage from '../pages/VendorApplicationPage';
+import DemoSwitcher from '../components/common/DemoSwitcher';
+
+import VendorDashboard from '../pages/vendor/VendorDashboard';
+import WardenDashboard from '../pages/warden/WardenDashboard';
+import AdminDashboard from '../pages/admin/AdminDashboard';
+
+// Portal & Feature Pages (Lazy Loaded)
+const AboutPage = lazy(() => import('../pages/AboutPage'));
+const ContactPage = lazy(() => import('../pages/ContactPage'));
+const NotificationsPage = lazy(() => import('../pages/NotificationsPage'));
+const StudentHostelRequests = lazy(() => import('../pages/student/StudentHostelRequests'));
+const VendorListings = lazy(() => import('../pages/vendor/VendorListings'));
+const VendorInventory = lazy(() => import('../pages/vendor/VendorInventory'));
+const InventoryAdjustmentPage = lazy(() => import('../pages/vendor/InventoryAdjustmentPage'));
+const CreateEditListingPage = lazy(() => import('../pages/vendor/CreateEditListingPage'));
+const WardenRequestsManagement = lazy(() => import('../pages/warden/WardenRequestsManagement'));
+const WardenHostelRequestDetail = lazy(() => import('../pages/warden/WardenHostelRequestDetail'));
+const AdminVendorApprovalDashboard = lazy(() => import('../pages/admin/AdminVendorApprovalDashboard'));
+const AdminOrders = lazy(() => import('../pages/admin/AdminOrders'));
+const AdminListings = lazy(() => import('../pages/admin/AdminListings'));
+const BookCreatePage = lazy(() => import('../pages/books/BookCreatePage'));
+const BookMyListingsPage = lazy(() => import('../pages/books/BookMyListingsPage'));
+const BookTransactionsPage = lazy(() => import('../pages/books/BookTransactionsPage'));
+const VendorAnalyticsPage = lazy(() => import('../pages/analytics/VendorAnalyticsPage'));
+const AdminAnalyticsPage = lazy(() => import('../pages/analytics/AdminAnalyticsPage'));
 
 export default function Router() {
   const { isLoading, initializeAuth } = useAuthStore();
@@ -62,7 +66,8 @@ export default function Router() {
 
   return (
     <BrowserRouter>
-      <Routes>
+      <Suspense fallback={<LoadingSpinner message="Loading view..." />}>
+        <Routes>
         {/* Public Routes */}
         <Route
           path="/login"
@@ -430,6 +435,8 @@ export default function Router() {
           }
         />
       </Routes>
-    </BrowserRouter>
+    </Suspense>
+    <DemoSwitcher />
+  </BrowserRouter>
   );
 }

@@ -11,6 +11,7 @@ from .models import (
     CanteenDetail,
     HostelSupplyDetail,
     Listing,
+    Review,
     StationeryDetail,
 )
 
@@ -105,6 +106,8 @@ class ListingSerializer(serializers.ModelSerializer):
             "book_detail",
             "stock_status",
             "is_purchasable",
+            "average_rating",
+            "reviews_count",
             "created_at",
             "updated_at",
         )
@@ -113,6 +116,8 @@ class ListingSerializer(serializers.ModelSerializer):
             "vendor",
             "vendor_name",
             "status",
+            "average_rating",
+            "reviews_count",
             "created_at",
             "updated_at",
         )
@@ -328,3 +333,22 @@ class ListingSerializer(serializers.ModelSerializer):
                     setattr(detail, field, value)
                 detail.save()
         return instance
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source="user.name", read_only=True)
+    user_email = serializers.CharField(source="user.email", read_only=True)
+
+    class Meta:
+        model = Review
+        fields = (
+            "id",
+            "listing",
+            "user",
+            "user_name",
+            "user_email",
+            "rating",
+            "comment",
+            "created_at",
+        )
+        read_only_fields = ("id", "user", "user_name", "user_email", "created_at")

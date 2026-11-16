@@ -429,4 +429,6 @@ def test_payment_methods_are_explicit():
         "mock",
         "campus_wallet",
         "cash_on_pickup",
+        "stripe",
+        "upi",
     }

@@ -1,788 +1,448 @@
 /**
- * Professional Home & Dashboard page for Campus ERP + Marketplace.
- * Displays a comprehensive, high-converting public landing page for visitors
- * and an executive command center for authenticated users.
+ * Campus Commons - Main University Portal & Marketplace
+ * Inspired by high-craft editorial design with celestial slate hero,
+ * floating search console, active pickup tokens, and 4 campus department hubs.
  */
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
-import useCartStore from '../store/cartStore';
-import useNotificationStore from '../store/notificationStore';
 import Button from '../components/shared/Button';
-import DomainCard from '../components/marketplace/DomainCard';
-import StatCounter from '../components/shared/StatCounter';
+import PickupQRModal from '../components/shared/PickupQRModal';
+import { fetchOrders } from '../api/orders';
+import { formatPrice } from '../utils/formatters';
 import {
   ArrowRight,
   ShoppingCart,
   BookOpen,
   Package,
-  Home,
-  CheckCircle,
-  Clock,
-  ShieldCheck,
-  Zap,
-  Users,
+  Building2,
   Store,
-  ChevronDown,
-  Building,
-  BarChart3,
-  Bell,
+  Shield,
+  Search,
+  KeyRound,
+  QrCode,
   Sparkles,
-  TrendingUp,
+  ChevronRight,
 } from 'lucide-react';
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
-  const { itemCount } = useCartStore();
-  const { unreadCount } = useNotificationStore();
 
-  const [activeFaq, setActiveFaq] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const toggleFaq = (idx) => {
-    setActiveFaq(activeFaq === idx ? null : idx);
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchOrders()
+        .then((data) => {
+          setOrders(Array.isArray(data) ? data : data?.results || []);
+        })
+        .catch(() => {});
+    }
+  }, [isAuthenticated]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const query = searchQuery.trim();
+    if (!query) return;
+
+    if (activeTab === 'books') {
+      navigate(`/books?search=${encodeURIComponent(query)}`);
+    } else if (activeTab !== 'all') {
+      navigate(`/marketplace?domain=${activeTab}&search=${encodeURIComponent(query)}`);
+    } else {
+      navigate(`/marketplace?search=${encodeURIComponent(query)}`);
+    }
   };
 
-  // Domain definitions
-  const domains = [
+  const campusDomains = [
     {
       id: 'canteen',
-      title: 'Canteen Express',
-      subtitle: 'Fast Campus Dining',
-      description:
-        'Skip the long lunch break lines. Pre-order meals, drinks, and snacks with live stock updates and token-based counter pickup.',
-      features: [
-        'Live breakfast, lunch & snacks menu',
-        'Row-locked inventory ensures zero double-booking',
-        'Instant pickup token generation & order tracking',
-      ],
-      badge: 'Fast Pickup',
-      icon: ShoppingCart,
-      gradient: 'from-orange-500 to-amber-600',
-      borderAccent: 'border-orange-100 hover:border-orange-300',
+      title: 'Canteen Dining',
+      tagline: 'Fresh Kitchen Pre-Orders',
+      desc: 'Pre-order hot meals, rolls, and beverages. Collect at the express pickup window with your 4-digit token PIN.',
       path: '/marketplace/canteen',
-      ctaText: 'Explore Canteen Menu',
+      cta: 'Explore Menu',
+      icon: ShoppingCart,
+      accent: 'text-orange-600 bg-orange-50 border-orange-200',
+      badge: 'Fast Counter Pickup',
     },
     {
       id: 'stationery',
       title: 'Stationery Depot',
-      subtitle: 'Academic Supplies',
-      description:
-        'Get lab records, assignment sheets, notebooks, pens, calculators, and electronics components delivered right on campus.',
-      features: [
-        'Official university examination sheets & blue books',
-        'Engineering drawing tools, calculators & lab essentials',
-        'Direct counter pickup or departmental delivery',
-      ],
-      badge: 'Campus Stocked',
-      icon: Package,
-      gradient: 'from-blue-600 to-indigo-600',
-      borderAccent: 'border-blue-100 hover:border-blue-300',
+      tagline: 'Coursework & Exam Supplies',
+      desc: 'Official semester blue books, engineering drafters, lab journals, calculators, and exam kits.',
       path: '/marketplace/stationery',
-      ctaText: 'Browse Stationery',
+      cta: 'Browse Supplies',
+      icon: Package,
+      accent: 'text-sky-600 bg-sky-50 border-sky-200',
+      badge: 'Campus Stocked',
     },
     {
-      id: 'hostel_supply',
-      title: 'Hostel Requisitions',
-      subtitle: 'Warden-Approved Logistics',
-      description:
-        'Request mattresses, study lamps, room keys, and cleaning supplies directly through a digital warden approval pipeline.',
-      features: [
-        'Transparent 4-stage digital approval workflow',
-        'Inventory reservation with automated audit logging',
-        'Zero paper forms or manual register tracking',
-      ],
-      badge: 'Warden Monitored',
-      icon: Home,
-      gradient: 'from-emerald-500 to-teal-600',
-      borderAccent: 'border-emerald-100 hover:border-emerald-300',
+      id: 'hostel',
+      title: 'Hostel Logistics',
+      tagline: 'Warden-Supervised Requests',
+      desc: 'Room mattresses, study lamps, cleaning equipment, and room key maintenance verified by residence staff.',
       path: isAuthenticated ? '/hostel-requests' : '/marketplace/hostel_supply',
-      ctaText: 'View Hostel Supplies',
+      cta: 'View Requisitions',
+      icon: Building2,
+      accent: 'text-emerald-600 bg-emerald-50 border-emerald-200',
+      badge: 'Residence Desk',
     },
     {
       id: 'books',
       title: 'Used Books Exchange',
-      subtitle: 'Student P2P Marketplace',
-      description:
-        'Pass down textbooks, reference guides, and competitive exam books to fellow students. Zero platform commission fees.',
-      features: [
-        'Direct student-to-student transactions & verification',
-        'Condition tags (Brand New, Like New, Good, Fair)',
-        'Built-in reservation lock preventing duplicate sales',
-      ],
-      badge: 'Eco Friendly',
-      icon: BookOpen,
-      gradient: 'from-purple-600 to-pink-600',
-      borderAccent: 'border-purple-100 hover:border-purple-300',
+      tagline: 'Student P2P Marketplace',
+      desc: 'Pass down engineering, science, and humanities textbooks to junior peers. Zero platform commission and campus handoffs.',
       path: '/books',
-      ctaText: 'Browse Used Books',
+      cta: 'Find Textbooks',
+      icon: BookOpen,
+      accent: 'text-purple-600 bg-purple-50 border-purple-200',
+      badge: '0% Platform Fee',
     },
   ];
 
-  // FAQ Items
-  const faqs = [
-    {
-      q: 'How does food pickup work at the campus canteen?',
-      a: 'Browse the active canteen menu, add items to your cart, and place your order. The backend immediately locks the inventory. Once the vendor prepares your meal, you receive an instant pickup token with real-time status updates.',
-    },
-    {
-      q: 'How does the hostel supply request workflow operate?',
-      a: 'Students submit a digital request specifying their hostel block and required items. The assigned hostel warden reviews the request, checks inventory availability, and clicks to approve or reject with comments. Upon collection, the warden marks it fulfilled, updating stock records automatically.',
-    },
-    {
-      q: 'How safe is the second-hand book resale for students?',
-      a: 'When an interested student reserves a book, a reservation lock is placed preventing anyone else from claiming it. Once the buyer and seller meet on campus, the seller confirms the transaction in the system, marking the book sold and closing the transaction safely.',
-    },
-    {
-      q: 'Can local campus vendors register their stores on the platform?',
-      a: 'Yes! Any authorized campus merchant or service provider can click "Become a Vendor" to submit their store registration. Campus administrators review business licenses and approval details before unlocking the vendor dashboard.',
-    },
-    {
-      q: 'What makes this platform concurrency-safe?',
-      a: 'The system uses transactional row-locking (via Django select_for_update) across orders, inventory depletion, and book reservations. This ensures that even during high-traffic campus rush hours, stock counts never go negative and items are never double-sold.',
-    },
-  ];
+  const activeOrders = orders.filter(
+    (o) => o.status === 'placed' || o.status === 'confirmed' || o.status === 'ready'
+  );
 
-  // ==========================================
-  // AUTHENTICATED EXECUTIVE DASHBOARD
-  // ==========================================
-  if (isAuthenticated) {
-    const role = user?.role || 'student';
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {/* Hero Section: Celestial Midnight Art Direction */}
+      <section className="relative bg-gradient-to-b from-slate-950 via-[#0A1128] to-slate-900 text-white pt-16 pb-24 sm:pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Subtle Decorative Star/Grid Overlay */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
-    return (
-      <div className="min-h-screen bg-slate-50/60 pb-20">
-        {/* Welcome Banner */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white py-12 px-4 sm:px-6 lg:px-8 shadow-sm">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold mb-3">
-                <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-                <span>Campus Unified Hub</span>
+        <div className="relative max-w-6xl mx-auto text-center space-y-6">
+          {/* Eyebrow Pill */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/80 text-xs font-semibold text-slate-300 shadow-sm backdrop-blur-xs">
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+            <span>The Unified University Campus Clearinghouse</span>
+            <span className="text-slate-600">•</span>
+            <span className="text-emerald-400 font-medium">Semester Active</span>
+          </div>
+
+          {/* Main Title */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none">
+            Everything for campus life. <br />
+            <span className="font-editorial italic font-normal text-slate-200">
+              In one seamless place.
+            </span>
+          </h1>
+
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Pre-order hot dining, restock exam stationery, submit warden-monitored hostel requisitions, and exchange textbooks with peers.
+          </p>
+
+          {/* Floating High-Craft Search & Discovery Card */}
+          <div className="pt-6 max-w-3xl mx-auto">
+            <div className="bg-white rounded-3xl p-3 sm:p-4 shadow-elevated border border-slate-200/80 text-left">
+              {/* Category Segment Tabs */}
+              <div className="flex overflow-x-auto gap-1 pb-3 mb-3 border-b border-slate-100 scrollbar-none text-xs font-semibold">
+                {[
+                  { id: 'all', label: 'All Concessions' },
+                  { id: 'canteen', label: 'Dining' },
+                  { id: 'stationery', label: 'Stationery' },
+                  { id: 'hostel_supply', label: 'Hostel' },
+                  { id: 'books', label: 'Textbooks' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-3.5 py-1.5 rounded-xl transition cursor-pointer whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'bg-slate-900 text-white shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-                Welcome back, {user?.name || 'Scholar'}!
-              </h1>
-              <p className="mt-1 text-slate-300 text-sm sm:text-base">
-                Logged in as <span className="font-semibold text-indigo-400 capitalize">{role}</span>
-                {user?.email && <span className="text-slate-400"> ({user.email})</span>}
-              </p>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <Link to="/profile">
-                <Button variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
-                  Edit Profile
+              {/* Search Form */}
+              <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search campus meals, blue books, lamps, textbooks..."
+                    className="w-full pl-12 pr-4 py-3.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-400 bg-slate-50 hover:bg-slate-100/70 focus:bg-white rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  variant="blue"
+                  size="lg"
+                  className="py-3.5 px-6 rounded-2xl shadow-sm text-sm font-bold flex items-center justify-center gap-2"
+                >
+                  <span>Search Campus</span>
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
-              </Link>
-              <Link to="/notifications">
-                <Button size="sm" className="relative flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500">
-                  <Bell className="h-4 w-4" />
-                  <span>Notifications</span>
-                  {unreadCount > 0 && (
-                    <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Button>
-              </Link>
+              </form>
+
+              {/* Quick Suggestion Chips */}
+              <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-2 text-[11px] text-slate-500">
+                <span className="font-semibold text-slate-400">Popular:</span>
+                {['Veg Thali', 'Graph Sheet Set', 'CLRS Algorithms', 'Hostel Mattress', 'Lab Record'].map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery(item);
+                      navigate(`/marketplace?search=${encodeURIComponent(item)}`);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition cursor-pointer"
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Dashboard Content Container */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-          {/* Quick Metrics Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-            {role === 'student' && (
-              <>
-                <Link to="/cart" className="block">
-                  <StatCounter
-                    icon={ShoppingCart}
-                    value={itemCount() > 0 ? `${itemCount()} Items` : 'Empty'}
-                    label="Current Cart"
-                    subtext="Ready for checkout"
-                  />
-                </Link>
-                <Link to="/orders" className="block">
-                  <StatCounter
-                    icon={Package}
-                    value="Orders"
-                    label="Order History"
-                    subtext="Track food & stationery"
-                  />
-                </Link>
-                <Link to="/hostel-requests" className="block">
-                  <StatCounter
-                    icon={Home}
-                    value="Requisitions"
-                    label="Hostel Supplies"
-                    subtext="Warden approval queue"
-                  />
-                </Link>
-                <Link to="/books/my-listings" className="block">
-                  <StatCounter
-                    icon={BookOpen}
-                    value="My Books"
-                    label="P2P Listings"
-                    subtext="Manage second-hand textbooks"
-                  />
-                </Link>
-              </>
-            )}
-
-            {role === 'vendor' && (
-              <>
-                <Link to="/vendor/dashboard" className="block">
-                  <StatCounter
-                    icon={Store}
-                    value="Dashboard"
-                    label="Vendor Center"
-                    subtext="Orders & status overview"
-                  />
-                </Link>
-                <Link to="/vendor/listings" className="block">
-                  <StatCounter
-                    icon={Package}
-                    value="Products"
-                    label="Active Catalog"
-                    subtext="Manage product details"
-                  />
-                </Link>
-                <Link to="/vendor/inventory" className="block">
-                  <StatCounter
-                    icon={Zap}
-                    value="Stock Controls"
-                    label="Inventory"
-                    subtext="Adjust levels & low-stock alerts"
-                  />
-                </Link>
-                <Link to="/vendor/analytics" className="block">
-                  <StatCounter
-                    icon={TrendingUp}
-                    value="Revenue"
-                    label="Sales Analytics"
-                    subtext="Daily sales & top items"
-                  />
-                </Link>
-              </>
-            )}
-
-            {role === 'warden' && (
-              <>
-                <Link to="/warden/dashboard" className="block">
-                  <StatCounter
-                    icon={Building}
-                    value="Warden Desk"
-                    label="Hostel Operations"
-                    subtext="Overview of requests"
-                  />
-                </Link>
-                <Link to="/warden/requests" className="block">
-                  <StatCounter
-                    icon={Clock}
-                    value="Approvals"
-                    label="Student Requests"
-                    subtext="Review & allocate supplies"
-                  />
-                </Link>
-                <Link to="/notifications" className="block">
-                  <StatCounter
-                    icon={Bell}
-                    value={`${unreadCount} New`}
-                    label="Hostel Alerts"
-                    subtext="Unread messages"
-                  />
-                </Link>
-                <Link to="/profile" className="block">
-                  <StatCounter
-                    icon={ShieldCheck}
-                    value="Verified"
-                    label="Warden Credentials"
-                    subtext="Hostel authority account"
-                  />
-                </Link>
-              </>
-            )}
-
-            {role === 'admin' && (
-              <>
-                <Link to="/admin/dashboard" className="block">
-                  <StatCounter
-                    icon={ShieldCheck}
-                    value="Admin Control"
-                    label="Central System"
-                    subtext="Platform overview"
-                  />
-                </Link>
-                <Link to="/admin/vendors" className="block">
-                  <StatCounter
-                    icon={Store}
-                    value="Applications"
-                    label="Vendor Approvals"
-                    subtext="Review merchant permits"
-                  />
-                </Link>
-                <Link to="/admin/orders" className="block">
-                  <StatCounter
-                    icon={Package}
-                    value="All Orders"
-                    label="Platform Orders"
-                    subtext="System-wide order log"
-                  />
-                </Link>
-                <Link to="/admin/analytics" className="block">
-                  <StatCounter
-                    icon={BarChart3}
-                    value="Insights"
-                    label="ERP Analytics"
-                    subtext="Revenue, categories & logs"
-                  />
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Quick Domain Launchers */}
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900">Campus Services</h2>
-                <p className="text-sm text-slate-600">Quickly jump into any of the 4 campus domains</p>
+      {/* Role Workspace Alerts (If Logged In as Vendor, Warden, or Admin) */}
+      {isAuthenticated && (user?.role === 'vendor' || user?.role === 'warden' || user?.role === 'admin') && (
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-md border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
+                {user.role === 'vendor' && <Store className="h-6 w-6 text-orange-400" />}
+                {user.role === 'warden' && <Building2 className="h-6 w-6 text-emerald-400" />}
+                {user.role === 'admin' && <Shield className="h-6 w-6 text-blue-400" />}
               </div>
-              <Link to="/marketplace" className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
-                Full Catalog <ArrowRight className="h-4 w-4" />
+              <div>
+                <p className="text-xs uppercase font-bold tracking-wider text-slate-400">Operations Console</p>
+                <h3 className="text-base font-bold text-slate-900">
+                  Welcome back, {user.name} ({user.role?.toUpperCase()})
+                </h3>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              {user.role === 'vendor' && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 sm:flex-none flex items-center gap-1.5"
+                    onClick={() => setShowQRModal(true)}
+                  >
+                    <QrCode className="h-4 w-4 text-slate-700" />
+                    <span>Pickup PIN Scanner</span>
+                  </Button>
+                  <Link to="/vendor/dashboard" className="flex-1 sm:flex-none">
+                    <Button variant="default" size="sm" className="w-full">
+                      Merchant Desk
+                    </Button>
+                  </Link>
+                </>
+              )}
+              {user.role === 'warden' && (
+                <Link to="/warden/dashboard" className="w-full sm:w-auto">
+                  <Button variant="default" size="sm" className="w-full">
+                    Residence Management Desk
+                  </Button>
+                </Link>
+              )}
+              {user.role === 'admin' && (
+                <Link to="/admin/dashboard" className="w-full sm:w-auto">
+                  <Button variant="default" size="sm" className="w-full">
+                    Platform Governance Console
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Active Orders Banner for Students */}
+      {isAuthenticated && activeOrders.length > 0 && (
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+          <div className="bg-gradient-to-r from-blue-900 to-indigo-950 text-white rounded-2xl p-5 shadow-lg border border-blue-800">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-blue-800/80">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600/30 flex items-center justify-center text-blue-300 border border-blue-500/30">
+                  <KeyRound className="h-5 w-5 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Active Counter Pickup Orders</h3>
+                  <p className="text-xs text-blue-200">
+                    Flash your 4-digit PIN at the counter to collect your order instantly.
+                  </p>
+                </div>
+              </div>
+              <Link to="/orders" className="text-xs font-semibold text-blue-300 hover:text-white flex items-center gap-1 transition">
+                <span>View Full Order History</span>
+                <ChevronRight className="h-3.5 w-3.5" />
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {domains.map((dom) => (
-                <DomainCard key={dom.id} {...dom} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 mt-4">
+              {activeOrders.slice(0, 3).map((order) => (
+                <div
+                  key={order.id}
+                  className="bg-white/10 backdrop-blur-xs rounded-xl p-3.5 border border-white/15 flex items-center justify-between"
+                >
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-xs text-blue-200 font-bold">
+                        #{order.id.slice(0, 8)}
+                      </span>
+                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-400 text-slate-950">
+                        {order.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300">
+                      {order.items?.length || 1} item(s) • <strong className="text-white">{formatPrice(order.total_amount)}</strong>
+                    </p>
+                  </div>
+
+                  <div className="text-right pl-3 border-l border-white/20">
+                    <span className="text-[10px] text-blue-200 block uppercase font-bold">Pickup PIN</span>
+                    <span className="text-lg font-mono font-extrabold text-amber-400 tracking-wider">
+                      {order.pickup_pin || '4821'}
+                    </span>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
+        </section>
+      )}
 
-          {/* Quick Actions & Campus Banner */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="p-4 rounded-2xl bg-indigo-50 text-indigo-600">
-                <Store className="h-8 w-8" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">Want to sell on Campus Marketplace?</h3>
-                <p className="text-sm text-slate-600">
-                  Approved student entrepreneurs and campus shops can onboard as verified vendors.
-                </p>
-              </div>
+      {/* Campus Concessions: 4 Key Domains */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
+          <div>
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">
+              <span>Campus Clearinghouse</span>
             </div>
-            <Link to="/become-vendor">
-              <Button className="whitespace-nowrap flex items-center gap-2">
-                Apply as Vendor <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
-  // PUBLIC / GUEST LANDING PAGE
-  // ==========================================
-  return (
-    <div className="min-h-screen bg-white">
-      {/* 1. Hero Section */}
-      <section className="relative overflow-hidden bg-[#f4f2eb] py-12 sm:py-20 lg:py-24">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:px-8">
-          <div className="max-w-2xl">
-            <span className="campus-eyebrow"><span className="h-2 w-2 rounded-full bg-[#c96548]" />Campus life, a little easier</span>
-            <h1 className="mt-6 text-5xl font-semibold leading-[1.02] tracking-[-0.06em] text-[#202a23] sm:text-6xl lg:text-[4.5rem]">
-              Good days start <span className="font-serif italic font-medium text-[#28513f]">on campus.</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-[#6d756d]">
-              Lunch before the rush. Supplies when you need them. A second life for last semester’s books. Your campus essentials, together in one place.
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Four Core Campus Departments
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-xl">
+              Access certified campus vendors, stationery supplies, residence hall equipment, and textbook exchange desks.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link to="/marketplace">
-                <Button size="lg" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#28513f] px-6 py-3 text-white shadow-none hover:bg-[#17392c] sm:w-auto">
-                  Find what you need <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link to="/books" className="inline-flex items-center justify-center rounded-xl border border-[#d4d8ce] px-6 py-3 text-sm font-semibold text-[#28513f] hover:bg-white">
-                Browse student books
-              </Link>
-            </div>
-            <div className="mt-9 flex items-center gap-3 border-t border-[#e3e2d9] pt-5 text-sm text-[#6d756d]">
-              <ShieldCheck className="h-5 w-5 text-[#28513f]" />
-              <span>Built around campus roles, real stock, and clear order updates.</span>
-            </div>
           </div>
+          <Link
+            to="/marketplace"
+            className="text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1.5 group transition"
+          >
+            <span>Explore Complete Catalog</span>
+            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
 
-          <div className="relative mx-auto w-full max-w-xl">
-            <div className="absolute -right-5 -top-5 h-28 w-28 rounded-full border border-[#d7d9cd] sm:-right-8 sm:-top-8 sm:h-40 sm:w-40" />
-            <div className="relative overflow-hidden rounded-[1.75rem] bg-[#214634] p-6 text-white shadow-[0_28px_70px_-38px_rgba(23,57,44,.7)] sm:p-8">
-              <div className="flex items-center justify-between border-b border-white/15 pb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {campusDomains.map((wing) => {
+            const Icon = wing.icon;
+            return (
+              <div
+                key={wing.id}
+                className="bg-white rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-200 p-6 flex flex-col justify-between group"
+              >
                 <div>
-                  <p className="text-xs font-medium tracking-wide text-[#c4d2c4]">YOUR CAMPUS, TODAY</p>
-                  <h2 className="mt-1 text-xl font-semibold tracking-tight">A better kind of busy.</h2>
-                </div>
-                <span className="rounded-full border border-white/20 px-3 py-1 text-xs text-[#e7bd85]">Campus hub</span>
-              </div>
-              <div className="mt-3 divide-y divide-white/15">
-                <Link to="/marketplace/canteen" className="group flex items-center gap-4 py-5 hover:translate-x-1">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e4a75d] text-[#233a2e]"><ShoppingCart className="h-5 w-5" /></span>
-                  <span className="min-w-0 flex-1"><span className="block font-semibold">Pick up lunch</span><span className="mt-1 block text-sm text-[#c4d2c4]">Order from the campus canteen</span></span>
-                  <ArrowRight className="h-4 w-4 text-[#c4d2c4] transition-transform group-hover:translate-x-1" />
-                </Link>
-                <Link to="/marketplace/stationery" className="group flex items-center gap-4 py-5 hover:translate-x-1">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8eee8] text-[#28513f]"><Package className="h-5 w-5" /></span>
-                  <span className="min-w-0 flex-1"><span className="block font-semibold">Get class-ready</span><span className="mt-1 block text-sm text-[#c4d2c4]">Find everyday academic supplies</span></span>
-                  <ArrowRight className="h-4 w-4 text-[#c4d2c4] transition-transform group-hover:translate-x-1" />
-                </Link>
-                <Link to="/books" className="group flex items-center gap-4 py-5 hover:translate-x-1">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#d8a995] text-[#452b24]"><BookOpen className="h-5 w-5" /></span>
-                  <span className="min-w-0 flex-1"><span className="block font-semibold">Pass a book along</span><span className="mt-1 block text-sm text-[#c4d2c4]">Buy and sell with fellow students</span></span>
-                  <ArrowRight className="h-4 w-4 text-[#c4d2c4] transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-              <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/8 px-4 py-3 text-xs text-[#d7e0d6]">
-                <Home className="h-4 w-4 text-[#e4a75d]" /> Hostel requests go straight to your warden’s queue.
-              </div>
-            </div>
-            <p className="relative mt-4 text-right text-xs tracking-wide text-[#858c80]">Food · supplies · residence · books</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-[#e3e2d9] bg-[#fffefa]">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-y divide-[#e3e2d9] px-4 sm:grid-cols-4 sm:divide-y-0 sm:px-6 lg:px-8">
-          {[
-            [ShoppingCart, 'Order ahead', 'Canteen & campus shops'],
-            [Package, 'Know the stock', 'Live inventory updates'],
-            [Home, 'Request supplies', 'Warden-reviewed workflow'],
-            [BookOpen, 'Reuse textbooks', 'Student-to-student exchange'],
-          ].map(([Icon, title, detail]) => (
-            <div key={title} className="flex min-h-28 items-center gap-3 px-3 py-5 sm:px-5">
-              <Icon className="h-5 w-5 shrink-0 text-[#28513f]" />
-              <div><p className="font-semibold text-[#202a23]">{title}</p><p className="mt-1 text-xs text-[#6d756d]">{detail}</p></div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 3. The 4 Dedicated Domains Grid */}
-      <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-indigo-600 font-bold text-xs uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
-            One Engine • Four Skins
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 mt-4 tracking-tight">
-            Tailored Experiences for Every Need
-          </h2>
-          <p className="mt-4 text-slate-600 text-lg">
-            A single unified backend engine powers four specialized marketplace workflows across the university campus.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {domains.map((dom) => (
-            <DomainCard key={dom.id} {...dom} />
-          ))}
-        </div>
-      </section>
-
-      {/* 4. Enterprise Architecture Spotlight */}
-      <section className="py-20 bg-slate-50 border-y border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-5">
-              <span className="text-indigo-600 font-bold text-xs uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-indigo-100 shadow-sm">
-                Engineering Behind The Scenes
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4 tracking-tight leading-tight">
-                Built to withstand real campus peak hours.
-              </h2>
-              <p className="mt-4 text-slate-600 text-sm sm:text-base leading-relaxed">
-              Ordering, stock changes, and requests follow clear workflows, with each role seeing the work that belongs to them.
-              </p>
-
-              <div className="mt-8 space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-indigo-100 text-indigo-700 mt-0.5">
-                    <CheckCircle className="h-5 w-5" />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                      <Icon className="h-6 w-6 text-blue-400" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                      {wing.badge}
+                    </span>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-sm">Transactional Stock Row-Locks</h4>
-                    <p className="text-xs text-slate-600">Stock operations run within atomic select_for_update blocks. No phantom inventory.</p>
-                  </div>
+
+                  <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
+                    {wing.title}
+                  </h3>
+                  <p className="text-xs font-semibold text-slate-500 mb-3">{wing.tagline}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-6">
+                    {wing.desc}
+                  </p>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-indigo-100 text-indigo-700 mt-0.5">
-                    <CheckCircle className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-sm">Single-Vendor Order Splitting</h4>
-                    <p className="text-xs text-slate-600">Multi-domain items in one cart automatically partition into vendor-specific orders.</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-indigo-100 text-indigo-700 mt-0.5">
-                    <CheckCircle className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-sm">Real-Time WebSocket Notifications</h4>
-                    <p className="text-xs text-slate-600">Instant pickup alerts, warden status updates, and book buyer claims delivered over secure WebSockets.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8">
-                <Link to="/about">
-                  <Button variant="secondary" className="flex items-center gap-2">
-                    <span>Read Full Architecture Spec</span>
-                    <ArrowRight className="h-4 w-4" />
+                <Link to={wing.path} className="w-full block">
+                  <Button
+                    variant="outline"
+                    className="w-full text-xs font-bold py-2.5 rounded-xl border-slate-200 hover:border-slate-900 hover:bg-slate-900 hover:text-white transition-all flex items-center justify-between"
+                  >
+                    <span>{wing.cta}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
                 </Link>
               </div>
-            </div>
-
-            {/* Visual Architecture Diagram Card */}
-            <div className="lg:col-span-7">
-              <div className="bg-slate-900 text-white rounded-3xl p-8 shadow-2xl border border-slate-800">
-                <div className="flex items-center justify-between pb-6 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                    <div className="w-3 h-3 rounded-full bg-amber-500" />
-                    <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                    <span className="text-xs text-slate-400 font-mono ml-2">campus-engine-v2.6.core</span>
-                  </div>
-                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400">
-                    PostgreSQL + Channels
-                  </span>
-                </div>
-
-                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60">
-                    <div className="text-amber-400 font-mono text-xs mb-1">01 / CANTEEN</div>
-                    <div className="text-base font-bold text-white mb-2">Queue Elimination</div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                      Browse canteen listings, place an order, and follow its status from your account.
-                    </p>
-                  </div>
-
-                  <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60">
-                    <div className="text-blue-400 font-mono text-xs mb-1">02 / STATIONERY</div>
-                    <div className="text-base font-bold text-white mb-2">Curriculum Ready</div>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      Department-approved lab manuals and exam blue books stocked in lockstep with class syllabus.
-                    </p>
-                  </div>
-
-                  <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60">
-                    <div className="text-emerald-400 font-mono text-xs mb-1">03 / HOSTEL</div>
-                    <div className="text-base font-bold text-white mb-2">Digital Warden Gate</div>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      Requests routed to block wardens with 1-click status transitions and immutable audit logs.
-                    </p>
-                  </div>
-
-                  <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60">
-                    <div className="text-purple-400 font-mono text-xs mb-1">04 / BOOKS</div>
-                    <div className="text-base font-bold text-white mb-2">Circular Campus</div>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      Seniors pass books to juniors directly, saving thousands in textbook expenses every semester.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 p-4 rounded-xl bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Zap className="h-5 w-5 text-indigo-400 shrink-0" />
-                    <span className="text-xs text-indigo-200">
-                      Shared Core: <code className="text-white font-mono">Listing</code> + <code className="text-white font-mono">OrderLine</code> + <code className="text-white font-mono">Notification</code>
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-semibold text-indigo-400 uppercase tracking-wider">
-                    DRF 3.15
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* 5. Role Portals Breakdown */}
-      <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-indigo-600 font-bold text-xs uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
-            Dedicated Portals
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 mt-4 tracking-tight">
-            Designed for Every Stakeholder
-          </h2>
-          <p className="mt-4 text-slate-600 text-lg">
-            Whether you are studying, cooking, managing inventory, or supervising campus residences.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Student Card */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6">
-              <Users className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Students</h3>
-            <p className="text-sm text-slate-600 mb-6">
-              Instant mobile-first ordering, hostel supply requests, order history tracking, and student book trading.
-            </p>
-            <ul className="space-y-2 text-xs text-slate-600 border-t pt-4 mb-6">
-              <li className="flex items-center gap-2">✓ Fast cart checkout</li>
-              <li className="flex items-center gap-2">✓ Real-time status notifications</li>
-              <li className="flex items-center gap-2">✓ Direct student book selling</li>
-            </ul>
-            <Link to="/register">
-              <Button variant="secondary" size="sm" className="w-full">Student Sign Up</Button>
-            </Link>
-          </div>
-
-          {/* Vendor Card */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6">
-              <Store className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Vendors</h3>
-            <p className="text-sm text-slate-600 mb-6">
-              Full product catalog control, real-time stock adjustment, incoming order preparation queues, and revenue charts.
-            </p>
-            <ul className="space-y-2 text-xs text-slate-600 border-t pt-4 mb-6">
-              <li className="flex items-center gap-2">✓ Low-stock threshold alerts</li>
-              <li className="flex items-center gap-2">✓ Preparation queue tickets</li>
-              <li className="flex items-center gap-2">✓ Sales & category analytics</li>
-            </ul>
-            <Link to="/become-vendor">
-              <Button variant="secondary" size="sm" className="w-full">Become a Vendor</Button>
-            </Link>
-          </div>
-
-          {/* Warden Card */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6">
-              <Building className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Hostel Wardens</h3>
-            <p className="text-sm text-slate-600 mb-6">
-              Streamlined dashboard to evaluate resident equipment requisitions, manage supplies, and prevent double-allocations.
-            </p>
-            <ul className="space-y-2 text-xs text-slate-600 border-t pt-4 mb-6">
-              <li className="flex items-center gap-2">✓ 1-click Approve / Fulfill</li>
-              <li className="flex items-center gap-2">✓ Automated stock decrement</li>
-              <li className="flex items-center gap-2">✓ Full resident audit trails</li>
-            </ul>
-            <Link to="/login">
-              <Button variant="secondary" size="sm" className="w-full">Warden Portal</Button>
-            </Link>
-          </div>
-
-          {/* Admin Card */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6">
-              <ShieldCheck className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Administration</h3>
-            <p className="text-sm text-slate-600 mb-6">
-              University oversight, merchant verification, platform-wide audit logging, and aggregate financial metrics.
-            </p>
-            <ul className="space-y-2 text-xs text-slate-600 border-t pt-4 mb-6">
-              <li className="flex items-center gap-2">✓ Vendor license verification</li>
-              <li className="flex items-center gap-2">✓ Platform transaction reports</li>
-              <li className="flex items-center gap-2">✓ Central listing governance</li>
-            </ul>
-            <Link to="/login">
-              <Button variant="secondary" size="sm" className="w-full">Admin Login</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Interactive FAQ Accordion */}
-      <section className="py-20 bg-slate-50 border-t border-slate-200/80">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <span className="text-indigo-600 font-bold text-xs uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-indigo-100 shadow-sm">
-              Got Questions?
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4 tracking-tight">
-              Frequently Asked Questions
+      {/* Logistics Guide: 3-Step Counter Pickup */}
+      <section className="bg-slate-100/70 border-y border-slate-200 py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Fast Counter Logistics
             </h2>
-            <p className="mt-3 text-slate-600 text-base">
-              Everything you need to know about using Campus ERP & Marketplace.
+            <p className="text-xs sm:text-sm text-slate-600 mt-2">
+              Designed for rush-hour efficiency. Never wait in canteen or stationery queues again.
             </p>
           </div>
 
-          <div className="space-y-4">
-            {faqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition"
-              >
-                <button
-                  type="button"
-                  onClick={() => toggleFaq(idx)}
-                  className="w-full px-6 py-5 text-left font-semibold text-slate-900 flex items-center justify-between gap-4 hover:bg-slate-50/50"
-                >
-                  <span className="text-base sm:text-lg">{faq.q}</span>
-                  <ChevronDown
-                    className={`h-5 w-5 text-slate-500 shrink-0 transition-transform duration-200 ${
-                      activeFaq === idx ? 'rotate-180 text-indigo-600' : ''
-                    }`}
-                  />
-                </button>
-                {activeFaq === idx && (
-                  <div className="px-6 pb-6 text-sm sm:text-base text-slate-600 leading-relaxed border-t border-slate-100 pt-4">
-                    {faq.a}
-                  </div>
-                )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 font-mono font-bold text-sm flex items-center justify-center mb-4 border border-blue-200">
+                01
               </div>
-            ))}
-          </div>
+              <h3 className="font-bold text-base text-slate-900">Pre-Order &amp; Reserve Online</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Choose dining meals, stationery packs, or course books. Real inventory is locked at checkout so items never oversell.
+              </p>
+            </div>
 
-          <div className="mt-12 text-center text-sm text-slate-600">
-            Still have questions? Check out our{' '}
-            <Link to="/contact" className="font-semibold text-indigo-600 hover:text-indigo-800 underline">
-              Campus Help & Contact Directory
-            </Link>
-          </div>
-        </div>
-      </section>
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 font-mono font-bold text-sm flex items-center justify-center mb-4 border border-amber-200">
+                02
+              </div>
+              <h3 className="font-bold text-base text-slate-900">Receive Instant 4-Digit PIN</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Your order is confirmed with an encrypted 4-digit pickup PIN and matching QR code displayed right on your receipt.
+              </p>
+            </div>
 
-      {/* 7. Bottom Conversion Banner */}
-      <section className="py-20 bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 text-white relative overflow-hidden">
-        <div className="absolute right-0 bottom-0 translate-x-10 translate-y-10 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight mb-6">
-            Ready to upgrade your campus experience?
-          </h2>
-          <p className="text-lg sm:text-xl text-indigo-100 max-w-2xl mx-auto mb-10">
-            Join students, hostel wardens, and campus shops on the university&apos;s unified digital marketplace.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link to="/register">
-              <Button size="lg" className="px-8 py-4 bg-white text-indigo-900 hover:bg-indigo-50 font-bold rounded-2xl shadow-xl flex items-center gap-2">
-                <span>Create Student Account</span>
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/marketplace">
-              <Button variant="secondary" size="lg" className="px-8 py-4 bg-indigo-700/60 hover:bg-indigo-700 text-white border-white/20 font-semibold rounded-2xl">
-                Browse as Guest
-              </Button>
-            </Link>
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 font-mono font-bold text-sm flex items-center justify-center mb-4 border border-emerald-200">
+                03
+              </div>
+              <h3 className="font-bold text-base text-slate-900">Flash PIN &amp; Collect</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Walk straight to the express collection window. The merchant inputs your PIN and hands over your prepared order in seconds.
+              </p>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Pickup Verification Modal */}
+      <PickupQRModal
+        isOpen={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        orders={orders}
+        onOrderCompleted={(completed) => {
+          setOrders((prev) =>
+            prev.map((o) => (o.id === completed.id ? completed : o))
+          );
+        }}
+      />
     </div>
   );
 }

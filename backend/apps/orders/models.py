@@ -1,5 +1,6 @@
 """Cart and order records for the server-authoritative checkout workflow."""
 
+from decimal import Decimal
 import uuid
 
 from django.conf import settings
@@ -87,6 +88,8 @@ class Order(models.Model):
         MOCK = "mock", "Mock Payment"
         CAMPUS_WALLET = "campus_wallet", "Campus Wallet"
         CASH_ON_PICKUP = "cash_on_pickup", "Cash on Pickup"
+        STRIPE = "stripe", "Stripe / Card"
+        UPI = "upi", "UPI Payment"
 
     class PaymentStatus(models.TextChoices):
         PENDING = "pending", "Pending"
@@ -103,7 +106,7 @@ class Order(models.Model):
     total_amount = models.DecimalField(
         max_digits=12,
         decimal_places=2,
-        validators=[MinValueValidator(0)],
+        validators=[MinValueValidator(Decimal("0.00"))],
     )
     status = models.CharField(
         max_length=20,
@@ -120,6 +123,7 @@ class Order(models.Model):
         db_index=True,
     )
     payment_reference = models.CharField(max_length=100, blank=True)
+    pickup_pin = models.CharField(max_length=10, blank=True, default="")
     stock_restored_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -183,12 +187,12 @@ class OrderItem(models.Model):
     price_at_order = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(0)],
+        validators=[MinValueValidator(Decimal("0.00"))],
     )
     subtotal = models.DecimalField(
         max_digits=12,
         decimal_places=2,
-        validators=[MinValueValidator(0)],
+        validators=[MinValueValidator(Decimal("0.00"))],
     )
 
     class Meta:

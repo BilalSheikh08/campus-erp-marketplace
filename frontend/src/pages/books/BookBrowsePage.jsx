@@ -1,12 +1,18 @@
+/**
+ * Campus Commons - Student Used Books Peer-to-Peer Exchange
+ * Browse curriculum textbooks, filter by condition and price, and list books for sale.
+ */
+
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Plus, Search } from 'lucide-react';
+import { BookOpen, Plus, Search, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { fetchBooks } from '../../services/booksApi';
 import useAuthStore from '../../store/authStore';
 import Alert from '../../components/shared/Alert';
 import Button from '../../components/shared/Button';
 import EmptyState from '../../components/common/EmptyState';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import SafeImage from '../../components/shared/SafeImage';
 
 const CONDITIONS = [
   ['new', 'New'],
@@ -65,71 +71,200 @@ export default function BookBrowsePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-24">
+      {/* Header Banner */}
+      <div className="bg-white border-b border-slate-200 pt-10 pb-8 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
-            <p className="text-sm font-medium text-primary mb-1">Campus Marketplace</p>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2"><BookOpen className="h-8 w-8" /> Second-Hand Books</h1>
-            <p className="text-gray-600 mt-2">Buy and sell course books directly with other students.</p>
-          </div>
-          {user?.role === 'student' ? (
-            <Link to="/books/new"><Button className="gap-2"><Plus className="h-4 w-4" /> Sell a book</Button></Link>
-          ) : !user ? (
-            <Link to="/login"><Button className="gap-2"><Plus className="h-4 w-4" /> Sign in to sell a book</Button></Link>
-          ) : null}
-        </div>
-
-        {error && <div className="mb-6"><Alert type="error" message={error} dismissible onClose={() => setError('')} /></div>}
-
-        <form onSubmit={onSubmit} className="bg-white rounded-xl shadow-sm border p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-2 relative">
-              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input name="search" value={filters.search} onChange={updateFilter} placeholder="Search title, author, subject..." className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold mb-2.5 border border-purple-200">
+              <Sparkles className="h-3.5 w-3.5 text-purple-600" />
+              <span>0% Commission • Student-to-Student Exchange</span>
             </div>
-            <select name="condition" value={filters.condition} onChange={updateFilter} className="rounded-lg border border-gray-300 px-3 py-2.5 bg-white">
-              <option value="">Any condition</option>
-              {CONDITIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+              <BookOpen className="h-8 w-8 text-purple-600" />
+              <span>Used Books Exchange</span>
+            </h1>
+            <p className="text-slate-500 mt-1 text-xs sm:text-sm max-w-xl">
+              Buy and sell engineering textbooks, exam preparation guides, and reference manuals directly with peers across campus.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {user?.role === 'student' ? (
+              <Link to="/books/new">
+                <Button variant="blue" className="flex items-center gap-2 py-2.5 px-5 rounded-2xl font-bold shadow-xs">
+                  <Plus className="h-4 w-4" />
+                  <span>List a Book for Sale</span>
+                </Button>
+              </Link>
+            ) : !user ? (
+              <Link to="/login">
+                <Button variant="blue" className="flex items-center gap-2 py-2.5 px-5 rounded-2xl font-bold shadow-xs">
+                  <Plus className="h-4 w-4" />
+                  <span>Sign In to Sell Books</span>
+                </Button>
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        {error && (
+          <div className="mb-6">
+            <Alert type="error" message={error} dismissible onClose={() => setError('')} />
+          </div>
+        )}
+
+        {/* Filter Card */}
+        <form onSubmit={onSubmit} className="bg-white rounded-3xl border border-slate-200 p-4 mb-8 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 items-center">
+            <div className="lg:col-span-2 relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                name="search"
+                value={filters.search}
+                onChange={updateFilter}
+                placeholder="Search title, author, course code..."
+                className="w-full rounded-2xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50 transition"
+              />
+            </div>
+            <select
+              name="condition"
+              value={filters.condition}
+              onChange={updateFilter}
+              className="rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
+            >
+              <option value="">Any Condition</option>
+              {CONDITIONS.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
-            <input name="min_price" value={filters.min_price} onChange={updateFilter} type="number" min="0" step="0.01" placeholder="Min ₹" className="rounded-lg border border-gray-300 px-3 py-2.5" />
+            <input
+              name="min_price"
+              value={filters.min_price}
+              onChange={updateFilter}
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Min Price (₹)"
+              className="rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50"
+            />
             <div className="flex gap-2">
-              <input name="max_price" value={filters.max_price} onChange={updateFilter} type="number" min="0" step="0.01" placeholder="Max ₹" className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2.5" />
-              <Button type="submit">Search</Button>
+              <input
+                name="max_price"
+                value={filters.max_price}
+                onChange={updateFilter}
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Max Price (₹)"
+                className="min-w-0 flex-1 rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50"
+              />
+              <Button type="submit" variant="blue" className="font-bold px-5 py-2.5 rounded-2xl text-xs sm:text-sm">
+                Filter
+              </Button>
             </div>
           </div>
         </form>
 
-        {loading ? <LoadingSpinner message="Loading books..." /> : books.length === 0 ? (
-          <div className="bg-white rounded-xl border shadow-sm"><EmptyState icon={<BookOpen className="mx-auto h-12 w-12" />} title="No books found" message="Try changing your search or price filters." /></div>
+        {/* Results */}
+        {loading ? (
+          <LoadingSpinner message="Scanning textbook catalog..." />
+        ) : books.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center shadow-sm">
+            <EmptyState
+              icon={<BookOpen className="mx-auto h-12 w-12 text-slate-300" />}
+              title="No course books found"
+              message="Try broadening your search term or adjusting your price filters."
+            />
+          </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {books.map((book) => (
-                <Link key={book.id} to={`/books/${book.id}`} className="bg-white rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="h-44 bg-gray-100 flex items-center justify-center overflow-hidden">
-                    {book.image_url ? <img src={book.image_url} alt={book.title} className="h-full w-full object-cover" /> : <BookOpen className="h-16 w-16 text-gray-300" />}
+                <Link
+                  key={book.id}
+                  to={`/books/${book.id}`}
+                  className="bg-white rounded-3xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col group"
+                >
+                  <div className="relative aspect-[4/3] bg-slate-50 overflow-hidden">
+                    <SafeImage
+                      src={book.image_url}
+                      alt={book.title}
+                      domain="book"
+                      category="book"
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <span className="absolute top-3 left-3 z-10 text-[10px] font-bold px-2.5 py-1 rounded-md bg-white/95 text-purple-700 border border-purple-200 uppercase tracking-wider shadow-xs">
+                      {book.condition?.replace('_', ' ')}
+                    </span>
                   </div>
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <h2 className="font-semibold text-gray-900 line-clamp-2">{book.title}</h2>
-                      <span className="shrink-0 text-lg font-bold text-primary">{money(book.price)}</span>
+
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h2 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 text-sm leading-snug">
+                        {book.title}
+                      </h2>
+                      <p className="text-xs text-slate-500 line-clamp-1 mt-1 mb-2">
+                        {book.author ? `by ${book.author}` : 'Author unspecified'}
+                      </p>
+
+                      {book.subject && (
+                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-medium mb-2.5">
+                          {book.subject}
+                        </span>
+                      )}
                     </div>
-                    <p className="mt-2 text-sm text-gray-500">{book.author || 'Author not provided'}</p>
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                      <span className="px-2 py-1 rounded-full bg-indigo-50 text-indigo-700">{book.condition?.replace('_', ' ')}</span>
-                      {book.subject && <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-700">{book.subject}</span>}
+
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-auto">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block uppercase font-bold">Student Price</span>
+                        <span className="text-base font-extrabold text-slate-900 font-mono">
+                          {money(book.price)}
+                        </span>
+                      </div>
+                      <span className="text-xs font-semibold text-purple-600 group-hover:underline">
+                        View Details →
+                      </span>
                     </div>
-                    <p className="mt-3 text-xs text-gray-500">Seller: {book.seller_name}</p>
                   </div>
                 </Link>
               ))}
             </div>
-            <div className="mt-8 flex items-center justify-center gap-4">
-              <Button variant="ghost" disabled={!previous} onClick={() => loadBooks(page - 1)}>Previous</Button>
-              <span className="text-sm text-gray-600">Page {page}</span>
-              <Button variant="ghost" disabled={!next} onClick={() => loadBooks(page + 1)}>Next</Button>
-            </div>
+
+            {/* Pagination */}
+            {(next || previous) && (
+              <div className="mt-12 flex items-center justify-between border-t border-slate-200 pt-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => previous && loadBooks(page - 1)}
+                  disabled={!previous}
+                  className="gap-1.5"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+
+                <span className="text-xs font-mono font-semibold text-slate-500">
+                  Page {page}
+                </span>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => next && loadBooks(page + 1)}
+                  disabled={!next}
+                  className="gap-1.5"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </>
         )}
       </div>

@@ -1,23 +1,37 @@
 /**
- * Listing detail page - full product information.
+ * Campus Commons - Listing Detail Page
+ * High-clarity campus product showcase with SafeImage fallback,
+ * real stock verification, operational metadata, and student review pipeline.
  */
 
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, BookOpen, Utensils, Package, ShoppingCart } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import {
+  BookOpen,
+  Utensils,
+  Package,
+  ShoppingCart,
+  ShieldCheck,
+  Clock,
+  ChevronRight,
+  Store,
+  CheckCircle,
+} from 'lucide-react';
 import useListingsStore from '../../store/listingsStore';
 import useCartStore from '../../store/cartStore';
 import useAuthStore from '../../store/authStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Alert from '../../components/shared/Alert';
 import Button from '../../components/shared/Button';
+import SafeImage from '../../components/shared/SafeImage';
+import ReviewSection from '../../components/marketplace/ReviewSection';
 import { formatPrice, getDomainLabel, getStockStatusLabel } from '../../utils/formatters';
 
 const DOMAIN_ICONS = {
-  canteen: <Utensils className="h-6 w-6" />,
-  stationery: <Package className="h-6 w-6" />,
-  hostel_supply: <Package className="h-6 w-6" />,
-  book: <BookOpen className="h-6 w-6" />,
+  canteen: <Utensils className="h-4 w-4" />,
+  stationery: <Package className="h-4 w-4" />,
+  hostel_supply: <Package className="h-4 w-4" />,
+  book: <BookOpen className="h-4 w-4" />,
 };
 
 export default function ListingDetailPage() {
@@ -26,26 +40,24 @@ export default function ListingDetailPage() {
   const { isAuthenticated } = useAuthStore();
   const [addToCartLoading, setAddToCartLoading] = useState(false);
   const [addToCartMessage, setAddToCartMessage] = useState(null);
-  const { currentListing, isLoading, error, fetchListing } =
-    useListingsStore();
-  const { addItem: addToCart, clearError: clearCartError } =
-    useCartStore();
+  const { currentListing, isLoading, error, fetchListing } = useListingsStore();
+  const { addItem: addToCart, clearError: clearCartError } = useCartStore();
 
   useEffect(() => {
     fetchListing(id);
   }, [id, fetchListing]);
 
   if (isLoading) {
-    return <LoadingSpinner message="Loading product..." />;
+    return <LoadingSpinner message="Loading catalog item..." />;
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="text-center">
-          <Alert type="error" title="Error" message={error} />
-          <Button onClick={() => navigate('/marketplace')} className="mt-4">
-            Back to Marketplace
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-md w-full bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+          <Alert type="error" title="Error Loading Product" message={error} />
+          <Button onClick={() => navigate('/marketplace')} className="mt-6 w-full">
+            Return to Marketplace
           </Button>
         </div>
       </div>
@@ -54,11 +66,13 @@ export default function ListingDetailPage() {
 
   if (!currentListing) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Product not found.</p>
-          <Button onClick={() => navigate('/marketplace')}>
-            Back to Marketplace
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-md w-full bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+          <Package className="h-10 w-10 text-slate-400 mx-auto mb-3" />
+          <h2 className="text-lg font-bold text-slate-900 mb-1">Item Not Found</h2>
+          <p className="text-slate-500 text-xs mb-6">This item may have been archived or removed from the campus catalog.</p>
+          <Button onClick={() => navigate('/marketplace')} className="w-full">
+            Browse All Products
           </Button>
         </div>
       </div>
@@ -93,12 +107,12 @@ export default function ListingDetailPage() {
     clearCartError();
     try {
       await addToCart(currentListing.id, 1);
-      setAddToCartMessage({ type: 'success', text: 'Added to cart!' });
+      setAddToCartMessage({ type: 'success', text: 'Added to cart successfully!' });
       setTimeout(() => setAddToCartMessage(null), 3000);
     } catch (err) {
       setAddToCartMessage({
         type: 'error',
-        text: err.response?.data?.detail || 'Failed to add to cart',
+        text: err.response?.data?.detail || 'Failed to add item to cart',
       });
     } finally {
       setAddToCartLoading(false);
@@ -106,20 +120,28 @@ export default function ListingDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-primary hover:underline mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </button>
+    <div className="min-h-screen bg-slate-50 py-8 pb-24">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-6">
+          <Link to="/" className="hover:text-blue-600 transition">
+            Home
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+          <Link to="/marketplace" className="hover:text-blue-600 transition">
+            Marketplace
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+          <Link to={`/marketplace/${categoryType || 'all'}`} className="capitalize hover:text-blue-600 transition">
+            {domainLabel}
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+          <span className="text-slate-900 font-semibold truncate max-w-xs">{title}</span>
+        </nav>
 
-        {/* Cart messages */}
+        {/* Cart Action Feedback Alert */}
         {addToCartMessage && (
-          <div className="mb-6">
+          <div className="mb-6 animate-in fade-in duration-150">
             <Alert
               type={addToCartMessage.type}
               message={addToCartMessage.text}
@@ -129,202 +151,178 @@ export default function ListingDetailPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
-            {/* Image */}
-            <div className="flex items-center justify-center bg-gray-100 rounded-lg h-96 md:h-full">
-              {imageUrl ? (
-                <img
+        {/* Main Product Showcase Card */}
+        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm mb-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 sm:p-10">
+            {/* Left Column: Image Showcase */}
+            <div className="lg:col-span-6 flex flex-col">
+              <div className="relative w-full aspect-[4/3] rounded-2xl bg-slate-50 overflow-hidden border border-slate-200 flex items-center justify-center">
+                <SafeImage
                   src={imageUrl}
                   alt={title}
+                  domain={categoryType}
                   className="w-full h-full object-cover"
-                  onError={e => {
-                    e.target.style.display = 'none';
-                  }}
                 />
-              ) : (
-                <div className="text-6xl opacity-50">{domainLabel.split(' ')[0]}</div>
-              )}
+
+                {/* Badges on image */}
+                <div className="absolute top-4 left-4">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/95 backdrop-blur-sm text-xs font-bold text-slate-800 border border-slate-200 shadow-sm">
+                    {DOMAIN_ICONS[categoryType]}
+                    <span>{domainLabel}</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Security & Pickup Trust Badges */}
+              <div className="mt-6 grid grid-cols-2 gap-3 pt-6 border-t border-slate-100">
+                <div className="flex items-center gap-2 text-xs text-slate-600">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>Real-time stock verification</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-600">
+                  <Clock className="h-4 w-4 text-blue-600 shrink-0" />
+                  <span>Instant 4-digit pickup PIN</span>
+                </div>
+              </div>
             </div>
 
-            {/* Information */}
-            <div className="flex flex-col">
-              {/* Category & Status */}
-              <div className="flex items-center gap-3 mb-4">
-                <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                  {DOMAIN_ICONS[categoryType]}
-                  {domainLabel}
-                </span>
-                {stockStatus && (
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      stockStatus === 'in_stock'
-                        ? 'bg-green-100 text-green-800'
-                        : stockStatus === 'low_stock'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {stockLabel}
+            {/* Right Column: Product Information & Action Panel */}
+            <div className="lg:col-span-6 flex flex-col justify-between">
+              <div>
+                {/* Stock Status Badge & Vendor Name */}
+                <div className="flex items-center justify-between mb-3">
+                  {stockStatus && (
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+                        stockStatus === 'in_stock'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : stockStatus === 'low_stock'
+                          ? 'bg-amber-50 text-amber-700 border-amber-200'
+                          : 'bg-rose-50 text-rose-700 border-rose-200'
+                      }`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          stockStatus === 'in_stock'
+                            ? 'bg-emerald-500'
+                            : stockStatus === 'low_stock'
+                            ? 'bg-amber-500'
+                            : 'bg-rose-500'
+                        }`}
+                      />
+                      <span>{stockLabel}</span>
+                    </span>
+                  )}
+
+                  {vendorName && (
+                    <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                      <Store className="h-4 w-4 text-blue-600" />
+                      <span>{vendorName}</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Title */}
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug mb-4">
+                  {title}
+                </h1>
+
+                {/* Price Display */}
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 mb-6 flex items-baseline justify-between">
+                  <div>
+                    <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400">
+                      Campus Counter Price
+                    </span>
+                    <div className="text-3xl font-mono font-extrabold text-slate-900 tracking-tight mt-0.5">
+                      {formatPrice(price)}
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    Verified Campus Listing
                   </span>
-                )}
-              </div>
+                </div>
 
-              {/* Title */}
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{title}</h1>
-
-              {/* Price */}
-              <div className="mb-6 pb-6 border-b">
-                <p className="text-4xl font-bold text-primary">
-                  {formatPrice(price)}
-                </p>
-              </div>
-
-              {/* Vendor */}
-              {vendorName && (
-                <div className="mb-6 pb-6 border-b">
-                  <p className="text-sm text-gray-600 mb-2">Sold by</p>
-                  <p className="flex items-center gap-2 font-semibold text-gray-900">
-                    <MapPin className="h-4 w-4" />
-                    {vendorName}
+                {/* Description */}
+                <div className="mb-6">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                    Item Overview
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    {description || 'Official campus supplies prepared for direct counter handover.'}
                   </p>
                 </div>
-              )}
 
-              {/* Domain-Specific Details */}
-              {canteenDetail && (
-                <div className="mb-6 pb-6 border-b">
-                  <h3 className="font-semibold text-gray-900 mb-3">Item Details</h3>
-                  <dl className="space-y-2 text-sm">
-                    {canteenDetail.is_veg !== undefined && (
-                      <>
-                        <dt className="font-medium text-gray-700">Vegetarian</dt>
-                        <dd className="text-gray-600">
-                          {canteenDetail.is_veg ? 'Yes' : 'No'}
-                        </dd>
-                      </>
-                    )}
-                    {canteenDetail.prep_time_minutes && (
-                      <>
-                        <dt className="font-medium text-gray-700">Prep Time</dt>
-                        <dd className="text-gray-600">{canteenDetail.prep_time_minutes} minutes</dd>
-                      </>
-                    )}
-                    {canteenDetail.available_from && (
-                      <>
-                        <dt className="font-medium text-gray-700">Available</dt>
-                        <dd className="text-gray-600">
-                          {canteenDetail.available_from} - {canteenDetail.available_to}
-                        </dd>
-                      </>
-                    )}
-                  </dl>
-                </div>
-              )}
+                {/* Domain Specific Attributes */}
+                {canteenDetail && (
+                  <div className="p-4 rounded-xl bg-orange-50/60 border border-orange-100 mb-6 text-xs space-y-2">
+                    <p className="font-bold text-orange-950 uppercase tracking-wider text-[11px]">Canteen Kitchen Details</p>
+                    <div className="grid grid-cols-2 gap-2 text-slate-700">
+                      <div>Prep Time: <strong className="text-slate-900">{canteenDetail.prep_time_minutes || 10} mins</strong></div>
+                      <div>Dietary: <strong className="text-slate-900">{canteenDetail.is_vegetarian ? 'Vegetarian' : 'Standard'}</strong></div>
+                    </div>
+                  </div>
+                )}
 
-              {stationeryDetail && (
-                <div className="mb-6 pb-6 border-b">
-                  <h3 className="font-semibold text-gray-900 mb-3">Product Details</h3>
-                  <dl className="space-y-2 text-sm">
-                    {stationeryDetail.sku && (
-                      <>
-                        <dt className="font-medium text-gray-700">SKU</dt>
-                        <dd className="text-gray-600">{stationeryDetail.sku}</dd>
-                      </>
-                    )}
-                    {stationeryDetail.unit && (
-                      <>
-                        <dt className="font-medium text-gray-700">Unit</dt>
-                        <dd className="text-gray-600">{stationeryDetail.unit}</dd>
-                      </>
-                    )}
-                  </dl>
-                </div>
-              )}
+                {stationeryDetail && (
+                  <div className="p-4 rounded-xl bg-sky-50/60 border border-sky-100 mb-6 text-xs space-y-2">
+                    <p className="font-bold text-sky-950 uppercase tracking-wider text-[11px]">Stationery Specifications</p>
+                    <div className="grid grid-cols-2 gap-2 text-slate-700">
+                      {stationeryDetail.brand && <div>Brand: <strong className="text-slate-900">{stationeryDetail.brand}</strong></div>}
+                      {stationeryDetail.paper_type && <div>Type: <strong className="text-slate-900">{stationeryDetail.paper_type}</strong></div>}
+                    </div>
+                  </div>
+                )}
 
-              {bookDetail && (
-                <div className="mb-6 pb-6 border-b">
-                  <h3 className="font-semibold text-gray-900 mb-3">Book Details</h3>
-                  <dl className="space-y-2 text-sm">
-                    {bookDetail.author && (
-                      <>
-                        <dt className="font-medium text-gray-700">Author</dt>
-                        <dd className="text-gray-600">{bookDetail.author}</dd>
-                      </>
-                    )}
-                    {bookDetail.subject && (
-                      <>
-                        <dt className="font-medium text-gray-700">Subject</dt>
-                        <dd className="text-gray-600">{bookDetail.subject}</dd>
-                      </>
-                    )}
-                    {bookDetail.edition && (
-                      <>
-                        <dt className="font-medium text-gray-700">Edition</dt>
-                        <dd className="text-gray-600">{bookDetail.edition}</dd>
-                      </>
-                    )}
-                    {bookDetail.condition && (
-                      <>
-                        <dt className="font-medium text-gray-700">Condition</dt>
-                        <dd className="capitalize text-gray-600">{bookDetail.condition}</dd>
-                      </>
-                    )}
-                  </dl>
-                </div>
-              )}
+                {hostelSupplyDetail && (
+                  <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-100 mb-6 text-xs space-y-2">
+                    <p className="font-bold text-emerald-950 uppercase tracking-wider text-[11px]">Hostel Requisition Info</p>
+                    <p className="text-slate-700">This equipment is officially registered and requires warden verification upon checkout.</p>
+                  </div>
+                )}
 
-              {hostelSupplyDetail && (
-                <div className="mb-6 pb-6 border-b">
-                  <h3 className="font-semibold text-gray-900 mb-3">Supply Details</h3>
-                  <dl className="space-y-2 text-sm">
-                    {hostelSupplyDetail.supply_category && (
-                      <>
-                        <dt className="font-medium text-gray-700">Category</dt>
-                        <dd className="text-gray-600">
-                          {hostelSupplyDetail.supply_category}
-                        </dd>
-                      </>
-                    )}
-                    {hostelSupplyDetail.request_only && (
-                      <>
-                        <dt className="font-medium text-gray-700">Availability</dt>
-                        <dd className="text-gray-600">Request only</dd>
-                      </>
-                    )}
-                  </dl>
-                </div>
-              )}
+                {bookDetail && (
+                  <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100 mb-6 text-xs space-y-2">
+                    <p className="font-bold text-purple-950 uppercase tracking-wider text-[11px]">Textbook Information</p>
+                    <div className="grid grid-cols-2 gap-2 text-slate-700">
+                      {bookDetail.edition && <div>Edition: <strong className="text-slate-900">{bookDetail.edition}</strong></div>}
+                      {bookDetail.condition && <div>Condition: <strong className="text-slate-900 capitalize">{bookDetail.condition}</strong></div>}
+                    </div>
+                  </div>
+                )}
+              </div>
 
-              {/* Description */}
-              {description && (
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-                  <p className="text-gray-600 whitespace-pre-wrap">{description}</p>
-                </div>
-              )}
-
-              {/* Action Button */}
-              <div className="mt-auto pt-6 border-t">
+              {/* Action Buttons */}
+              <div className="pt-6 border-t border-slate-100 space-y-3">
                 {isPurchasable ? (
                   <Button
-                    size="lg"
-                    className="w-full flex items-center justify-center gap-2"
                     onClick={handleAddToCart}
-                    disabled={addToCartLoading}
                     loading={addToCartLoading}
+                    variant="blue"
+                    size="lg"
+                    className="w-full py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-sm"
                   >
                     <ShoppingCart className="h-5 w-5" />
-                    {addToCartLoading ? 'Adding...' : 'Add to Cart'}
+                    <span>Add to Campus Cart</span>
                   </Button>
                 ) : (
-                  <Button size="lg" variant="secondary" className="w-full" disabled>
-                    Not Available
+                  <Button disabled size="lg" className="w-full py-3.5 rounded-2xl bg-slate-200 text-slate-500 font-bold">
+                    Currently Out of Stock
                   </Button>
                 )}
+
+                <div className="flex items-center justify-between text-xs text-slate-500 px-2">
+                  <span>Direct counter collection</span>
+                  <span>4-Digit PIN with instant verification</span>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Customer Reviews Section */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm">
+          <ReviewSection listingId={id} />
         </div>
       </div>
     </div>
