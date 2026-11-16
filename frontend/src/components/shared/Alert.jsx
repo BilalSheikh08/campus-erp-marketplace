@@ -17,10 +17,10 @@ export default function Alert({ type = 'info', title, message, onClose, dismissi
   if (!isVisible) return null;
 
   const styles = {
-    error: 'bg-red-50 border-red-200 text-red-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-    success: 'bg-green-50 border-green-200 text-green-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-800',
+    error: 'bg-[#FEF2F2] border-[#F87171] text-[#991B1B]',
+    warning: 'bg-[#FFFBEB] border-[#FBBF24] text-[#92400E]',
+    success: 'bg-[#F0FDF4] border-[#4ADE80] text-[#166534]',
+    info: 'bg-[#F0F9FF] border-[#38BDF8] text-[#075985]',
   };
 
   const icons = {

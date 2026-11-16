@@ -1,56 +1,62 @@
 /**
  * Campus Commons / Exchange Footer
- * Comprehensive university marketplace, concessions directory, and student services links.
+ * University publication colophon, concessions directory, and student services links.
  */
 
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Landmark, MapPin, Clock } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800">
+    <footer className="bg-[#18181B] text-[#D4D4D8] pt-16 pb-12 border-t border-zinc-800 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-slate-800">
-          {/* Brand Column */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-zinc-800">
+          {/* Brand Colophon */}
           <div className="md:col-span-5 pr-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-bold text-lg shadow-sm border border-blue-400/30">
-                <span className="font-editorial text-white">U</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded bg-white text-zinc-950 flex items-center justify-center font-serif text-lg font-bold shadow-xs">
+                <span>U</span>
               </div>
-              <span className="font-bold text-xl tracking-tight text-white">
+              <span className="font-serif font-bold text-xl tracking-tight text-white">
                 CAMPUS<span className="text-blue-400">HUB</span>
               </span>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-              The official centralized marketplace and logistics clearinghouse for campus dining, course stationery supplies, warden-supervised residence requisitions, and student-to-student textbook exchanges.
+            <p className="text-xs text-zinc-400 leading-relaxed max-w-sm mb-4">
+              The official centralized clearinghouse and marketplace for university concessions. Operating express counter pre-orders, verified academic stationery, residence hall supply logistics, and peer textbook exchanges.
             </p>
-            <div className="mt-5 flex items-center gap-2 text-[11px] text-slate-400 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700/60 w-fit">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Campus Local Dispatch &amp; Express Pickups Active</span>
+            <div className="space-y-1.5 text-[11px] text-zinc-400 font-mono">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                <span>Central Campus Quadrangle &amp; Concession Annex</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                <span>Service Counters: Mon–Sat 08:00 – 21:00</span>
+              </div>
             </div>
           </div>
 
-          {/* Directory Links */}
+          {/* Department Directory */}
           <div className="md:col-span-2">
-            <h4 className="font-bold text-xs uppercase tracking-wider text-white mb-4">
-              Departments
+            <h4 className="font-mono font-bold text-[11px] uppercase tracking-wider text-white mb-3 pb-1 border-b border-zinc-800">
+              Concessions
             </h4>
-            <ul className="space-y-2.5 text-xs text-slate-400">
+            <ul className="space-y-2 text-xs text-zinc-400">
               <li><Link to="/marketplace/canteen" className="hover:text-amber-400 transition">Canteen Dining</Link></li>
-              <li><Link to="/marketplace/stationery" className="hover:text-blue-400 transition">Stationery Depot</Link></li>
+              <li><Link to="/marketplace/stationery" className="hover:text-sky-400 transition">Stationery Depot</Link></li>
               <li><Link to="/marketplace/hostel_supply" className="hover:text-emerald-400 transition">Hostel Logistics</Link></li>
               <li><Link to="/books" className="hover:text-purple-400 transition">Used Textbooks</Link></li>
             </ul>
           </div>
 
-          {/* Student Services */}
+          {/* Student Desk */}
           <div className="md:col-span-2">
-            <h4 className="font-bold text-xs uppercase tracking-wider text-white mb-4">
+            <h4 className="font-mono font-bold text-[11px] uppercase tracking-wider text-white mb-3 pb-1 border-b border-zinc-800">
               Student Desk
             </h4>
-            <ul className="space-y-2.5 text-xs text-slate-400">
-              <li><Link to="/cart" className="hover:text-white transition">Active Cart</Link></li>
-              <li><Link to="/orders" className="hover:text-white transition">Pickup PIN Tokens</Link></li>
+            <ul className="space-y-2 text-xs text-zinc-400">
+              <li><Link to="/cart" className="hover:text-white transition">Active Cart Slip</Link></li>
+              <li><Link to="/orders" className="hover:text-white transition">4-Digit Pickup PINs</Link></li>
               <li><Link to="/hostel-requests" className="hover:text-white transition">Room Requisitions</Link></li>
               <li><Link to="/books/new" className="hover:text-white transition">Sell Textbooks</Link></li>
             </ul>
@@ -58,28 +64,28 @@ export default function Footer() {
 
           {/* Administration & Permits */}
           <div className="md:col-span-3">
-            <h4 className="font-bold text-xs uppercase tracking-wider text-white mb-4">
-              Administration &amp; Permits
+            <h4 className="font-mono font-bold text-[11px] uppercase tracking-wider text-white mb-3 pb-1 border-b border-zinc-800">
+              Administration
             </h4>
-            <ul className="space-y-2.5 text-xs text-slate-400">
+            <ul className="space-y-2 text-xs text-zinc-400">
               <li>
-                <Link to="/become-vendor" className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-semibold transition">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Apply as Merchant Vendor
+                <Link to="/become-vendor" className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-medium transition">
+                  <Landmark className="h-3.5 w-3.5" />
+                  Apply for Vendor Permit
                   <ArrowUpRight className="h-3 w-3" />
                 </Link>
               </li>
-              <li><Link to="/about" className="hover:text-white transition">Platform Architecture</Link></li>
-              <li><Link to="/contact" className="hover:text-white transition">Campus Concession Inquiries</Link></li>
+              <li><Link to="/about" className="hover:text-white transition">System Architecture</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition">Campus Concessions Board</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© 2026 Campus Hub Digital Marketplace. All rights reserved.</p>
-          <div className="flex gap-6">
-            <Link to="/about" className="hover:text-slate-300 transition">Privacy &amp; Rules</Link>
-            <Link to="/contact" className="hover:text-slate-300 transition">Help Desk</Link>
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
+          <p>© 2026 Campus Hub Digital Marketplace. University Official Clearinghouse.</p>
+          <div className="flex gap-6 font-mono text-[11px]">
+            <Link to="/about" className="hover:text-zinc-300 transition">Regulations &amp; Rules</Link>
+            <Link to="/contact" className="hover:text-zinc-300 transition">Superintendent Contact</Link>
           </div>
         </div>
       </div>

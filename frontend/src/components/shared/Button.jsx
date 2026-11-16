@@ -12,25 +12,26 @@ export default function Button({
   ...props
 }) {
   const baseClasses =
-    'inline-flex items-center justify-center font-semibold tracking-tight transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none rounded-xl cursor-pointer';
+    'inline-flex items-center justify-center font-medium tracking-tight transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed select-none rounded-lg cursor-pointer';
 
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2 text-xs sm:text-sm',
-    lg: 'px-6 py-3 text-sm sm:text-base font-bold',
+    sm: 'px-2.5 py-1.5 text-xs',
+    md: 'px-3.5 py-2 text-xs sm:text-sm',
+    lg: 'px-5 py-2.5 text-sm sm:text-base font-semibold',
     icon: 'p-2',
   };
 
   const variantClasses = {
-    default: 'bg-slate-900 hover:bg-slate-800 text-white shadow-sm active:scale-[0.99]',
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm active:scale-[0.99]',
-    blue: 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm active:scale-[0.99]',
-    amber: 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold shadow-sm active:scale-[0.99]',
-    crimson: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm active:scale-[0.99]',
-    secondary: 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200',
-    outline: 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-xs',
-    ghost: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-    danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm',
+    default: 'bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-900 shadow-xs active:translate-y-px',
+    primary: 'bg-blue-900 hover:bg-blue-950 text-white border border-blue-900 shadow-xs active:translate-y-px',
+    blue: 'bg-blue-900 hover:bg-blue-950 text-white border border-blue-900 shadow-xs active:translate-y-px',
+    amber: 'bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-xs active:translate-y-px',
+    crimson: 'bg-red-800 hover:bg-red-900 text-white shadow-xs active:translate-y-px',
+    secondary: 'bg-[#F1ECE1] hover:bg-[#E3DDD0] text-zinc-900 border border-[#E4DDCF]',
+    outline: 'bg-white hover:bg-[#FAF8F3] text-zinc-800 border border-[#E4DDCF] shadow-xs',
+    ghost: 'text-zinc-700 hover:text-zinc-950 hover:bg-[#F1ECE1]',
+    danger: 'bg-red-800 hover:bg-red-900 text-white shadow-xs',
+    forest: 'bg-emerald-800 hover:bg-emerald-900 text-white shadow-xs',
   };
 
   return (

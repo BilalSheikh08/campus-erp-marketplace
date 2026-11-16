@@ -1,6 +1,12 @@
+/**
+ * Campus Commons - Vendor Applications & Permits Console
+ * Central Registrar Concessionaire Licensing Desk:
+ * Review credentials, operational proposals, and authorize / decline campus concession permits.
+ */
+
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckCircle, XCircle, Clock, ShieldCheck, ArrowLeft, Store, Phone, Calendar } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { CheckCircle, XCircle, Clock, ShieldCheck, ArrowLeft, Store, Phone, Calendar, RefreshCw } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import { fetchVendorApplications, approveVendor, rejectVendor } from '../../api/vendors';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -8,9 +14,9 @@ import Alert from '../../components/shared/Alert';
 import Button from '../../components/shared/Button';
 
 const STATUS_COLORS = {
-  pending: 'bg-amber-50 text-amber-700 border-amber-200',
-  approved: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  rejected: 'bg-rose-50 text-rose-700 border-rose-200',
+  pending: 'bg-amber-50 text-amber-900 border-amber-300',
+  approved: 'bg-emerald-50 text-emerald-900 border-emerald-300',
+  rejected: 'bg-rose-50 text-rose-900 border-rose-300',
 };
 
 const STATUS_ICONS = {
@@ -57,12 +63,12 @@ export default function AdminVendorApprovalDashboard() {
   };
 
   const handleApprove = async (vendorId) => {
-    if (!window.confirm('Are you sure you want to approve this vendor for campus operations?')) return;
+    if (!window.confirm('Authorize this vendor for campus commercial operations?')) return;
 
     setIsProcessing(true);
     try {
       await approveVendor(vendorId);
-      setSuccessMessage('Vendor authorized successfully. Merchant can now manage listings.');
+      setSuccessMessage('Vendor authorized successfully. Concessionaire permit issued.');
       setTimeout(() => setSuccessMessage(null), 3000);
       setSelectedVendor(null);
       loadVendors();
@@ -75,16 +81,16 @@ export default function AdminVendorApprovalDashboard() {
 
   const handleReject = async (vendorId) => {
     if (!rejectionReason.trim()) {
-      setError('Please provide a rejection justification note for audit logs');
+      setError('Please provide a rejection justification note for compliance audit records.');
       return;
     }
 
-    if (!window.confirm('Are you sure you want to reject this vendor application?')) return;
+    if (!window.confirm('Reject this vendor permit application?')) return;
 
     setIsProcessing(true);
     try {
       await rejectVendor(vendorId, { reason: rejectionReason });
-      setSuccessMessage('Vendor application rejected and recorded in compliance log.');
+      setSuccessMessage('Vendor application rejected and recorded in compliance registry.');
       setTimeout(() => setSuccessMessage(null), 3000);
       setSelectedVendor(null);
       setRejectionReason('');
@@ -98,11 +104,11 @@ export default function AdminVendorApprovalDashboard() {
 
   if (!user || user.role !== 'admin') {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-2xl border border-slate-200 max-w-md w-full text-center">
+      <div className="min-h-screen bg-[#F8F6F0] flex items-center justify-center p-4 font-sans">
+        <div className="bg-white p-8 rounded-lg border border-[#E4DDCF] max-w-md w-full text-center shadow-xs">
           <Alert type="error" message="Access restricted to campus platform administrators." />
-          <Button onClick={() => navigate('/')} className="mt-6 w-full bg-slate-900 text-white">
-            Return to Homepage
+          <Button onClick={() => navigate('/')} className="mt-6 w-full text-xs font-mono font-bold">
+            Return to Directory
           </Button>
         </div>
       </div>
@@ -116,25 +122,40 @@ export default function AdminVendorApprovalDashboard() {
   const StatusIcon = selectedVendor ? STATUS_ICONS[selectedVendor.approval_status] : null;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 pb-20 text-slate-900">
+    <div className="min-h-screen bg-[#F8F6F0] text-zinc-900 py-10 pb-24 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button
-          type="button"
-          onClick={() => navigate('/admin/dashboard')}
-          className="mb-5 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to Governance Console
-        </button>
+        {/* Masthead */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-5 border-b border-[#E4DDCF]">
+          <div>
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-zinc-700" />
+              <span>CENTRAL REGISTRAR · CONCESSIONAIRE PERMITS &amp; LICENSING</span>
+            </div>
+            <h1 className="font-serif text-3xl sm:text-4xl font-normal text-zinc-950 tracking-tight">
+              Vendor Permits &amp; Approvals
+            </h1>
+            <p className="text-zinc-600 text-xs sm:text-sm mt-1 font-sans">
+              Review commercial onboarding proposals, examine vendor credentials, and issue campus permits.
+            </p>
+          </div>
 
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
-            <ShieldCheck className="h-7 w-7 text-blue-600" />
-            <span>Vendor Permits & Approvals</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Review onboarding credentials, business permits, and campus concession authorizations.
-          </p>
+          <div className="flex items-center gap-2.5">
+            <Link to="/admin/dashboard">
+              <Button variant="outline" size="sm" className="text-xs flex items-center gap-1.5">
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span>Governance Console</span>
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadVendors}
+              className="text-xs p-2"
+              title="Refresh ledger"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
 
         {/* Alerts */}
@@ -150,7 +171,7 @@ export default function AdminVendorApprovalDashboard() {
         )}
 
         {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1 font-mono">
           {['pending', 'approved', 'rejected', 'all'].map((status) => (
             <button
               key={status}
@@ -158,13 +179,13 @@ export default function AdminVendorApprovalDashboard() {
                 setFilter(status);
                 setSelectedVendor(null);
               }}
-              className={`px-3.5 py-2 rounded-lg text-xs font-semibold capitalize transition-all ${
+              className={`px-3 py-1.5 rounded text-xs transition-colors cursor-pointer ${
                 filter === status
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                  ? 'bg-zinc-900 text-white font-semibold'
+                  : 'bg-white border border-[#E4DDCF] text-zinc-700 hover:bg-[#FAF8F3]'
               }`}
             >
-              {status === 'all' ? 'All Applications' : status}
+              {status === 'all' ? 'All Applications' : `${status.toUpperCase()} PERMITS`}
             </button>
           ))}
         </div>
@@ -172,16 +193,21 @@ export default function AdminVendorApprovalDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Applications List (2 cols) */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-              <h2 className="text-sm font-bold text-slate-900 mb-4">
-                Applications ({vendors.length})
-              </h2>
+            <div className="bg-white rounded-lg border border-[#E4DDCF] p-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#E4DDCF]">
+                <h2 className="font-serif font-bold text-sm text-zinc-950">
+                  Registered Applications ({vendors.length})
+                </h2>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                  Filter: {filter}
+                </span>
+              </div>
 
               {vendors.length === 0 ? (
-                <div className="text-center text-slate-400 py-16 text-xs">
-                  <Store className="h-10 w-10 text-slate-300 mx-auto mb-2" />
-                  <p className="font-semibold text-slate-700">No vendor applications found</p>
-                  <p className="mt-0.5 text-slate-400">No applications matching filter &ldquo;{filter}&rdquo;.</p>
+                <div className="text-center text-zinc-400 py-16 text-xs">
+                  <Store className="h-10 w-10 text-zinc-300 mx-auto mb-2" />
+                  <p className="font-serif font-bold text-zinc-700 text-sm">No vendor applications recorded</p>
+                  <p className="mt-0.5 text-zinc-500 font-sans">No submissions match the current filter selection &ldquo;{filter}&rdquo;.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -191,25 +217,25 @@ export default function AdminVendorApprovalDashboard() {
                       <div
                         key={vendor.id}
                         onClick={() => setSelectedVendor(vendor)}
-                        className={`p-4 border rounded-xl cursor-pointer transition-all ${
+                        className={`p-4 border rounded cursor-pointer transition-colors ${
                           isSelected
-                            ? 'border-blue-600 bg-blue-50/40 shadow-sm ring-1 ring-blue-600/20'
-                            : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                            ? 'border-blue-900 bg-blue-50/30 ring-1 ring-blue-900/20'
+                            : 'border-[#E4DDCF] bg-white hover:bg-[#FAF8F3]'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <h3 className="font-bold text-sm text-slate-900">{vendor.business_name}</h3>
-                            <p className="text-xs text-slate-500 mt-0.5">
+                            <h3 className="font-serif font-bold text-sm text-zinc-950">{vendor.business_name}</h3>
+                            <p className="text-xs text-zinc-600 mt-0.5 font-sans">
                               {VENDOR_TYPES[vendor.vendor_type] || vendor.vendor_type}
                             </p>
-                            <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
-                              <Calendar className="h-3 w-3" />
-                              Applied: {new Date(vendor.created_at).toLocaleDateString()}
+                            <p className="text-[11px] text-zinc-400 mt-1 flex items-center gap-1.5 font-mono">
+                              <Calendar className="h-3 w-3 text-zinc-400" />
+                              <span>Applied: {new Date(vendor.created_at).toLocaleDateString()}</span>
                             </p>
                           </div>
-                          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${STATUS_COLORS[vendor.approval_status]}`}>
-                            {vendor.approval_status?.toUpperCase()}
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${STATUS_COLORS[vendor.approval_status]}`}>
+                            {vendor.approval_status}
                           </span>
                         </div>
                       </div>
@@ -223,44 +249,44 @@ export default function AdminVendorApprovalDashboard() {
           {/* Details Panel (1 col) */}
           <div>
             {selectedVendor ? (
-              <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm text-xs sticky top-24">
-                <div className="mb-4 flex items-center justify-between pb-3 border-b border-slate-100">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Permit Details</span>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${STATUS_COLORS[selectedVendor.approval_status]}`}>
-                    {StatusIcon && <StatusIcon className="h-3.5 w-3.5" />}
-                    <span className="capitalize">{selectedVendor.approval_status}</span>
+              <div className="bg-white rounded-lg border border-[#E4DDCF] p-5 shadow-xs text-xs sticky top-24 font-sans">
+                <div className="mb-4 flex items-center justify-between pb-3 border-b border-[#E4DDCF]">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">Permit Dossier</span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${STATUS_COLORS[selectedVendor.approval_status]}`}>
+                    {StatusIcon && <StatusIcon className="h-3 w-3" />}
+                    <span>{selectedVendor.approval_status}</span>
                   </span>
                 </div>
 
                 <div className="space-y-4 mb-5">
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Store / Merchant</label>
-                    <p className="text-slate-900 font-bold text-sm mt-0.5">{selectedVendor.business_name}</p>
+                    <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 block">Concession Entity</label>
+                    <p className="font-serif font-bold text-base text-zinc-950 mt-0.5">{selectedVendor.business_name}</p>
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Concession Category</label>
-                    <p className="text-slate-800 font-medium mt-0.5">{VENDOR_TYPES[selectedVendor.vendor_type] || selectedVendor.vendor_type}</p>
+                    <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 block">Operational Category</label>
+                    <p className="text-zinc-800 font-semibold mt-0.5">{VENDOR_TYPES[selectedVendor.vendor_type] || selectedVendor.vendor_type}</p>
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Contact Number</label>
-                    <p className="text-slate-800 font-medium mt-0.5 flex items-center gap-1">
-                      <Phone className="h-3 w-3 text-slate-400" />
-                      {selectedVendor.contact_number || 'Not provided'}
+                    <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 block">Official Contact</label>
+                    <p className="text-zinc-800 font-mono mt-0.5 flex items-center gap-1">
+                      <Phone className="h-3 w-3 text-zinc-400" />
+                      <span>{selectedVendor.contact_number || 'Not provided'}</span>
                     </p>
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Operational Proposal</label>
-                    <p className="text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100 mt-1 leading-relaxed text-xs">
+                    <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 block">Operational Proposal</label>
+                    <p className="text-zinc-700 bg-[#FAF8F3] p-3 rounded border border-[#E4DDCF] mt-1 leading-relaxed text-xs">
                       {selectedVendor.description || 'No detailed proposal submitted.'}
                     </p>
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Submitted Timestamp</label>
-                    <p className="text-slate-600 mt-0.5 font-mono text-[11px]">
+                    <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 block">Registration Timestamp</label>
+                    <p className="text-zinc-600 mt-0.5 font-mono text-[11px]">
                       {new Date(selectedVendor.created_at).toLocaleString()}
                     </p>
                   </div>
@@ -268,33 +294,34 @@ export default function AdminVendorApprovalDashboard() {
 
                 {/* Actions */}
                 {selectedVendor.approval_status === 'pending' && (
-                  <div className="space-y-3 pt-4 border-t border-slate-100">
+                  <div className="space-y-3 pt-4 border-t border-[#E4DDCF]">
                     <Button
                       onClick={() => handleApprove(selectedVendor.id)}
                       disabled={isProcessing}
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                      variant="primary"
+                      className="w-full text-xs font-mono font-bold py-2.5"
                     >
                       Authorize Campus Concession
                     </Button>
 
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                        Decline Reason (If rejecting)
+                      <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                        Decline Justification (If Rejecting)
                       </label>
                       <textarea
                         value={rejectionReason}
                         onChange={(e) => setRejectionReason(e.target.value)}
-                        placeholder="Explain reason for administrative log..."
+                        placeholder="Explain reason for administrative compliance log..."
                         rows="2"
-                        className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-rose-600 bg-white text-slate-900"
+                        className="w-full text-xs p-2.5 border border-[#E4DDCF] rounded focus:outline-none focus:border-red-600 bg-white text-zinc-900 font-sans"
                       />
                     </div>
 
                     <Button
                       onClick={() => handleReject(selectedVendor.id)}
                       disabled={isProcessing || !rejectionReason.trim()}
-                      variant="danger"
-                      className="w-full"
+                      variant="outline"
+                      className="w-full text-xs font-mono text-red-700 border-red-300 hover:bg-red-50"
                     >
                       Decline Permit Application
                     </Button>
@@ -302,15 +329,15 @@ export default function AdminVendorApprovalDashboard() {
                 )}
 
                 {selectedVendor.approval_status === 'rejected' && selectedVendor.rejection_reason && (
-                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 mt-3">
+                  <div className="p-3 bg-red-50 border border-red-200 rounded text-xs text-red-900 mt-3 font-mono">
                     <strong>Rejection Reason:</strong> {selectedVendor.rejection_reason}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center text-xs text-slate-400 flex flex-col items-center justify-center">
-                <Store className="h-8 w-8 text-slate-300 mb-2" />
-                Select an application from the list to inspect permit details and take action.
+              <div className="bg-white rounded-lg border border-dashed border-[#E4DDCF] p-8 text-center text-xs text-zinc-400 flex flex-col items-center justify-center font-sans">
+                <Store className="h-8 w-8 text-zinc-300 mb-2" />
+                Select an application from the registry to inspect permit credentials.
               </div>
             )}
           </div>

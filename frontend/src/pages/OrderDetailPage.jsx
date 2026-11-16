@@ -1,6 +1,7 @@
 /**
- * Campus Commons - Order Detail & Receipt
- * Complete order tracking, pickup PIN & QR token display, and action buttons.
+ * Campus Commons - Order Detail & Counter Voucher Receipt
+ * Redesigned with university dispatch receipt & voucher ticket aesthetic:
+ * tactile service ticket, clear status timeline, and itemized ledger.
  */
 
 import { useEffect, useState } from 'react';
@@ -14,17 +15,17 @@ import Button from '../components/shared/Button';
 import { formatPrice } from '../utils/formatters';
 
 const STATUS_CONFIGS = {
-  placed: { badge: 'bg-amber-50 text-amber-700 border-amber-200', icon: Package },
-  confirmed: { badge: 'bg-blue-50 text-blue-700 border-blue-200', icon: Truck },
-  ready: { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: CheckCircle },
-  completed: { badge: 'bg-slate-100 text-slate-700 border-slate-200', icon: CheckCircle },
-  cancelled: { badge: 'bg-rose-50 text-rose-700 border-rose-200', icon: XCircle },
-  disputed: { badge: 'bg-purple-50 text-purple-700 border-purple-200', icon: AlertCircle },
+  placed: { badge: 'bg-amber-50 text-amber-800 border-amber-300', icon: Package },
+  confirmed: { badge: 'bg-blue-50 text-blue-900 border-blue-300', icon: Truck },
+  ready: { badge: 'bg-emerald-50 text-emerald-900 border-emerald-300', icon: CheckCircle },
+  completed: { badge: 'bg-[#FAF8F3] text-zinc-700 border-[#E4DDCF]', icon: CheckCircle },
+  cancelled: { badge: 'bg-red-50 text-red-800 border-red-300', icon: XCircle },
+  disputed: { badge: 'bg-purple-50 text-purple-900 border-purple-300', icon: AlertCircle },
 };
 
 const STATUS_LABELS = {
-  placed: 'Order Placed',
-  confirmed: 'Kitchen Confirmed',
+  placed: 'Requisition Placed',
+  confirmed: 'Kitchen/Depot Confirmed',
   ready: 'Ready for Counter Pickup',
   completed: 'Order Handed Over',
   cancelled: 'Cancelled',
@@ -87,7 +88,7 @@ export default function OrderDetailPage() {
     if (isStudent && order.user?.id === user.id) {
       if (order.status === 'placed' || order.status === 'confirmed') {
         actions.push({
-          label: 'Cancel Order',
+          label: 'Cancel Requisition',
           status: 'cancelled',
           variant: 'danger',
           disabled: transitionLoading,
@@ -95,7 +96,7 @@ export default function OrderDetailPage() {
       }
       if (order.status === 'ready') {
         actions.push({
-          label: 'Mark as Completed (Confirm Pickup)',
+          label: 'Confirm Pickup & Handover',
           status: 'completed',
           variant: 'primary',
           disabled: transitionLoading,
@@ -134,15 +135,15 @@ export default function OrderDetailPage() {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="Retrieving order details..." />;
+    return <LoadingSpinner message="Consulting order docket..." />;
   }
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-slate-50 py-12 px-4">
-        <div className="max-w-md mx-auto bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center">
-          <Alert type="error" message="Order not found" />
-          <Button onClick={() => navigate('/orders')} className="mt-4 w-full">
+      <div className="min-h-screen bg-[#F8F6F0] py-12 px-4 font-sans">
+        <div className="max-w-md mx-auto bg-white p-6 rounded-lg border border-[#E4DDCF] shadow-xs text-center">
+          <Alert type="error" message="Order record not found" />
+          <Button onClick={() => navigate('/orders')} className="mt-4 w-full text-xs">
             Back to Orders
           </Button>
         </div>
@@ -155,22 +156,22 @@ export default function OrderDetailPage() {
   const actions = getAvailableActions();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 py-10 pb-24">
+    <div className="min-h-screen bg-[#F8F6F0] text-zinc-900 py-10 pb-24 font-sans">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between pb-4 border-b border-slate-200">
+        <div className="mb-6 flex items-center justify-between pb-4 border-b border-[#E4DDCF]">
           <button
             onClick={() => navigate('/orders')}
-            className="p-2 hover:bg-slate-200/60 rounded-xl transition-colors border border-slate-200 flex items-center gap-1.5 text-xs font-semibold text-slate-700 cursor-pointer"
+            className="px-3 py-1.5 hover:bg-[#FAF8F3] rounded border border-[#E4DDCF] bg-white flex items-center gap-1.5 text-xs font-mono text-zinc-700 cursor-pointer"
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>All Orders</span>
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>ALL DOCKETS</span>
           </button>
-          <div className="text-right">
-            <span className="font-mono font-extrabold text-sm text-slate-900">
-              #{order.id.slice(0, 8).toUpperCase()}
+          <div className="text-right font-mono">
+            <span className="font-bold text-sm text-zinc-950 block">
+              DOCKET #{order.id.slice(0, 8).toUpperCase()}
             </span>
-            <p className="text-slate-400 text-xs">
+            <p className="text-zinc-500 text-xs">
               {new Date(order.created_at).toLocaleDateString()}
             </p>
           </div>
@@ -178,42 +179,44 @@ export default function OrderDetailPage() {
 
         {/* Alerts */}
         {error && (
-          <div className="mb-6">
+          <div className="mb-5">
             <Alert type="error" message={error} dismissible onClose={() => setError(null)} />
           </div>
         )}
         {successMessage && (
-          <div className="mb-6">
+          <div className="mb-5">
             <Alert type="success" message={successMessage} dismissible onClose={() => setSuccessMessage(null)} />
           </div>
         )}
 
-        {/* Campus Pickup QR & PIN Card */}
+        {/* Physical Dispatch Slip Style Pickup Voucher */}
         {(order.status === 'ready' || order.status === 'confirmed' || order.status === 'placed') && (
-          <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-3xl p-6 sm:p-8 mb-6 text-white shadow-lg border border-slate-800">
+          <div className="bg-[#FFFBEB] rounded-lg border border-amber-300 p-6 sm:p-7 mb-6 shadow-xs relative">
             <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="bg-white p-3 rounded-2xl border border-slate-200 text-center shrink-0 shadow-md">
-                <div className="w-24 h-24 bg-slate-900 rounded-xl flex items-center justify-center p-2 text-white">
+              <div className="bg-white p-3 rounded border border-amber-300 text-center shrink-0 shadow-xs">
+                <div className="w-20 h-20 bg-zinc-950 rounded flex items-center justify-center p-2 text-white">
                   <QrCode className="w-full h-full text-white" />
                 </div>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mt-2">Counter QR</p>
+                <p className="text-[9px] uppercase font-mono font-bold tracking-wider text-zinc-500 mt-1.5">Counter QR</p>
               </div>
 
-              <div className="space-y-3 flex-1 text-center sm:text-left">
+              <div className="space-y-2.5 flex-1 text-center sm:text-left">
                 <div>
-                  <span className="text-[11px] uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-amber-400 text-slate-950 inline-block mb-1">
-                    {order.status === 'ready' ? 'Ready for Counter Pickup' : 'Order Processing'}
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-amber-400 bg-amber-100 text-amber-900 inline-block mb-1">
+                    {order.status === 'ready' ? 'Ready for Counter Pickup' : 'Order Processing In Queue'}
                   </span>
-                  <h3 className="text-xl font-bold text-white mt-1">Present at Counter to Collect</h3>
-                  <p className="text-xs text-slate-300 mt-1">
-                    Show this encrypted QR code to the merchant staff, or read out your 4-digit PIN:
+                  <h3 className="font-serif text-xl font-bold text-zinc-950">
+                    Official Counter Collection Slip
+                  </h3>
+                  <p className="text-xs text-zinc-700 font-sans mt-0.5">
+                    Show this encrypted QR code at the service counter, or quote your 4-digit PIN:
                   </p>
                 </div>
 
-                <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20">
-                  <KeyRound className="h-5 w-5 text-amber-400" />
-                  <span className="text-xs font-semibold text-slate-200">Pickup PIN:</span>
-                  <span className="text-2xl font-mono font-extrabold text-amber-400 tracking-wider">
+                <div className="inline-flex items-center gap-2.5 bg-white px-3.5 py-1.5 rounded border border-amber-300 shadow-xs">
+                  <KeyRound className="h-4 w-4 text-amber-700" />
+                  <span className="text-xs font-mono font-semibold text-zinc-600">PICKUP PIN:</span>
+                  <span className="text-xl font-mono font-extrabold text-amber-950 tracking-widest">
                     {order.pickup_pin || '4821'}
                   </span>
                 </div>
@@ -223,39 +226,36 @@ export default function OrderDetailPage() {
         )}
 
         {/* Status Card */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 mb-6 shadow-sm">
-          <div className="flex items-center gap-4 mb-6">
-            <div className={`p-4 rounded-2xl border ${statusCfg.badge}`}>
-              <StatusIcon className="h-7 w-7" />
+        <div className="bg-white rounded-lg border border-[#E4DDCF] p-6 mb-6 shadow-xs">
+          <div className="flex items-center gap-3.5 mb-5 pb-5 border-b border-[#E4DDCF]">
+            <div className={`p-3 rounded border ${statusCfg.badge}`}>
+              <StatusIcon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Order Status</p>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400">Order Lifecycle Status</p>
+              <h2 className="font-serif text-xl font-bold text-zinc-950">
                 {STATUS_LABELS[order.status] || order.status}
               </h2>
             </div>
           </div>
 
           {/* Status Timeline */}
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <h3 className="font-bold text-slate-900 text-sm mb-4">Status Log &amp; Timeline</h3>
-            <div className="space-y-4">
+          <div>
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-700 mb-3">
+              Status Audit Log
+            </h3>
+            <div className="space-y-3 font-mono text-xs">
               {order.status_logs?.length > 0 ? (
-                order.status_logs.map((log, idx) => (
-                  <div key={log.id} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div className="w-3 h-3 bg-blue-600 rounded-full ring-4 ring-blue-100" />
-                      {idx < order.status_logs.length - 1 && (
-                        <div className="w-0.5 h-8 bg-slate-200 my-1" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-bold text-slate-900 text-sm">{STATUS_LABELS[log.status] || log.status}</p>
-                      <p className="text-xs text-slate-400">
-                        {new Date(log.changed_at).toLocaleString()}
-                      </p>
+                order.status_logs.map((log) => (
+                  <div key={log.id} className="flex items-start gap-3 p-2.5 rounded border border-[#E4DDCF] bg-[#FAF8F3]">
+                    <div className="w-2 h-2 rounded-full bg-blue-900 mt-1.5 shrink-0" />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-baseline">
+                        <span className="font-bold text-zinc-900">{STATUS_LABELS[log.status] || log.status}</span>
+                        <span className="text-[10px] text-zinc-500">{new Date(log.changed_at).toLocaleString()}</span>
+                      </div>
                       {log.note && (
-                        <p className="text-xs text-slate-600 mt-1 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                        <p className="text-xs text-zinc-600 mt-1 font-sans">
                           {log.note}
                         </p>
                       )}
@@ -263,75 +263,79 @@ export default function OrderDetailPage() {
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-slate-400">Order registered in platform queue.</p>
+                <p className="text-xs text-zinc-500 font-sans">Order registered in central platform queue.</p>
               )}
             </div>
           </div>
         </div>
 
-        {/* Order Items */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 mb-6">
-          <h3 className="font-bold text-slate-900 text-base mb-4">Ordered Items</h3>
-          <div className="divide-y divide-slate-100">
+        {/* Order Items Table */}
+        <div className="bg-white rounded-lg border border-[#E4DDCF] shadow-xs p-6 mb-6">
+          <h3 className="font-serif font-bold text-base text-zinc-950 mb-3 pb-2 border-b border-[#E4DDCF]">
+            Itemized Concession Requisition
+          </h3>
+          <div className="divide-y divide-[#E4DDCF]">
             {order.items?.length > 0 ? (
               order.items.map((item) => (
-                <div key={item.id} className="py-4 first:pt-0 last:pb-0 flex justify-between items-start">
+                <div key={item.id} className="py-3 first:pt-0 last:pb-0 flex justify-between items-start">
                   <div>
-                    <p className="font-bold text-slate-900 text-sm">{item.title_snapshot}</p>
+                    <p className="font-serif font-bold text-zinc-900 text-sm">{item.title_snapshot}</p>
                     {item.vendor_name_snapshot && (
-                      <p className="text-xs text-slate-500 mt-0.5">Merchant: {item.vendor_name_snapshot}</p>
+                      <p className="text-xs font-mono text-zinc-500 mt-0.5">Concession: {item.vendor_name_snapshot}</p>
                     )}
-                    <p className="text-xs text-slate-600 mt-1">
-                      Qty: <strong className="text-slate-900">{item.quantity}</strong> × {formatPrice(item.price_at_order)}
+                    <p className="text-xs font-mono text-zinc-600 mt-0.5">
+                      Qty: <strong>{item.quantity}</strong> × {formatPrice(item.price_at_order)}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-mono font-extrabold text-blue-600 text-base">{formatPrice(item.subtotal)}</p>
+                    <p className="font-mono font-bold text-zinc-950 text-sm">{formatPrice(item.subtotal)}</p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-slate-400">No items listed in this order.</p>
+              <p className="text-xs text-zinc-500">No items listed in this order docket.</p>
             )}
           </div>
         </div>
 
-        {/* Payment & Settlement Summary */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 mb-6">
-          <h3 className="font-bold text-slate-900 text-base mb-4">Payment &amp; Settlement</h3>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between text-slate-600">
+        {/* Settlement Summary */}
+        <div className="bg-white rounded-lg border border-[#E4DDCF] shadow-xs p-6 mb-6">
+          <h3 className="font-serif font-bold text-base text-zinc-950 mb-3 pb-2 border-b border-[#E4DDCF]">
+            Settlement Summary
+          </h3>
+          <div className="space-y-2 text-xs font-mono">
+            <div className="flex justify-between text-zinc-600">
               <span>Items Total</span>
-              <span className="font-mono font-semibold text-slate-900">{formatPrice(order.total_amount)}</span>
+              <span className="font-bold text-zinc-900">{formatPrice(order.total_amount)}</span>
             </div>
-            <div className="flex justify-between text-slate-600">
-              <span>Express Pickup</span>
-              <span className="font-semibold text-emerald-600">Free Counter Handover</span>
+            <div className="flex justify-between text-zinc-600">
+              <span>Collection Handling</span>
+              <span className="font-semibold text-emerald-800">Free Counter Handover</span>
             </div>
-            <div className="flex justify-between text-slate-600">
-              <span>Payment Mode</span>
-              <span className="font-bold text-slate-900 capitalize">
+            <div className="flex justify-between text-zinc-600">
+              <span>Settlement Mode</span>
+              <span className="font-bold text-zinc-900 capitalize">
                 {order.payment_method || 'Cash on Pickup'}
               </span>
             </div>
-            <div className="flex justify-between pt-4 border-t border-slate-100 items-baseline">
-              <span className="font-bold text-slate-900 text-base">Grand Total</span>
-              <span className="text-2xl font-mono font-extrabold text-slate-900">{formatPrice(order.total_amount)}</span>
+            <div className="flex justify-between pt-3 border-t border-[#E4DDCF] items-baseline">
+              <span className="font-serif font-bold text-sm text-zinc-950">Grand Total</span>
+              <span className="text-xl font-mono font-bold text-zinc-950">{formatPrice(order.total_amount)}</span>
             </div>
           </div>
         </div>
 
         {/* Actions (if any) */}
         {actions.length > 0 && (
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 mb-6 space-y-3">
-            <h3 className="font-bold text-slate-900 text-base mb-2">Available Actions</h3>
+          <div className="bg-white rounded-lg border border-[#E4DDCF] shadow-xs p-5 mb-6 space-y-2.5">
+            <h3 className="font-serif font-bold text-zinc-950 text-sm mb-1">Available Transitions</h3>
             {actions.map((act) => (
               <Button
                 key={act.status}
                 onClick={() => handleTransition(act.status)}
                 disabled={act.disabled}
-                variant={act.variant === 'danger' ? 'danger' : 'blue'}
-                className="w-full py-3 rounded-2xl font-bold"
+                variant={act.variant === 'danger' ? 'danger' : 'primary'}
+                className="w-full py-2.5 rounded text-xs font-semibold"
               >
                 {act.label}
               </Button>

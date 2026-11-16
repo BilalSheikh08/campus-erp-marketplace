@@ -20,7 +20,20 @@ export default function RoleRoute({ requiredRole, children }) {
   }
 
   if (user?.role !== requiredRole) {
-    return <Navigate to="/" replace />;
+    const roleHomes = {
+      vendor: '/vendor/dashboard',
+      warden: '/warden/dashboard',
+      admin: '/admin/dashboard',
+      student: '/',
+    };
+    const userHome = roleHomes[user?.role] || '/';
+    return (
+      <Navigate
+        to={userHome}
+        replace
+        state={{ error: `Access restricted. This section requires ${requiredRole} privileges.` }}
+      />
+    );
   }
 
   return children;

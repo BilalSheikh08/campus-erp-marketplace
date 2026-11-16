@@ -1,11 +1,12 @@
 /**
- * Campus Commons - Vendor Product Editor
- * Create or update listing with domain specifications (canteen, stationery, hostel).
+ * Campus Commons - Vendor Product Specification Sheet
+ * University Concession Docket Entry:
+ * Structured form with domain-specific metadata (kitchen preparation times, stationery specs, hostel guidelines).
  */
 
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Store } from 'lucide-react';
+import { ArrowLeft, Store, FileText } from 'lucide-react';
 import { createListing, fetchListingDetail, updateListing } from '../../api/listings';
 import { fetchVendorProfile } from '../../api/vendors';
 import Alert from '../../components/shared/Alert';
@@ -26,7 +27,7 @@ const getError = (error) => {
   const data = error.response?.data;
   if (typeof data?.detail === 'string') return data.detail;
   if (data && typeof data === 'object') return Object.values(data).flat().join(' ');
-  return 'Could not save the listing. Please try again.';
+  return 'Could not save the listing. Please verify the entered data.';
 };
 
 export default function CreateEditListingPage() {
@@ -110,7 +111,7 @@ export default function CreateEditListingPage() {
         await createListing(payload);
       }
 
-      navigate('/vendor/listings', { state: { notice: editing ? 'Listing updated successfully.' : 'New listing created successfully.' } });
+      navigate('/vendor/listings', { state: { notice: editing ? 'Listing updated successfully.' : 'New listing published to campus catalog.' } });
     } catch (requestError) {
       setError(getError(requestError));
     } finally {
@@ -118,30 +119,36 @@ export default function CreateEditListingPage() {
     }
   };
 
-  if (loading) return <LoadingSpinner message="Opening product editor..." />;
+  if (loading) return <LoadingSpinner message="Consulting concession registry..." />;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 pb-24 text-slate-900">
+    <div className="min-h-screen bg-[#F8F6F0] text-zinc-900 py-10 pb-24 font-sans">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={() => navigate('/vendor/listings')}
-          className="mb-6 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition cursor-pointer"
+          className="mb-6 inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-950 transition cursor-pointer"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to listings
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Return to Concession Catalog</span>
         </button>
 
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm">
-          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
-            <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-200">
-              <Store className="h-6 w-6" />
+        <div className="bg-white rounded-lg border border-[#E4DDCF] p-6 sm:p-8 shadow-xs">
+          {/* Header */}
+          <div className="flex items-center gap-3.5 mb-6 pb-5 border-b border-[#E4DDCF]">
+            <div className="w-10 h-10 rounded bg-[#FAF8F3] text-zinc-800 flex items-center justify-center border border-[#E4DDCF]">
+              <Store className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-slate-900">
-                {editing ? 'Edit Catalog Listing' : 'Create New Catalog Listing'}
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
+                <FileText className="h-3 w-3" />
+                <span>SPECIFICATION DOSSIER · {CATEGORY_LABELS[category] || category}</span>
+              </div>
+              <h1 className="font-serif text-2xl font-normal text-zinc-950 tracking-tight">
+                {editing ? 'Modify Catalog Entry' : 'Register New Concession Item'}
               </h1>
-              <p className="text-xs text-slate-500">
-                Department: <strong className="text-slate-900 capitalize">{CATEGORY_LABELS[category] || category}</strong> ({vendor?.business_name})
+              <p className="text-xs text-zinc-600 mt-0.5 font-sans">
+                Vendor: <strong className="text-zinc-900">{vendor?.business_name || 'Concession Desk'}</strong>
               </p>
             </div>
           </div>
@@ -154,79 +161,79 @@ export default function CreateEditListingPage() {
 
           <form onSubmit={submit} className="space-y-4">
             <Input
-              label="Listing Title / Product Name"
+              label="Item Title / Concession Nomenclature"
               name="title"
               value={form.title}
               onChange={update}
-              placeholder="e.g. Masala Dosa with Sambar"
+              placeholder="e.g. Masala Dosa with Chutney & Sambar"
               required
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Price (₹)"
+                label="Physical Counter Rate (₹)"
                 type="number"
                 step="0.01"
                 min="0"
                 name="price"
                 value={form.price}
                 onChange={update}
-                placeholder="e.g. 65.00"
+                placeholder="65.00"
                 required
               />
               <Input
-                label="SKU / Internal Identifier (Optional)"
+                label="SKU / Stock Reference (Optional)"
                 name="sku"
                 value={form.sku}
                 onChange={update}
-                placeholder="e.g. CNT-DOSA-01"
+                placeholder="CNT-MEAL-04"
               />
             </div>
 
             <ImageUploader
-              label="Product Photo"
+              label="Reference Photo"
               value={form.image_url}
               onChange={(url) => setForm((prev) => ({ ...prev, image_url: url }))}
             />
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Product Description
+              <label className="block text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
+                Specification &amp; Description
               </label>
               <textarea
                 name="description"
                 rows={3}
                 value={form.description}
                 onChange={update}
-                placeholder="Describe dietary info, paper quality, or room equipment specs..."
-                className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition placeholder:text-slate-400"
+                placeholder="Specify ingredients, dietary declarations, page counts, or equipment allocation terms..."
+                className="w-full text-xs px-3 py-2 rounded border border-[#E4DDCF] bg-white text-zinc-900 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:border-blue-900 transition-colors placeholder:text-zinc-400 font-sans leading-relaxed"
               />
             </div>
 
             {/* Canteen Specific Fields */}
             {category === 'canteen' && (
-              <div className="p-4 rounded-2xl bg-orange-50/60 border border-orange-100 space-y-3">
-                <p className="text-xs font-bold text-orange-950 uppercase tracking-wider">Canteen Kitchen Attributes</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-4 rounded border border-[#E4DDCF] bg-[#FAF8F3] space-y-3">
+                <p className="text-[10px] font-mono font-bold text-zinc-700 uppercase tracking-wider">Kitchen &amp; Preparation Parameters</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Preparation Time (Minutes)"
+                    label="Estimated Kitchen Prep Time (Minutes)"
                     type="number"
                     name="prep_time_minutes"
                     value={form.prep_time_minutes}
                     onChange={update}
-                    placeholder="e.g. 15"
+                    placeholder="12"
                   />
-                  <div className="flex items-center gap-2 pt-6">
+                  <div className="flex items-center gap-2 pt-5">
                     <input
                       type="checkbox"
                       id="is_veg"
                       name="is_veg"
                       checked={form.is_veg}
                       onChange={update}
-                      className="rounded text-blue-600 focus:ring-blue-500"
+                      className="rounded border-[#E4DDCF] text-blue-900 focus:ring-blue-900"
                     />
-                    <label htmlFor="is_veg" className="text-xs font-semibold text-slate-800">
-                      Vegetarian Recipe
+                    <label htmlFor="is_veg" className="text-xs font-semibold text-zinc-800">
+                      Certified Vegetarian Recipe
                     </label>
                   </div>
                 </div>
@@ -236,19 +243,20 @@ export default function CreateEditListingPage() {
             <div className="pt-4 flex gap-3">
               <Button
                 type="submit"
-                variant="blue"
-                size="lg"
+                variant="primary"
+                size="md"
                 loading={saving}
                 disabled={saving}
-                className="flex-1 py-3.5 rounded-2xl font-bold"
+                className="flex-1 py-2.5 rounded text-xs font-bold"
               >
-                {editing ? 'Update Listing' : 'Publish to Campus Catalog'}
+                {editing ? 'Save Changes' : 'Authorize & Publish to Catalog'}
               </Button>
               <Button
+                type="button"
                 variant="outline"
-                size="lg"
+                size="md"
                 onClick={() => navigate('/vendor/listings')}
-                className="px-6 rounded-2xl"
+                className="px-6 rounded text-xs"
               >
                 Cancel
               </Button>

@@ -1,6 +1,7 @@
 /**
  * Campus Commons - Student My Book Listings
- * Manage peer-to-peer textbook sales, confirm handoffs, and view status.
+ * Academic Exchange Management Ledger:
+ * Manage textbook listings, confirm student handoffs, and review sales status.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -57,24 +58,29 @@ export default function BookMyListingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 pb-24 text-slate-900">
+    <div className="min-h-screen bg-[#F8F6F0] py-10 pb-24 text-zinc-900 font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-5 border-b border-[#E4DDCF]">
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">My Book Listings</h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Manage textbook sales and confirm handoffs to student buyers.
+            <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-900 mb-1">
+              STUDENT DESK · SELLER DASHBOARD
+            </div>
+            <h1 className="font-serif text-3xl font-normal text-zinc-950 tracking-tight">
+              My Textbook Listings
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-600 mt-1 font-sans">
+              Manage listed textbooks, review student reserve requests, and confirm physical campus handoffs.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 font-sans">
             <Link to="/books/transactions">
-              <Button variant="outline" size="sm">
-                View Transactions
+              <Button variant="outline" size="sm" className="text-xs">
+                Transaction History
               </Button>
             </Link>
             <Link to="/books/new">
-              <Button variant="blue" size="sm" className="gap-1.5 font-bold">
-                <Plus className="h-4 w-4" /> New Book Listing
+              <Button variant="primary" size="sm" className="gap-1.5 text-xs font-semibold">
+                <Plus className="h-3.5 w-3.5" /> New Textbook Listing
               </Button>
             </Link>
           </div>
@@ -87,17 +93,17 @@ export default function BookMyListingsPage() {
         )}
 
         {loading ? (
-          <LoadingSpinner message="Loading your listings..." />
+          <LoadingSpinner message="Consulting seller catalog..." />
         ) : books.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center shadow-sm">
+          <div className="bg-white rounded-lg border border-[#E4DDCF] p-10 text-center shadow-xs">
             <EmptyState
-              icon={<BookOpen className="mx-auto h-12 w-12 text-slate-300" />}
-              title="No book listings yet"
+              icon={<BookOpen className="mx-auto h-8 w-8 text-zinc-400" />}
+              title="No textbook listings on record"
               message="List course textbooks or competitive exam guides to hand down to fellow students."
               action={
                 <Link to="/books/new">
-                  <Button variant="blue" className="mt-4 font-bold">
-                    List Your First Book
+                  <Button variant="primary" size="sm" className="mt-2 text-xs">
+                    List Your First Textbook
                   </Button>
                 </Link>
               }
@@ -110,11 +116,11 @@ export default function BookMyListingsPage() {
               return (
                 <div
                   key={book.id}
-                  className="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition"
+                  className="bg-white rounded-lg border border-[#E4DDCF] p-5 flex flex-col justify-between shadow-xs hover:border-zinc-400 transition-colors"
                 >
                   <div>
                     <div className="flex items-center gap-3.5 mb-4">
-                      <div className="w-16 h-20 rounded-xl bg-slate-100 overflow-hidden border border-slate-200 shrink-0">
+                      <div className="w-16 h-20 rounded bg-[#FAF8F3] overflow-hidden border border-[#E4DDCF] shrink-0">
                         <SafeImage
                           src={book.image_url}
                           alt={book.title}
@@ -125,44 +131,44 @@ export default function BookMyListingsPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <span
-                          className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border inline-block mb-1 ${
+                          className={`text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border inline-block mb-1 ${
                             book.status === 'active' && book.is_available
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                               : isReserved
-                              ? 'bg-amber-50 text-amber-700 border-amber-200'
-                              : 'bg-slate-100 text-slate-600 border-slate-200'
+                              ? 'bg-amber-50 text-amber-800 border-amber-300'
+                              : 'bg-[#FAF8F3] text-zinc-600 border-[#E4DDCF]'
                           }`}
                         >
                           {label(book.status)}
                         </span>
-                        <h3 className="text-sm font-bold text-slate-900 truncate">{book.title}</h3>
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <h3 className="font-serif text-sm font-bold text-zinc-950 truncate">{book.title}</h3>
+                        <p className="text-xs font-mono text-zinc-500 mt-0.5">
                           {book.author ? `by ${book.author}` : 'Author unspecified'}
                         </p>
-                        <p className="text-sm font-mono font-extrabold text-slate-900 mt-1">
+                        <p className="text-sm font-mono font-bold text-zinc-950 mt-1">
                           ₹{Number(book.price || 0).toFixed(2)}
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-[#E4DDCF] flex items-center justify-between gap-2">
                     <Link
                       to={`/books/${book.id}`}
-                      className="text-xs font-semibold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                      className="text-xs font-mono text-blue-900 hover:underline inline-flex items-center gap-1"
                     >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      View Listing
+                      <ExternalLink className="h-3 w-3" />
+                      View Folio
                     </Link>
 
                     {isReserved && (
                       <Button
                         size="sm"
-                        variant="blue"
+                        variant="primary"
                         loading={workingId === book.id}
                         disabled={workingId === book.id}
                         onClick={() => confirmSale(book.id)}
-                        className="text-xs font-bold"
+                        className="text-xs font-semibold"
                       >
                         <CheckCircle className="h-3.5 w-3.5 mr-1" />
                         Confirm Handover

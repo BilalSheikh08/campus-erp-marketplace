@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 
 export default function AuthLayout({ children }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-[#F8F6F0] text-zinc-900 flex flex-col justify-center">
       {children}
     </div>
   );

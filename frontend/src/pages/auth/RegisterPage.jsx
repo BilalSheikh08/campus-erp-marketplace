@@ -1,11 +1,12 @@
 /**
  * Campus Commons - Student Registration
- * Register student account with campus email and hostel room assignment.
+ * University Student Matriculation & Portal Registration:
+ * Create student account with verified campus email and residence hall assignment.
  */
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { UserPlus } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import Button from '../../components/shared/Button';
 import Input from '../../components/shared/Input';
@@ -33,11 +34,11 @@ export default function RegisterPage() {
     if (!formData.email.trim()) {
       errors.email = 'Email is required';
     } else if (!VALIDATION_RULES.EMAIL_PATTERN.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = 'Please enter a valid campus email address';
     }
 
     if (!formData.name.trim()) {
-      errors.name = 'Name is required';
+      errors.name = 'Full name is required';
     }
 
     if (!formData.password) {
@@ -99,23 +100,28 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 py-12 bg-slate-50 text-slate-900">
+    <div className="flex items-center justify-center min-h-screen px-4 py-12 bg-[#F8F6F0] text-zinc-900 font-sans">
       <div className="w-full max-w-md">
-        {/* Brand Header */}
+        {/* University Masthead Header */}
         <div className="mb-8 text-center">
-          <Link to="/" className="inline-flex items-center gap-3 mb-4 group">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white font-bold text-xl shadow-md border border-slate-800 group-hover:scale-105 transition-transform">
-              <span className="font-editorial text-amber-400">U</span>
+          <Link to="/" className="inline-flex items-center gap-2.5 mb-3 group">
+            <div className="w-9 h-9 rounded bg-zinc-900 text-white flex items-center justify-center font-serif font-bold text-base shadow-xs">
+              U
             </div>
-            <span className="text-2xl font-bold tracking-tight text-slate-900">
-              CAMPUS<span className="text-blue-600">HUB</span>
-            </span>
+            <div className="text-left">
+              <span className="font-serif text-lg font-bold tracking-tight text-zinc-950 block leading-tight">
+                CAMPUS<span className="font-light text-zinc-600">HUB</span>
+              </span>
+              <span className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase block -mt-0.5">
+                Central Exchange
+              </span>
+            </div>
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Create Student Account
+          <h1 className="font-serif text-2xl sm:text-3xl font-normal text-zinc-950 tracking-tight">
+            Register Student Identity
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500">
-            Join the campus clearinghouse to order food, supplies, and trade books.
+          <p className="mt-1 text-xs text-zinc-600 font-sans">
+            Enroll for express dining tokens, academic supplies, and room logistics.
           </p>
         </div>
 
@@ -126,12 +132,11 @@ export default function RegisterPage() {
           </div>
         )}
 
-        {/* Register Card */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Registration Box */}
+        <div className="bg-white rounded-lg border border-[#E4DDCF] p-6 sm:p-7 shadow-xs">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             <Input
-              label="Full Name"
-              type="text"
+              label="Full Official Name"
               name="name"
               placeholder="e.g. Aarav Sharma"
               value={formData.name}
@@ -155,17 +160,32 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
-                label="Hostel Room (Optional)"
-                type="text"
-                name="hostelRoom"
-                placeholder="e.g. Block B-302"
-                value={formData.hostelRoom}
+                label="Password"
+                type="password"
+                name="password"
+                placeholder="••••••••"
+                value={formData.password}
                 onChange={handleChange}
+                error={validationErrors.password}
                 disabled={isLoading}
+                required
               />
               <Input
-                label="Phone (Optional)"
-                type="tel"
+                label="Confirm Password"
+                type="password"
+                name="passwordConfirmation"
+                placeholder="••••••••"
+                value={formData.passwordConfirmation}
+                onChange={handleChange}
+                error={validationErrors.passwordConfirmation}
+                disabled={isLoading}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Input
+                label="Contact Phone"
                 name="phone"
                 placeholder="+91 98765 43210"
                 value={formData.phone}
@@ -173,53 +193,37 @@ export default function RegisterPage() {
                 error={validationErrors.phone}
                 disabled={isLoading}
               />
+              <Input
+                label="Residence Room"
+                name="hostelRoom"
+                placeholder="Block B-302"
+                value={formData.hostelRoom}
+                onChange={handleChange}
+                disabled={isLoading}
+              />
             </div>
 
-            <Input
-              label="Password"
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              error={validationErrors.password}
-              disabled={isLoading}
-              required
-            />
-
-            <Input
-              label="Confirm Password"
-              type="password"
-              name="passwordConfirmation"
-              placeholder="••••••••"
-              value={formData.passwordConfirmation}
-              onChange={handleChange}
-              error={validationErrors.passwordConfirmation}
-              disabled={isLoading}
-              required
-            />
-
-            <div className="pt-3">
+            <div className="pt-2">
               <Button
                 type="submit"
-                variant="blue"
-                size="lg"
+                variant="primary"
+                size="md"
                 loading={isLoading}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold shadow-xs"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded text-xs font-mono font-bold shadow-xs"
               >
-                <UserPlus className="h-4 w-4" />
                 <span>Create Student Account</span>
+                <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </div>
           </form>
         </div>
 
         {/* Footer */}
-        <p className="text-center mt-6 text-slate-500 text-xs sm:text-sm">
-          Already registered?{' '}
-          <Link to="/login" className="text-blue-600 font-bold hover:underline">
-            Sign in here
+        <p className="text-center mt-5 text-zinc-600 text-xs font-sans">
+          Already registered on campus?{' '}
+          <Link to="/login" className="text-blue-900 font-bold hover:underline">
+            Sign in to portal
           </Link>
         </p>
       </div>

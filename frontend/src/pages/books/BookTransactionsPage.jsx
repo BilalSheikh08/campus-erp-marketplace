@@ -1,6 +1,7 @@
 /**
  * Campus Commons - Student Textbook Transactions
- * Track peer book reservations, cancellations, and completed exchanges.
+ * Academic Exchange Transaction Ledger:
+ * Track student reservations, peer handoffs, and completed transactions.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -14,9 +15,9 @@ import EmptyState from '../../components/common/EmptyState';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const labels = {
-  reserved: 'Reserved',
+  reserved: 'Peer Reserved',
   confirmed: 'Sale Confirmed',
-  completed: 'Completed',
+  completed: 'Handover Completed',
   cancelled: 'Cancelled',
 };
 
@@ -59,22 +60,27 @@ export default function BookTransactionsPage() {
     }
   };
 
-  const participantLabel = (tx) => (tx.buyer === user?.id ? 'You are the buyer' : 'You are the seller');
+  const participantLabel = (tx) => (tx.buyer === user?.id ? 'Your Role: Registered Buyer' : 'Your Role: Listed Seller');
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 pb-24 text-slate-900">
+    <div className="min-h-screen bg-[#F8F6F0] py-10 pb-24 text-zinc-900 font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link
           to="/books/my-listings"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition mb-6"
+          className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-600 hover:text-zinc-950 transition mb-5"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to My Book Listings
+          <ArrowLeft className="h-3.5 w-3.5" /> BACK TO MY LISTINGS
         </Link>
 
-        <div className="mb-8 pb-6 border-b border-slate-200">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Book Transactions</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Track student reservations, handoffs, and peer exchange ledger records.
+        <div className="mb-8 pb-5 border-b border-[#E4DDCF]">
+          <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-900 mb-1">
+            PEER-TO-PEER EXCHANGE · TRANSACTION LEDGER
+          </div>
+          <h1 className="font-serif text-3xl font-normal text-zinc-950 tracking-tight">
+            Book Transaction Records
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-600 mt-1 font-sans">
+            Track student reservations, handoff receipts, and peer exchange ledger records.
           </p>
         </div>
 
@@ -85,61 +91,61 @@ export default function BookTransactionsPage() {
         )}
 
         {loading ? (
-          <LoadingSpinner message="Loading transactions..." />
+          <LoadingSpinner message="Consulting transaction ledger..." />
         ) : transactions.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center shadow-sm">
+          <div className="bg-white rounded-lg border border-[#E4DDCF] p-10 text-center shadow-xs">
             <EmptyState
-              icon={<Clock className="mx-auto h-12 w-12 text-slate-300" />}
-              title="No book transactions"
+              icon={<Clock className="mx-auto h-8 w-8 text-zinc-400" />}
+              title="No textbook transactions on record"
               message="Student reservations and completed textbook exchanges will appear here."
               action={
                 <Link to="/books">
-                  <Button variant="blue" className="mt-4 font-bold">
-                    Browse Books
+                  <Button variant="primary" size="sm" className="mt-2 text-xs">
+                    Browse Textbook Catalog
                   </Button>
                 </Link>
               }
             />
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {transactions.map((tx) => (
               <div
                 key={tx.id}
-                className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="bg-white rounded-lg border border-[#E4DDCF] p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="font-mono text-xs font-bold text-slate-900">
+                    <span className="font-mono text-xs font-bold text-zinc-950">
                       TX #{tx.id.slice(0, 8).toUpperCase()}
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${
+                      className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
                         tx.status === 'completed'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                           : tx.status === 'confirmed'
-                          ? 'bg-blue-50 text-blue-700 border-blue-200'
+                          ? 'bg-blue-50 text-blue-900 border-blue-300'
                           : tx.status === 'cancelled'
-                          ? 'bg-rose-50 text-rose-700 border-rose-200'
-                          : 'bg-amber-50 text-amber-700 border-amber-200'
+                          ? 'bg-red-50 text-red-800 border-red-300'
+                          : 'bg-amber-50 text-amber-800 border-amber-300'
                       }`}
                     >
                       {labels[tx.status] || tx.status}
                     </span>
                   </div>
 
-                  <p className="text-sm font-bold text-slate-900">{tx.book_title || 'Curriculum Textbook'}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{participantLabel(tx)}</p>
+                  <p className="font-serif text-sm font-bold text-zinc-950">{tx.book_title || 'Curriculum Textbook'}</p>
+                  <p className="text-xs font-mono text-zinc-500 mt-0.5">{participantLabel(tx)}</p>
                 </div>
 
-                <div className="flex items-center gap-2 self-start sm:self-auto">
+                <div className="flex items-center gap-2 self-start sm:self-auto font-sans">
                   {tx.status === 'confirmed' && tx.buyer === user?.id && (
                     <Button
                       size="sm"
-                      variant="blue"
+                      variant="primary"
                       loading={workingId === tx.id}
                       onClick={() => action(tx.id, completeBookTransaction)}
-                      className="font-bold text-xs"
+                      className="text-xs font-semibold"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
                       Mark Received
@@ -152,7 +158,7 @@ export default function BookTransactionsPage() {
                       variant="outline"
                       loading={workingId === tx.id}
                       onClick={() => action(tx.id, cancelBookTransaction)}
-                      className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-slate-200"
+                      className="text-xs text-red-800 hover:bg-red-50 border-[#E4DDCF]"
                     >
                       <XCircle className="h-3.5 w-3.5 mr-1" />
                       Cancel

@@ -1,11 +1,12 @@
 /**
  * Campus Commons - Student Textbook Details & Reservation
- * Direct peer-to-peer textbook handoff and escrow reservation.
+ * Redesigned with academic exchange folio aesthetic:
+ * warm paper background, monospace course & ISBN metadata, and peer handoff reservation.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, User } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import { fetchBook, reserveBook } from '../../services/booksApi';
 import Alert from '../../components/shared/Alert';
@@ -31,7 +32,7 @@ export default function BookDetailPage() {
     try {
       setBook(await fetchBook(id));
     } catch (err) {
-      setError(err.response?.data?.detail || 'Could not load this book.');
+      setError(err.response?.data?.detail || 'Could not load this book entry.');
     } finally {
       setLoading(false);
     }
@@ -63,11 +64,11 @@ export default function BookDetailPage() {
     }
   };
 
-  if (loading) return <LoadingSpinner message="Loading book details..." />;
+  if (loading) return <LoadingSpinner message="Consulting textbook entry..." />;
   if (!book)
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <Alert type="error" message={error || 'Book not found.'} />
+      <div className="max-w-4xl mx-auto px-4 py-12 font-sans">
+        <Alert type="error" message={error || 'Book record not found.'} />
       </div>
     );
 
@@ -76,14 +77,14 @@ export default function BookDetailPage() {
   const isAvailable = book.status === 'active' && book.is_available;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 pb-24 text-slate-900">
+    <div className="min-h-screen bg-[#F8F6F0] py-10 pb-24 text-zinc-900 font-sans">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-6 inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition cursor-pointer"
+          className="mb-5 inline-flex items-center gap-1.5 text-xs font-mono text-zinc-600 hover:text-zinc-950 transition cursor-pointer"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to listings
+          <ArrowLeft className="h-3.5 w-3.5" /> BACK TO TEXTBOOK INDEX
         </button>
 
         {error && (
@@ -97,10 +98,10 @@ export default function BookDetailPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-2">
+        <div className="bg-white rounded-lg border border-[#E4DDCF] shadow-xs overflow-hidden grid grid-cols-1 md:grid-cols-2">
           {/* Book Image Cover with SafeImage */}
-          <div className="min-h-96 bg-slate-50 flex items-center justify-center p-8 border-b md:border-b-0 md:border-r border-slate-200">
-            <div className="w-full max-w-xs aspect-[3/4] relative rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-white">
+          <div className="min-h-96 bg-[#FAF8F3] flex items-center justify-center p-8 border-b md:border-b-0 md:border-r border-[#E4DDCF]">
+            <div className="w-full max-w-xs aspect-[3/4] relative rounded overflow-hidden border border-[#E4DDCF] shadow-xs bg-white">
               <SafeImage
                 src={book.image_url}
                 alt={book.title}
@@ -112,77 +113,78 @@ export default function BookDetailPage() {
           </div>
 
           {/* Book Details */}
-          <div className="p-8 sm:p-10 flex flex-col justify-between">
+          <div className="p-6 sm:p-8 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-200">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-900 bg-purple-50 px-2 py-0.5 rounded border border-purple-300">
                   Student P2P Exchange
                 </span>
                 <span
-                  className={`text-xs px-3 py-1 rounded-full font-bold border ${
+                  className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border uppercase ${
                     isAvailable
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-slate-100 text-slate-600 border-slate-200'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                      : 'bg-[#FAF8F3] text-zinc-500 border-[#E4DDCF]'
                   }`}
                 >
                   {isAvailable ? 'Available' : 'Reserved / Sold'}
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-zinc-950 tracking-tight leading-snug">
                 {book.title}
               </h1>
-              <p className="text-xs text-slate-500 mt-1 mb-4">
+              <p className="text-xs font-mono text-zinc-500 mt-1 mb-4">
                 {book.author ? `by ${book.author}` : 'Author unspecified'}
               </p>
 
               {/* Price Block */}
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 mb-6 flex items-baseline justify-between">
+              <div className="p-4 rounded border border-[#E4DDCF] bg-[#FAF8F3] mb-5 flex items-baseline justify-between font-mono">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Student Price</span>
-                  <div className="text-3xl font-mono font-extrabold text-slate-900 mt-0.5">
+                  <span className="text-[10px] uppercase font-bold text-zinc-400">Peer Exchange Rate</span>
+                  <div className="text-2xl font-bold text-zinc-950 mt-0.5">
                     ₹{Number(book.price || 0).toFixed(2)}
                   </div>
                 </div>
-                <span className="text-xs text-purple-700 font-bold bg-purple-50 px-3 py-1 rounded-xl border border-purple-200">
+                <span className="text-xs text-purple-900 font-semibold bg-white px-2.5 py-1 rounded border border-[#E4DDCF]">
                   Condition: {conditionLabel(book.condition)}
                 </span>
               </div>
 
               {/* Meta Specifications */}
-              <div className="space-y-2.5 text-xs border-y border-slate-100 py-4 mb-6">
+              <div className="space-y-2 text-xs font-mono border-y border-[#E4DDCF] py-3.5 mb-5">
                 {book.subject && (
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Subject / Course:</span>
-                    <span className="font-semibold text-slate-900">{book.subject}</span>
+                    <span className="text-zinc-500">Subject / Course:</span>
+                    <span className="font-semibold text-zinc-900">{book.subject}</span>
                   </div>
                 )}
                 {book.edition && (
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Edition:</span>
-                    <span className="font-semibold text-slate-900">{book.edition}</span>
+                    <span className="text-zinc-500">Edition:</span>
+                    <span className="font-semibold text-zinc-900">{book.edition}</span>
                   </div>
                 )}
                 {book.isbn && (
                   <div className="flex justify-between">
-                    <span className="text-slate-500">ISBN:</span>
-                    <span className="font-mono text-slate-900">{book.isbn}</span>
+                    <span className="text-zinc-500">ISBN Record:</span>
+                    <span className="text-zinc-900">{book.isbn}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Seller:</span>
-                  <span className="font-semibold text-blue-600">
+                <div className="flex justify-between items-center">
+                  <span className="text-zinc-500">Listed Seller:</span>
+                  <span className="font-semibold text-zinc-900 flex items-center gap-1">
+                    <User className="h-3 w-3 text-zinc-400" />
                     {book.seller_name || 'Verified Student Peer'}
                   </span>
                 </div>
               </div>
 
               {book.description && (
-                <div className="mb-6">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                    Seller Notes
+                <div className="mb-5">
+                  <h3 className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                    Seller Notes &amp; Handoff Details
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <p className="text-xs text-zinc-700 leading-relaxed bg-[#FAF8F3] p-3 rounded border border-[#E4DDCF] font-sans">
                     {book.description}
                   </p>
                 </div>
@@ -190,23 +192,23 @@ export default function BookDetailPage() {
             </div>
 
             {/* Actions */}
-            <div className="pt-6 border-t border-slate-100">
+            <div className="pt-4 border-t border-[#E4DDCF]">
               {canReserve ? (
                 <Button
                   onClick={() => runAction(() => reserveBook(book.id))}
                   loading={actionLoading}
-                  variant="blue"
+                  variant="primary"
                   size="lg"
-                  className="w-full py-3.5 rounded-2xl font-bold"
+                  className="w-full py-2.5 rounded text-xs font-semibold"
                 >
                   Reserve Book for Campus Handoff
                 </Button>
               ) : isSeller ? (
-                <p className="text-xs text-slate-500 text-center py-2 bg-slate-100 rounded-xl">
-                  You are the seller of this textbook listing.
+                <p className="text-xs font-mono text-zinc-500 text-center py-2 bg-[#FAF8F3] rounded border border-[#E4DDCF]">
+                  You are the listed seller of this textbook.
                 </p>
               ) : (
-                <Button disabled size="lg" className="w-full py-3.5 rounded-2xl bg-slate-200 text-slate-500 font-bold">
+                <Button disabled size="lg" className="w-full py-2.5 rounded bg-zinc-100 text-zinc-400 font-medium text-xs">
                   Book Currently Reserved or Sold
                 </Button>
               )}

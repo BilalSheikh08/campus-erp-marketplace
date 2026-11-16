@@ -1,11 +1,12 @@
 /**
  * Campus Commons - Vendor Concessionaire Application
- * Students and merchants applying for campus vending permits.
+ * Commercial Concession Licensing Desk:
+ * Apply for campus commercial merchant permits and dining concession authorisations.
  */
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, CheckCircle, Sparkles } from 'lucide-react';
+import { Store, CheckCircle, Sparkles, Building2 } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import { applyAsVendor, fetchVendorProfile } from '../api/vendors';
 import Alert from '../components/shared/Alert';
@@ -13,9 +14,9 @@ import Button from '../components/shared/Button';
 import Input from '../components/shared/Input';
 
 const VENDOR_TYPES = [
-  { value: 'canteen', label: 'Canteen Dining - Meals, Snacks & Beverages' },
-  { value: 'stationery', label: 'Academic Stationery - Blue Books & Drafters' },
-  { value: 'hostel_supply', label: 'Hostel Logistics - Room Necessities' },
+  { value: 'canteen', label: 'Canteen Dining - Meals, Snacks & Kitchen Pre-Orders' },
+  { value: 'stationery', label: 'Academic Stationery - Blue Books, Logbooks & Drafting Sets' },
+  { value: 'hostel_supply', label: 'Hostel Logistics - Room Necessities & Bedding' },
 ];
 
 export default function VendorApplicationPage() {
@@ -75,14 +76,14 @@ export default function VendorApplicationPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-        <div className="bg-white p-8 rounded-3xl border border-slate-200 text-center max-w-md shadow-sm">
-          <Store className="h-12 w-12 text-blue-600 mx-auto mb-3" />
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Authentication Required</h2>
-          <p className="text-xs text-slate-500 mb-6">
-            Please sign in to your student account to apply for a campus vendor permit.
+      <div className="min-h-screen bg-[#F8F6F0] flex items-center justify-center px-4 font-sans">
+        <div className="bg-white p-8 rounded-lg border border-[#E4DDCF] text-center max-w-md shadow-xs">
+          <Store className="h-10 w-10 text-zinc-700 mx-auto mb-3" />
+          <h2 className="font-serif font-bold text-lg text-zinc-950 mb-1">Authentication Required</h2>
+          <p className="text-xs text-zinc-600 mb-6 font-sans">
+            Please sign in to your student account to apply for a commercial campus vending permit.
           </p>
-          <Button variant="blue" onClick={() => navigate('/login')} className="w-full font-bold">
+          <Button variant="primary" onClick={() => navigate('/login')} className="w-full text-xs font-mono font-bold">
             Sign In Now
           </Button>
         </div>
@@ -91,18 +92,18 @@ export default function VendorApplicationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 py-10 pb-24">
+    <div className="min-h-screen bg-[#F8F6F0] text-zinc-900 py-10 pb-24 font-sans">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 pb-6 border-b border-slate-200 text-center">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold mb-2 border border-blue-200">
-            <Sparkles className="h-3.5 w-3.5 text-blue-600" />
-            <span>Commercial Concession Licensing</span>
+        <div className="mb-8 pb-5 border-b border-[#E4DDCF] text-center">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-zinc-700" />
+            <span>COMMERCIAL CONCESSION LICENSING</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            Apply as Campus Merchant
+          <h1 className="font-serif text-3xl sm:text-4xl font-normal text-zinc-950 tracking-tight">
+            Apply for Campus Merchant Permit
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Operate official canteen stalls, sell examination supplies, or manage hostel equipment.
+          <p className="text-xs sm:text-sm text-zinc-600 mt-1 max-w-lg mx-auto font-sans">
+            Register your dining outlet, stationery counter, or student service to begin accepting campus pre-orders.
           </p>
         </div>
 
@@ -113,70 +114,59 @@ export default function VendorApplicationPage() {
         )}
 
         {step === 'existing' && existingVendor && (
-          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm text-center">
-            <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-4 border border-amber-200">
-              <Store className="h-8 w-8" />
+          <div className="bg-white rounded-lg border border-[#E4DDCF] p-8 text-center shadow-xs">
+            <div className="w-12 h-12 rounded bg-[#FAF8F3] border border-[#E4DDCF] text-zinc-700 flex items-center justify-center mx-auto mb-4">
+              <Building2 className="h-6 w-6" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Application Already on File</h2>
-            <p className="text-xs sm:text-sm text-slate-600 mb-6">
-              You have an active permit application for <strong>{existingVendor.business_name}</strong> under review by University Administration.
+            <h2 className="font-serif font-bold text-lg text-zinc-950 mb-1">Application on Record</h2>
+            <p className="text-xs text-zinc-600 mb-4 font-sans">
+              You have already registered an application for <strong>{existingVendor.business_name}</strong>.
             </p>
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-2 mb-6">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Business Unit:</span>
-                <span className="font-bold text-slate-900">{existingVendor.business_name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Concession Category:</span>
-                <span className="font-semibold text-slate-900 capitalize">{existingVendor.vendor_type}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Status:</span>
-                <span className="font-bold text-amber-600 capitalize">{existingVendor.status || 'Pending Review'}</span>
-              </div>
+            <div className="inline-block px-3 py-1 rounded text-xs font-mono font-bold uppercase tracking-wider border border-amber-300 bg-amber-50 text-amber-900 mb-6">
+              Status: {existingVendor.approval_status}
             </div>
-            <Button variant="outline" onClick={() => navigate('/')} className="w-full font-bold">
-              Return to Homepage
-            </Button>
+            <p className="text-xs text-zinc-500 max-w-sm mx-auto font-sans leading-relaxed">
+              Your permit application is currently being evaluated by the campus concessions committee. You will be notified once reviewed.
+            </p>
           </div>
         )}
 
         {step === 'success' && (
-          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm text-center">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-200">
-              <CheckCircle className="h-8 w-8" />
+          <div className="bg-white rounded-lg border border-[#E4DDCF] p-8 text-center shadow-xs">
+            <div className="w-12 h-12 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-6 w-6" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Permit Application Submitted!</h2>
-            <p className="text-xs sm:text-sm text-slate-600 mb-6">
-              University administrators will review your credentials and business details. You will receive an alert once approved.
+            <h2 className="font-serif font-bold text-lg text-zinc-950 mb-1">Permit Application Submitted</h2>
+            <p className="text-xs text-zinc-600 mb-6 font-sans">
+              Your commercial concession request has been received by the Central Registrar.
             </p>
-            <Button variant="blue" onClick={() => navigate('/')} className="w-full font-bold">
-              Back to Campus Commons
+            <Button variant="primary" onClick={() => navigate('/')} className="text-xs font-mono font-bold">
+              Return to Campus Home
             </Button>
           </div>
         )}
 
         {step === 'form' && (
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm">
+          <div className="bg-white rounded-lg border border-[#E4DDCF] p-6 sm:p-8 shadow-xs">
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
-                label="Commercial Stall / Business Name"
+                label="Commercial Entity / Concession Name"
                 name="business_name"
                 value={formData.business_name}
                 onChange={handleChange}
-                placeholder="e.g. Campus Corner Cafe"
+                placeholder="e.g. South Campus Brew & Bagel Co."
                 required
               />
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                   Concession Domain
                 </label>
                 <select
                   name="vendor_type"
                   value={formData.vendor_type}
                   onChange={handleChange}
-                  className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
+                  className="w-full text-xs px-3 py-2 rounded border border-[#E4DDCF] bg-white text-zinc-900 focus:outline-none focus:border-blue-900 font-mono"
                 >
                   {VENDOR_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -187,7 +177,7 @@ export default function VendorApplicationPage() {
               </div>
 
               <Input
-                label="Direct Counter Phone Number"
+                label="Primary Contact Phone"
                 name="contact_number"
                 value={formData.contact_number}
                 onChange={handleChange}
@@ -196,30 +186,30 @@ export default function VendorApplicationPage() {
               />
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Business Description &amp; Offerings
+                <label className="block text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
+                  Operational Proposal &amp; Menu Overview
                 </label>
                 <textarea
                   name="description"
                   rows={4}
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Detail your menu items, preparation times, or equipment quality..."
+                  placeholder="Outline your planned menu items, pricing structure, kitchen hygiene standards, and physical counter operating hours..."
+                  className="w-full text-xs px-3 py-2 rounded border border-[#E4DDCF] bg-white text-zinc-900 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:border-blue-900 transition-colors placeholder:text-zinc-400 font-sans leading-relaxed"
                   required
-                  className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition placeholder:text-slate-400"
                 />
               </div>
 
-              <div className="pt-4">
+              <div className="pt-2">
                 <Button
                   type="submit"
-                  variant="blue"
-                  size="lg"
+                  variant="primary"
+                  size="md"
                   loading={isSubmitting}
                   disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-2xl font-bold"
+                  className="w-full text-xs font-mono font-bold py-2.5"
                 >
-                  Submit Vending Permit Application
+                  Submit Commercial Permit Dossier
                 </Button>
               </div>
             </form>

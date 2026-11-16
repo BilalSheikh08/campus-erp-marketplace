@@ -1,21 +1,22 @@
 /**
- * Campus Commons - Contact & Campus Support Directory
- * Support inquiry ticketing, department routing, and campus assistance.
+ * Campus Commons - Campus Support Directory & Inquiry Desk
+ * University Service Desk & Department Routing:
+ * Support inquiries, department dispatch routing, and campus assistance records.
  */
 
 import { useState } from 'react';
-import { Send, Sparkles } from 'lucide-react';
+import { Send, Building2 } from 'lucide-react';
 import { submitContactInquiry } from '../api/support';
 import Alert from '../components/shared/Alert';
 import Button from '../components/shared/Button';
 import Input from '../components/shared/Input';
 
 const departments = [
-  { value: 'general', title: 'Campus Helpdesk', description: 'Account access, platform issues, and general feedback.' },
-  { value: 'canteen', title: 'Canteen Operations', description: 'Meal orders, dietary information, and counter pickup queries.' },
-  { value: 'stationery', title: 'Stationery Depot', description: 'Product availability and academic examination supplies.' },
-  { value: 'hostel', title: 'Hostel Administration', description: 'Room supply requisitions and warden sign-offs.' },
-  { value: 'vendor', title: 'Vendor Onboarding', description: 'Merchant licensing and marketplace listing assistance.' },
+  { value: 'general', title: 'Central Campus Helpdesk', description: 'Account credentials, portal access, and general inquiries.' },
+  { value: 'canteen', title: 'Dining & Kitchen Operations', description: 'Meal pre-orders, dietary inquiries, and counter pickup protocols.' },
+  { value: 'stationery', title: 'Stationery Depot Concession', description: 'Academic blue books, examination supplies, and batch orders.' },
+  { value: 'hostel', title: 'Residence Hall Administration', description: 'Room supply allocations and superintendent sign-off support.' },
+  { value: 'vendor', title: 'Vendor Onboarding & Permits', description: 'Commercial merchant licensing and concession management.' },
 ];
 
 const initialForm = { name: '', email: '', studentId: '', department: 'general', message: '' };
@@ -58,19 +59,19 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 pb-24">
+    <main className="min-h-screen bg-[#F8F6F0] text-zinc-900 pb-24 font-sans">
       {/* Header Banner */}
-      <section className="bg-white border-b border-slate-200 px-4 py-12 text-center sm:px-6 shadow-xs">
-        <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 mb-2">
-            <Sparkles className="h-3.5 w-3.5 text-blue-600" />
-            <span>Campus Helpdesk &amp; Support</span>
+      <section className="bg-[#FAF8F3] border-b border-[#E4DDCF] px-4 py-12 text-center sm:px-6">
+        <div className="max-w-3xl mx-auto space-y-2">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-500">
+            <Building2 className="h-3.5 w-3.5 text-zinc-700" />
+            <span>CAMPUS HELPDESK &amp; DEPARTMENT INQUIRY DESK</span>
           </div>
-          <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-            How Can We Assist You?
+          <h1 className="font-serif text-3xl sm:text-4xl font-normal text-zinc-950 tracking-tight">
+            How May the Clearinghouse Assist You?
           </h1>
-          <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-slate-500 leading-relaxed">
-            Reach out to campus operators, dining staff, or hostel administration with questions or feedback.
+          <p className="text-xs sm:text-sm text-zinc-600 max-w-xl mx-auto leading-relaxed font-sans">
+            Submit formal inquiries to campus concession operators, dining staff, or hostel residence administration.
           </p>
         </div>
       </section>
@@ -78,18 +79,18 @@ export default function ContactPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Department Directory */}
-          <div className="lg:col-span-5 space-y-4">
-            <h2 className="text-base font-bold text-slate-900 uppercase tracking-wider text-xs">
-              Campus Support Desks
+          <div className="lg:col-span-5 space-y-3">
+            <h2 className="font-mono text-[10px] font-bold text-zinc-500 uppercase tracking-wider pb-2 border-b border-[#E4DDCF]">
+              Campus Concession &amp; Authority Desks
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {departments.map((dept) => (
                 <div
                   key={dept.value}
-                  className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition"
+                  className="bg-white rounded-lg border border-[#E4DDCF] p-4 shadow-xs"
                 >
-                  <h3 className="font-bold text-slate-900 text-sm">{dept.title}</h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">{dept.description}</p>
+                  <h3 className="font-serif font-bold text-sm text-zinc-950">{dept.title}</h3>
+                  <p className="text-xs text-zinc-600 mt-1 leading-relaxed font-sans">{dept.description}</p>
                 </div>
               ))}
             </div>
@@ -97,18 +98,19 @@ export default function ContactPage() {
 
           {/* Contact Form */}
           <div className="lg:col-span-7">
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900 mb-2">Submit an Inquiry</h2>
-              <p className="text-xs text-slate-500 mb-6">
-                Your ticket will be routed directly to the designated department administrator.
-              </p>
+            <div className="bg-white rounded-lg border border-[#E4DDCF] p-6 sm:p-8 shadow-xs">
+              <div className="pb-4 mb-5 border-b border-[#E4DDCF]">
+                <h2 className="font-serif font-bold text-lg text-zinc-950">Lodge Official Service Inquiry</h2>
+                <p className="text-xs text-zinc-600 mt-0.5 font-sans">
+                  Inquiries are assigned a reference token and routed to the respective desk supervisor.
+                </p>
+              </div>
 
               {reference && (
                 <div className="mb-6">
                   <Alert
                     type="success"
-                    title="Inquiry Received"
-                    message={`Ticket #${reference.slice(0, 8)} has been registered. Our campus team will review and respond shortly.`}
+                    message={`Inquiry recorded successfully. Reference Token: #${reference.slice(0, 8).toUpperCase()}`}
                   />
                 </div>
               )}
@@ -122,7 +124,7 @@ export default function ContactPage() {
               <form onSubmit={submit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Your Full Name"
+                    label="Full Name"
                     name="name"
                     value={form.name}
                     onChange={update}
@@ -135,28 +137,28 @@ export default function ContactPage() {
                     name="email"
                     value={form.email}
                     onChange={update}
-                    placeholder="e.g. student@campus.edu"
+                    placeholder="student@campus.edu"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Student ID / Roll No"
+                    label="Student Roll / ID Number"
                     name="studentId"
                     value={form.studentId}
                     onChange={update}
-                    placeholder="e.g. 2024CS104"
+                    placeholder="e.g. 2026-CS-042"
                   />
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    <label className="block text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                       Target Department
                     </label>
                     <select
                       name="department"
                       value={form.department}
                       onChange={update}
-                      className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
+                      className="w-full text-xs px-3 py-2 rounded border border-[#E4DDCF] bg-white text-zinc-900 focus:outline-none focus:border-blue-900 font-mono"
                     >
                       {departments.map((d) => (
                         <option key={d.value} value={d.value}>
@@ -168,31 +170,31 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Your Message
+                  <label className="block text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
+                    Inquiry Statement
                   </label>
                   <textarea
                     name="message"
                     rows={4}
                     value={form.message}
                     onChange={update}
-                    placeholder="Describe your question or issue in detail..."
+                    placeholder="Describe your requisition query, counter pickup issue, or feedback..."
+                    className="w-full text-xs px-3 py-2 rounded border border-[#E4DDCF] bg-white text-zinc-900 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:border-blue-900 transition-colors placeholder:text-zinc-400 font-sans leading-relaxed"
                     required
-                    className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition placeholder:text-slate-400"
                   />
                 </div>
 
                 <div className="pt-2">
                   <Button
                     type="submit"
-                    variant="blue"
-                    size="lg"
+                    variant="primary"
+                    size="md"
                     loading={loading}
                     disabled={loading}
-                    className="w-full py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-xs"
+                    className="w-full text-xs font-mono font-bold py-2.5 flex items-center justify-center gap-2"
                   >
-                    <Send className="h-4 w-4" />
-                    <span>Send Inquiry</span>
+                    <Send className="h-3.5 w-3.5" />
+                    <span>Transmit Service Inquiry</span>
                   </Button>
                 </div>
               </form>

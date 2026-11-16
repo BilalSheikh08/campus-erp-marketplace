@@ -1,6 +1,7 @@
 /**
  * Campus Commons - Student Hostel Requisitions
- * Track dorm equipment requisitions, warden approval states, and delivery status.
+ * Residence Hall Requisition Docket Ledger:
+ * Room maintenance & equipment requests, warden review stamps, and cancellation options.
  */
 
 import { useEffect, useState } from 'react';
@@ -27,33 +28,33 @@ import {
 
 const STATUS_CONFIG = {
   submitted: {
-    label: 'Submitted',
-    color: 'bg-slate-100 text-slate-700 border-slate-200',
+    label: 'Docket Submitted',
+    color: 'bg-[#FAF8F3] text-zinc-700 border-[#E4DDCF]',
     icon: Clock,
   },
   pending_approval: {
-    label: 'Pending Warden Approval',
-    color: 'bg-amber-50 text-amber-700 border-amber-200',
+    label: 'Pending Warden Review',
+    color: 'bg-amber-50 text-amber-800 border-amber-300',
     icon: AlertCircle,
   },
   approved: {
-    label: 'Approved by Warden',
-    color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    label: 'Warden Approved',
+    color: 'bg-emerald-50 text-emerald-800 border-emerald-300',
     icon: CheckCircle,
   },
   rejected: {
-    label: 'Declined',
-    color: 'bg-rose-50 text-rose-700 border-rose-200',
+    label: 'Declined by Warden',
+    color: 'bg-red-50 text-red-800 border-red-300',
     icon: XCircle,
   },
   fulfilled: {
-    label: 'Delivered / Fulfilled',
-    color: 'bg-blue-50 text-blue-700 border-blue-200',
+    label: 'Fulfilled & Issued',
+    color: 'bg-blue-50 text-blue-900 border-blue-300',
     icon: Package,
   },
   cancelled: {
     label: 'Cancelled',
-    color: 'bg-slate-100 text-slate-500 border-slate-200',
+    color: 'bg-[#FAF8F3] text-zinc-500 border-[#E4DDCF]',
     icon: X,
   },
 };
@@ -99,7 +100,7 @@ export default function StudentHostelRequests() {
   };
 
   const handleCancel = async (id) => {
-    if (!window.confirm('Are you sure you want to cancel this requisition?')) return;
+    if (!window.confirm('Are you sure you want to cancel this requisition docket?')) return;
     try {
       setCancelling(id);
       await cancelHostelRequest(id);
@@ -122,119 +123,123 @@ export default function StudentHostelRequests() {
 
   const canCancel = (status) => ['submitted', 'pending_approval'].includes(status);
 
-  if (loading) return <LoadingSpinner message="Loading hostel requisitions..." />;
+  if (loading) return <LoadingSpinner message="Consulting residence hall requisition ledger..." />;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 pb-24 text-slate-900">
+    <div className="min-h-screen bg-[#F8F6F0] py-10 pb-24 text-zinc-900 font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-[#E4DDCF]">
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
-              <Building2 className="h-7 w-7 text-emerald-600" /> My Hostel Requisitions
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+              <Building2 className="h-3.5 w-3.5 text-emerald-800" />
+              <span>RESIDENCE SUPERINTENDENT · STUDENT REQUISITIONS</span>
+            </div>
+            <h1 className="font-serif text-3xl font-normal text-zinc-950 tracking-tight">
+              Hostel Requisitions &amp; Supply Ledger
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Track room mattresses, study lamps, cleaning kits, and warden verification.
+            <p className="text-xs sm:text-sm text-zinc-600 mt-1 font-sans">
+              Track room mattresses, study lamps, cleaning equipment, and warden decision stamps.
             </p>
           </div>
           <Link to="/marketplace/hostel_supply">
-            <Button variant="blue" size="sm" className="gap-1.5 font-bold">
-              <Plus size={16} /> New Supply Request
+            <Button variant="primary" size="sm" className="gap-1.5 text-xs font-semibold">
+              <Plus size={14} /> Requisition Room Supply
             </Button>
           </Link>
         </div>
 
         {error && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-800 text-xs p-3 rounded-xl mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-800 text-xs p-3 rounded mb-6 font-mono">
             {error}
           </div>
         )}
 
-        {/* Filters */}
-        <div className="flex gap-2 mb-6 flex-wrap">
+        {/* Status Filter Tabs */}
+        <div className="flex gap-1.5 mb-6 flex-wrap font-mono text-xs">
           {['all', 'submitted', 'pending_approval', 'approved', 'rejected', 'fulfilled', 'cancelled'].map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition cursor-pointer ${
+              className={`px-3 py-1.5 rounded text-xs transition cursor-pointer ${
                 filter === status
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                  ? 'bg-zinc-900 text-white font-semibold'
+                  : 'bg-white border border-[#E4DDCF] text-zinc-700 hover:bg-[#FAF8F3]'
               }`}
             >
-              {status.replace('_', ' ')}
+              {status === 'all' ? 'All Dockets' : status.replace('_', ' ')}
             </button>
           ))}
         </div>
 
         {filteredRequests.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center shadow-sm">
+          <div className="bg-white rounded-lg border border-[#E4DDCF] p-10 text-center shadow-xs">
             <EmptyState
-              icon={<Package className="mx-auto h-12 w-12 text-slate-300" />}
-              title="No hostel requisitions found"
+              icon={<Package className="mx-auto h-8 w-8 text-zinc-400" />}
+              title="No hostel requisitions on record"
               message="You haven't submitted any room equipment requests matching this filter."
               action={
                 <Link to="/marketplace/hostel_supply">
-                  <Button variant="blue" className="mt-4 font-bold">
-                    Browse Hostel Supplies
+                  <Button variant="primary" size="sm" className="mt-2 text-xs">
+                    Browse Hostel Supplies Catalog
                   </Button>
                 </Link>
               }
             />
           </div>
         ) : (
-          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+          <div className="bg-white rounded-lg border border-[#E4DDCF] overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+              <table className="w-full text-left text-xs font-sans">
+                <thead className="bg-[#FAF8F3] border-b border-[#E4DDCF] text-zinc-600 font-mono font-bold uppercase tracking-wider text-[11px]">
                   <tr>
-                    <th className="px-6 py-4">Request ID</th>
-                    <th className="px-6 py-4">Item</th>
-                    <th className="px-6 py-4">Qty</th>
-                    <th className="px-6 py-4">Room</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Submitted</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
+                    <th className="px-5 py-3">Docket ID</th>
+                    <th className="px-5 py-3">Equipment Item</th>
+                    <th className="px-5 py-3">Qty</th>
+                    <th className="px-5 py-3">Resident Room</th>
+                    <th className="px-5 py-3">Warden Decision</th>
+                    <th className="px-5 py-3">Submission</th>
+                    <th className="px-5 py-3 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#E4DDCF]">
                   {filteredRequests.map((req) => {
                     const statusConfig = STATUS_CONFIG[req.status] || STATUS_CONFIG.submitted;
                     const StatusIcon = statusConfig.icon;
                     return (
-                      <tr key={req.id} className="hover:bg-slate-50/70 transition">
-                        <td className="px-6 py-4 font-mono font-bold text-slate-900">
-                          #{req.id.slice(0, 8)}
+                      <tr key={req.id} className="hover:bg-[#FAF8F3] transition-colors">
+                        <td className="px-5 py-3.5 font-mono font-bold text-zinc-950">
+                          #{req.id.slice(0, 8).toUpperCase()}
                         </td>
-                        <td className="px-6 py-4 font-semibold text-slate-900">
+                        <td className="px-5 py-3.5 font-semibold text-zinc-900">
                           {req.listing?.title || 'Hostel Supply Item'}
                         </td>
-                        <td className="px-6 py-4 font-mono text-slate-700">{req.quantity}</td>
-                        <td className="px-6 py-4 text-slate-600">{req.room_number || 'Unspecified'}</td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${statusConfig.color}`}>
-                            <StatusIcon size={12} />
+                        <td className="px-5 py-3.5 font-mono text-zinc-800">{req.quantity}</td>
+                        <td className="px-5 py-3.5 font-mono text-zinc-600">{req.room_number || 'Unspecified'}</td>
+                        <td className="px-5 py-3.5">
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold border uppercase ${statusConfig.color}`}>
+                            <StatusIcon size={11} />
                             <span>{statusConfig.label}</span>
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-slate-400">
+                        <td className="px-5 py-3.5 font-mono text-zinc-500">
                           {new Date(req.created_at).toLocaleDateString()}
                         </td>
-                        <td className="px-6 py-4 text-right space-x-2">
+                        <td className="px-5 py-3.5 text-right space-x-1.5">
                           <button
                             onClick={() => handleViewDetail(req.id)}
-                            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition cursor-pointer"
-                            title="View Details"
+                            className="p-1 text-zinc-600 hover:text-blue-900 hover:bg-[#FAF8F3] rounded border border-[#E4DDCF] transition cursor-pointer"
+                            title="Inspect Docket"
                           >
-                            <Eye size={16} />
+                            <Eye size={14} />
                           </button>
                           {canCancel(req.status) && (
                             <button
                               onClick={() => handleCancel(req.id)}
                               disabled={cancelling === req.id}
-                              className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition cursor-pointer disabled:opacity-50"
-                              title="Cancel Request"
+                              className="p-1 text-red-700 hover:text-red-900 hover:bg-red-50 rounded border border-red-200 transition cursor-pointer disabled:opacity-50"
+                              title="Cancel Requisition"
                             >
-                              <X size={16} />
+                              <X size={14} />
                             </button>
                           )}
                         </td>
@@ -247,66 +252,66 @@ export default function StudentHostelRequests() {
           </div>
         )}
 
-        {/* Request Detail Modal with Dark Backdrop */}
+        {/* Request Detail Modal */}
         {selectedRequest && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs animate-in fade-in duration-100"
             onClick={(e) => {
               if (e.target === e.currentTarget) setSelectedRequest(null);
             }}
           >
-            <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
-              <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+            <div className="bg-white rounded-lg max-w-lg w-full shadow-lg border border-[#E4DDCF] overflow-hidden transform transition-all font-sans">
+              <div className="px-5 py-3.5 bg-[#18181B] text-white flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-sm text-white">Hostel Requisition Detail</h3>
-                  <p className="text-[11px] text-slate-400">ID: #{selectedRequest.id.slice(0, 8)}</p>
+                  <h3 className="font-serif font-bold text-sm text-white">Residence Requisition Docket</h3>
+                  <p className="text-[11px] font-mono text-zinc-400">DOCKET #{selectedRequest.id.slice(0, 8).toUpperCase()}</p>
                 </div>
                 <button
                   onClick={() => setSelectedRequest(null)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg transition cursor-pointer"
+                  className="p-1 text-zinc-400 hover:text-white rounded transition cursor-pointer"
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               </div>
 
-              <div className="p-6 space-y-4 text-xs">
+              <div className="p-5 space-y-4 text-xs">
                 {detailLoading ? (
-                  <LoadingSpinner message="Loading request..." />
+                  <LoadingSpinner message="Consulting requisition details..." />
                 ) : detailError ? (
-                  <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-800 rounded font-mono">
                     {detailError}
                   </div>
                 ) : (
                   <>
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center justify-between pb-3 border-b border-[#E4DDCF]">
                       <div>
-                        <p className="font-bold text-base text-slate-900">
+                        <p className="font-serif font-bold text-base text-zinc-950">
                           {selectedRequest.listing?.title || 'Hostel Supply'}
                         </p>
-                        <p className="text-slate-500">Room: {selectedRequest.room_number || 'Not specified'}</p>
+                        <p className="text-zinc-600 font-mono text-xs">Resident Room: {selectedRequest.room_number || 'Unassigned'}</p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold border ${STATUS_CONFIG[selectedRequest.status]?.color}`}>
+                      <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${STATUS_CONFIG[selectedRequest.status]?.color}`}>
                         {STATUS_CONFIG[selectedRequest.status]?.label || selectedRequest.status}
                       </span>
                     </div>
 
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                    <div className="bg-[#FAF8F3] p-4 rounded border border-[#E4DDCF] space-y-2 font-mono">
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Requested Quantity:</span>
-                        <span className="font-bold text-slate-900">{selectedRequest.quantity} unit(s)</span>
+                        <span className="text-zinc-500">Requested Quantity:</span>
+                        <span className="font-bold text-zinc-900">{selectedRequest.quantity} unit(s)</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Submitted Date:</span>
-                        <span className="font-mono text-slate-700">
+                        <span className="text-zinc-500">Submission Timestamp:</span>
+                        <span className="text-zinc-800">
                           {new Date(selectedRequest.created_at).toLocaleString()}
                         </span>
                       </div>
                       {selectedRequest.warden_notes && (
-                        <div className="pt-2 border-t border-slate-200 mt-2">
-                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
-                            Warden Feedback Note:
+                        <div className="pt-2 border-t border-[#E4DDCF] mt-2 font-sans">
+                          <span className="text-[10px] font-mono uppercase font-bold text-zinc-500 block mb-1">
+                            Warden Superintendent Remarks:
                           </span>
-                          <p className="text-slate-800 bg-white p-2.5 rounded-xl border border-slate-200">
+                          <p className="text-zinc-900 bg-white p-2.5 rounded border border-[#E4DDCF] text-xs">
                             {selectedRequest.warden_notes}
                           </p>
                         </div>
@@ -316,11 +321,11 @@ export default function StudentHostelRequests() {
                     {canCancel(selectedRequest.status) && (
                       <Button
                         variant="danger"
-                        className="w-full py-2.5 rounded-xl font-bold"
+                        className="w-full py-2 rounded text-xs font-semibold"
                         onClick={() => handleCancel(selectedRequest.id)}
                         disabled={cancelling === selectedRequest.id}
                       >
-                        Cancel Requisition
+                        Cancel Requisition Docket
                       </Button>
                     )}
                   </>

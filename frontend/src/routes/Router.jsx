@@ -2,7 +2,7 @@
  * Main application router with all routes and navigation.
  */
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, lazy, Suspense } from 'react';
 import useAuthStore from '../store/authStore';
 import MainLayout from '../layouts/MainLayout';
@@ -52,6 +52,24 @@ const BookTransactionsPage = lazy(() => import('../pages/books/BookTransactionsP
 const VendorAnalyticsPage = lazy(() => import('../pages/analytics/VendorAnalyticsPage'));
 const AdminAnalyticsPage = lazy(() => import('../pages/analytics/AdminAnalyticsPage'));
 
+function RootHandler() {
+  const { user, isAuthenticated } = useAuthStore();
+  if (isAuthenticated && user?.role === 'vendor') {
+    return <Navigate to="/vendor/dashboard" replace />;
+  }
+  if (isAuthenticated && user?.role === 'warden') {
+    return <Navigate to="/warden/dashboard" replace />;
+  }
+  if (isAuthenticated && user?.role === 'admin') {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  return (
+    <MainLayout>
+      <HomePage />
+    </MainLayout>
+  );
+}
+
 export default function Router() {
   const { isLoading, initializeAuth } = useAuthStore();
 
@@ -86,14 +104,10 @@ export default function Router() {
           }
         />
 
-        {/* Home Page - works for both authenticated and unauthenticated */}
+        {/* Home Page - Role-aware dispatch for staff vs students/guests */}
         <Route
           path="/"
-          element={
-            <MainLayout>
-              <HomePage />
-            </MainLayout>
-          }
+          element={<RootHandler />}
         />
 
         {/* Public Informational Routes */}
@@ -155,9 +169,9 @@ export default function Router() {
           path="/cart"
           element={
             <MainLayout>
-              <ProtectedRoute>
+              <RoleRoute requiredRole="student">
                 <CartPage />
-              </ProtectedRoute>
+              </RoleRoute>
             </MainLayout>
           }
         />
@@ -332,9 +346,9 @@ export default function Router() {
           path="/become-vendor"
           element={
             <MainLayout>
-              <ProtectedRoute>
+              <RoleRoute requiredRole="student">
                 <VendorApplicationPage />
-              </ProtectedRoute>
+              </RoleRoute>
             </MainLayout>
           }
         />
@@ -386,9 +400,9 @@ export default function Router() {
           path="/hostel-requests"
           element={
             <MainLayout>
-              <ProtectedRoute>
+              <RoleRoute requiredRole="student">
                 <StudentHostelRequests />
-              </ProtectedRoute>
+              </RoleRoute>
             </MainLayout>
           }
         />

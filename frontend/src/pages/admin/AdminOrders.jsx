@@ -1,6 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Filter, Search, ArrowLeft, ShoppingBag, KeyRound, ExternalLink } from 'lucide-react';
+/**
+ * Campus Commons - Order Surveillance Ledger
+ * Central Registrar Transaction Surveillance:
+ * Campus-wide transaction audit, real-time status transitions, and pickup PIN records.
+ */
+
+import { useEffect, useState, Fragment } from 'react';
+import { Link } from 'react-router-dom';
+import { ChevronDown, Filter, Search, ArrowLeft, ShoppingBag, KeyRound, ExternalLink, RefreshCw } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import { fetchOrders, fetchOrder, transitionOrder } from '../../api/orders';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -9,15 +15,14 @@ import Button from '../../components/shared/Button';
 import { formatPrice } from '../../utils/formatters';
 
 const ORDER_STATUS_BADGE = {
-  placed: 'bg-amber-50 text-amber-700 border-amber-200',
-  confirmed: 'bg-blue-50 text-blue-700 border-blue-200',
-  ready: 'bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse',
-  completed: 'bg-slate-100 text-slate-700 border-slate-200',
-  cancelled: 'bg-rose-50 text-rose-700 border-rose-200',
+  placed: 'bg-amber-50 text-amber-900 border-amber-300',
+  confirmed: 'bg-blue-50 text-blue-900 border-blue-300',
+  ready: 'bg-emerald-50 text-emerald-900 border-emerald-300',
+  completed: 'bg-[#FAF8F3] text-zinc-700 border-[#E4DDCF]',
+  cancelled: 'bg-rose-50 text-rose-900 border-rose-300',
 };
 
 export default function AdminOrders() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -98,322 +103,240 @@ export default function AdminOrders() {
     const transitions = {
       placed: ['confirmed', 'cancelled'],
       confirmed: ['ready', 'cancelled'],
-      ready: ['completed'],
+      ready: ['completed', 'cancelled'],
       completed: [],
       cancelled: [],
     };
     return transitions[currentStatus] || [];
   };
 
-  const getStatusLabel = (status) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
-  };
-
-  if (user?.role !== 'admin') {
-    return (
-      <div className="min-h-screen bg-slate-50 py-10 px-4">
-        <div className="max-w-md mx-auto bg-white p-8 rounded-2xl border border-slate-200 text-center">
-          <Alert type="error" message="Access restricted to campus platform administrators." />
-          <Button onClick={() => navigate('/')} className="mt-4 w-full">
-            Back to Home
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   if (isLoading) {
-    return <LoadingSpinner message="Auditing campus orders ledger..." />;
+    return <LoadingSpinner message="Consulting central order surveillance ledger..." />;
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 pb-20 text-slate-900">
+    <div className="min-h-screen bg-[#F8F6F0] text-zinc-900 py-10 pb-24 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button
-          type="button"
-          onClick={() => navigate('/admin/dashboard')}
-          className="mb-5 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to Governance Console
-        </button>
+        {/* Masthead */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-5 border-b border-[#E4DDCF]">
+          <div>
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+              <ShoppingBag className="h-3.5 w-3.5 text-zinc-700" />
+              <span>CENTRAL REGISTRAR · TRANSACTION SURVEILLANCE LEDGER</span>
+            </div>
+            <h1 className="font-serif text-3xl sm:text-4xl font-normal text-zinc-950 tracking-tight">
+              Campus Order Surveillance
+            </h1>
+            <p className="text-zinc-600 text-xs sm:text-sm mt-1 font-sans">
+              Audit live commercial transactions, monitor pickup tokens, and oversee concession fulfillment.
+            </p>
+          </div>
 
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
-            <ShoppingBag className="h-7 w-7 text-blue-600" />
-            <span>Platform Orders Surveillance</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Cross-vendor fulfillment timeline, counter pickup tokens, and settlement audits.
-          </p>
+          <div className="flex items-center gap-2.5">
+            <Link to="/admin/dashboard">
+              <Button variant="outline" size="sm" className="text-xs flex items-center gap-1.5">
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span>Governance Console</span>
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadOrders}
+              className="text-xs p-2"
+              title="Refresh ledger"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
 
         {error && (
-          <div className="mb-4">
+          <div className="mb-6">
             <Alert type="error" message={error} dismissible onClose={() => setError(null)} />
           </div>
         )}
-
         {transitionError && (
-          <div className="mb-4">
-            <Alert
-              type="error"
-              message={transitionError}
-              dismissible
-              onClose={() => setTransitionError(null)}
-            />
+          <div className="mb-6">
+            <Alert type="error" message={transitionError} dismissible onClose={() => setTransitionError(null)} />
           </div>
         )}
 
-        {/* Stats Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-          <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm text-center">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Throughput</p>
-            <p className="text-2xl font-black text-slate-900 mt-1 font-mono">{orders.length}</p>
+        {/* Filter Bar */}
+        <div className="bg-white rounded-lg p-4 border border-[#E4DDCF] shadow-xs mb-6 space-y-3">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by order ID, resident name, or vendor concession..."
+                className="w-full pl-10 pr-3.5 py-2 text-xs font-sans rounded border border-[#E4DDCF] bg-[#FAF8F3] text-zinc-900 focus:outline-none focus:border-blue-900 focus:bg-white placeholder:text-zinc-400"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="h-3.5 w-3.5 text-zinc-400" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="text-xs font-mono px-3 py-2 rounded border border-[#E4DDCF] bg-[#FAF8F3] text-zinc-900 focus:outline-none focus:border-blue-900"
+              >
+                <option value="all">All Statuses ({orders.length})</option>
+                <option value="placed">Placed</option>
+                <option value="confirmed">Confirmed / Preparing</option>
+                <option value="ready">Ready at Counter</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm text-center">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-amber-600">Placed</p>
-            <p className="text-2xl font-black text-amber-600 mt-1 font-mono">
-              {orders.filter((o) => o.status === 'placed').length}
-            </p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm text-center">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-blue-600">In Prep</p>
-            <p className="text-2xl font-black text-blue-600 mt-1 font-mono">
-              {orders.filter((o) => o.status === 'confirmed').length}
-            </p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm text-center">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-600">At Counter</p>
-            <p className="text-2xl font-black text-emerald-600 mt-1 font-mono">
-              {orders.filter((o) => o.status === 'ready').length}
-            </p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm text-center">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Fulfilled</p>
-            <p className="text-2xl font-black text-slate-700 mt-1 font-mono">
-              {orders.filter((o) => o.status === 'completed').length}
-            </p>
-          </div>
-        </div>
-
-        {/* Search & Filter Bar */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm mb-6 flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search by order ID, student name, or merchant..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm border border-slate-200 bg-white rounded-lg text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 placeholder:text-slate-400"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-slate-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-xs sm:text-sm border border-slate-200 bg-white rounded-lg text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-            >
-              <option value="all">All Order Statuses</option>
-              <option value="placed">Placed (Pending Kitchen)</option>
-              <option value="confirmed">Confirmed (In Prep)</option>
-              <option value="ready">Ready for Counter Pickup</option>
-              <option value="completed">Completed & Settled</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+          <div className="text-[11px] font-mono text-zinc-500">
+            Showing <strong className="text-zinc-900">{filteredOrders.length}</strong> of {orders.length} campus transaction dockets
           </div>
         </div>
 
         {/* Orders Table */}
-        <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-          {filteredOrders.length === 0 ? (
-            <div className="p-16 text-center text-slate-400 text-xs sm:text-sm">
-              <ShoppingBag className="h-8 w-8 text-slate-300 mx-auto mb-2" />
-              <div className="font-semibold text-slate-700">No orders recorded</div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {orders.length === 0 ? 'No campus orders placed yet' : 'No orders matching current filter criteria'}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-700">
-                <thead className="bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div className="bg-white rounded-lg border border-[#E4DDCF] shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#FAF8F3] border-b border-[#E4DDCF] text-zinc-500 font-mono text-[10px] font-bold uppercase tracking-wider">
+                <tr>
+                  <th className="px-5 py-3.5">Docket ID</th>
+                  <th className="px-5 py-3.5">Concession / Vendor</th>
+                  <th className="px-5 py-3.5">Resident Student</th>
+                  <th className="px-5 py-3.5">Total Settlement</th>
+                  <th className="px-5 py-3.5">Fulfillment Status</th>
+                  <th className="px-5 py-3.5">4-Digit PIN</th>
+                  <th className="px-5 py-3.5 text-right">Details</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E4DDCF]">
+                {filteredOrders.length === 0 ? (
                   <tr>
-                    <th className="px-5 py-3.5">Order Token</th>
-                    <th className="px-4 py-3.5">Buyer (Student)</th>
-                    <th className="px-4 py-3.5">Campus Merchant</th>
-                    <th className="px-4 py-3.5">Amount</th>
-                    <th className="px-4 py-3.5">Status</th>
-                    <th className="px-4 py-3.5">Date</th>
-                    <th className="px-5 py-3.5 text-right">Action</th>
+                    <td colSpan={7} className="px-5 py-14 text-center text-zinc-400">
+                      <ShoppingBag className="h-8 w-8 text-zinc-300 mx-auto mb-2" />
+                      <p className="font-serif font-bold text-zinc-800 text-sm">No transaction records found</p>
+                      <p className="text-xs text-zinc-500 mt-0.5 font-sans">
+                        No orders match the current filter selection.
+                      </p>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredOrders.map((order) => {
+                ) : (
+                  filteredOrders.map((order) => {
                     const isExpanded = expandedOrder === order.id;
-                    const badge = ORDER_STATUS_BADGE[order.status] || 'bg-slate-100 text-slate-700';
+                    const availableTransitions = getAvailableTransitions(order.status);
 
                     return (
-                      <tr key={order.id} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="px-5 py-3.5">
-                          <span className="font-mono font-bold text-xs text-slate-900 block">
-                            #{order.id.slice(0, 8).toUpperCase()}
-                          </span>
-                          {order.pickup_pin && (
-                            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mt-0.5">
-                              <KeyRound className="h-2.5 w-2.5" /> PIN: {order.pickup_pin}
+                      <Fragment key={order.id}>
+                        <tr className="hover:bg-[#FAF8F3]/60 transition-colors">
+                          <td className="px-5 py-3.5 font-mono">
+                            <Link
+                              to={`/orders/${order.id}`}
+                              className="font-bold text-zinc-950 hover:text-blue-900 transition-colors inline-flex items-center gap-1"
+                            >
+                              <span>#{order.id.slice(0, 8).toUpperCase()}</span>
+                              <ExternalLink className="h-3 w-3 text-zinc-400" />
+                            </Link>
+                            <span className="text-[10px] text-zinc-400 block mt-0.5">
+                              {new Date(order.created_at).toLocaleDateString()}
                             </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <div className="font-semibold text-slate-900 text-xs sm:text-sm">
-                            {order.student_name || 'Campus Student'}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3.5 text-xs text-slate-600 font-medium">
-                          {order.vendor_name || 'Concession'}
-                        </td>
-                        <td className="px-4 py-3.5 font-bold font-mono text-slate-900 text-xs sm:text-sm">
-                          {formatPrice(order.total_amount || order.total_price)}
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <span
-                            className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badge}`}
-                          >
-                            {getStatusLabel(order.status)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3.5 text-slate-400 font-mono text-xs">
-                          {new Date(order.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="px-5 py-3.5 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <span className="font-serif font-bold text-zinc-950 text-sm block">
+                              {order.vendor_name || 'Campus Concession'}
+                            </span>
+                            <span className="text-[10px] font-mono text-zinc-500 capitalize">
+                              {order.category_type || 'General'}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3.5 font-sans">
+                            <span className="font-semibold text-zinc-900 block">
+                              {order.student_name || 'Resident'}
+                            </span>
+                            <span className="text-[10px] font-mono text-zinc-500">
+                              {order.student_email || '—'}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3.5 font-mono font-bold text-zinc-950 text-sm">
+                            {formatPrice(order.total_amount)}
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${
+                                ORDER_STATUS_BADGE[order.status] || 'bg-[#FAF8F3] text-zinc-700 border-[#E4DDCF]'
+                              }`}
+                            >
+                              {order.status}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3.5">
+                            {order.pickup_pin ? (
+                              <span className="px-2 py-0.5 rounded bg-amber-50 border border-amber-300 text-amber-900 font-mono text-xs font-bold inline-flex items-center gap-1">
+                                <KeyRound className="h-3 w-3 text-amber-700" />
+                                <span>{order.pickup_pin}</span>
+                              </span>
+                            ) : (
+                              <span className="text-zinc-400 font-mono">—</span>
+                            )}
+                          </td>
+                          <td className="px-5 py-3.5 text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
-                              className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1 text-xs"
+                              className="text-xs p-1.5 ml-auto"
+                              title="Expand order audit"
                             >
                               <ChevronDown
-                                className={`h-3.5 w-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                className={`h-3.5 w-3.5 text-zinc-600 transition-transform ${
+                                  isExpanded ? 'rotate-180' : ''
+                                }`}
                               />
-                              Audit
-                            </button>
-                            <button
-                              onClick={() => navigate(`/orders/${order.id}`)}
-                              className="p-1 text-slate-400 hover:text-slate-600"
-                              title="Full Order Receipt"
-                            >
-                              <ExternalLink className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                            </Button>
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr className="bg-[#FAF8F3] border-b border-[#E4DDCF]">
+                            <td colSpan={7} className="px-5 py-3">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                <div>
+                                  <span className="text-[10px] font-mono font-bold uppercase text-zinc-500">Docket Items:</span>
+                                  <div className="text-xs text-zinc-800 mt-1 space-y-0.5 font-mono">
+                                    {(order.items || []).map((it, idx) => (
+                                      <p key={idx}>• {it.title} × {it.quantity} ({formatPrice(it.unit_price)})</p>
+                                    ))}
+                                  </div>
+                                </div>
+                                {availableTransitions.length > 0 && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-mono text-zinc-500 uppercase">Transition Status:</span>
+                                    {availableTransitions.map((st) => (
+                                      <Button
+                                        key={st}
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={transitioningOrder === order.id}
+                                        onClick={() => handleTransition(order.id, st)}
+                                        className="text-[10px] font-mono uppercase px-2 py-1"
+                                      >
+                                        Mark {st}
+                                      </Button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
                     );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Expanded Order Audit Drawer */}
-        {expandedOrder && (
-          <div className="mt-6 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm text-xs">
-            {filteredOrders.find((o) => o.id === expandedOrder) && (
-              <>
-                <div className="mb-4 pb-4 border-b border-slate-100 flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-900">
-                    Order Audit Specification #{expandedOrder.slice(0, 8).toUpperCase()}
-                  </h3>
-                  <button
-                    onClick={() => setExpandedOrder(null)}
-                    className="text-slate-400 hover:text-slate-700 text-xs font-medium"
-                  >
-                    Close inspection
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 mb-4">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Student Buyer</span>
-                    <span className="font-bold text-slate-900">
-                      {filteredOrders.find((o) => o.id === expandedOrder)?.student_name || 'N/A'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Merchant Store</span>
-                    <span className="font-bold text-slate-900">
-                      {filteredOrders.find((o) => o.id === expandedOrder)?.vendor_name || 'N/A'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Settlement Total</span>
-                    <span className="font-bold font-mono text-emerald-700 text-sm">
-                      {formatPrice(filteredOrders.find((o) => o.id === expandedOrder)?.total_amount || filteredOrders.find((o) => o.id === expandedOrder)?.total_price)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Pickup Token PIN</span>
-                    <span className="font-mono font-black text-blue-600 text-sm">
-                      {filteredOrders.find((o) => o.id === expandedOrder)?.pickup_pin || 'VERIFIED'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Items */}
-                {filteredOrders.find((o) => o.id === expandedOrder)?.items &&
-                  filteredOrders.find((o) => o.id === expandedOrder)?.items.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="font-bold text-slate-700 text-[11px] uppercase tracking-wider mb-2">Item Breakdown</h4>
-                      <div className="space-y-1.5 p-3 bg-white rounded-lg border border-slate-100">
-                        {filteredOrders
-                          .find((o) => o.id === expandedOrder)
-                          ?.items.map((item, idx) => (
-                            <div key={idx} className="flex justify-between py-1 text-slate-800 border-b border-slate-50 last:border-0 text-xs">
-                              <span>
-                                {item.listing_title} × <strong className="font-mono">{item.quantity}</strong>
-                              </span>
-                              <span className="font-mono font-bold">{formatPrice(item.price_at_order * item.quantity)}</span>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-
-                {/* Status Transitions */}
-                {getAvailableTransitions(
-                  filteredOrders.find((o) => o.id === expandedOrder)?.status
-                ).length > 0 && (
-                  <div className="pt-3 border-t border-slate-100">
-                    <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      Administrative Override Action
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {getAvailableTransitions(
-                        filteredOrders.find((o) => o.id === expandedOrder)?.status
-                      ).map((newStatus) => (
-                        <Button
-                          key={newStatus}
-                          onClick={() => handleTransition(expandedOrder, newStatus)}
-                          disabled={transitioningOrder === expandedOrder}
-                          size="sm"
-                          variant="outline"
-                          className="text-xs"
-                        >
-                          {transitioningOrder === expandedOrder
-                            ? 'Transitioning...'
-                            : `Mark as ${getStatusLabel(newStatus)}`}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
+                  })
                 )}
-              </>
-            )}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

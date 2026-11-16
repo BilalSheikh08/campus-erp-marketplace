@@ -1,11 +1,12 @@
 /**
  * Campus Commons - Student Used Books Peer-to-Peer Exchange
- * Browse curriculum textbooks, filter by condition and price, and list books for sale.
+ * Redesigned with academic folio & student exchange aesthetic:
+ * warm paper background, monospace price & course tags, and clear condition stamps.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Plus, Search, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { BookOpen, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchBooks } from '../../services/booksApi';
 import useAuthStore from '../../store/authStore';
 import Alert from '../../components/shared/Alert';
@@ -15,11 +16,11 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import SafeImage from '../../components/shared/SafeImage';
 
 const CONDITIONS = [
-  ['new', 'New'],
+  ['new', 'Brand New'],
   ['like_new', 'Like New'],
-  ['good', 'Good'],
-  ['fair', 'Fair'],
-  ['worn', 'Worn'],
+  ['good', 'Good Condition'],
+  ['fair', 'Fair / Readable'],
+  ['worn', 'Marked / Worn'],
 ];
 
 function resultsFrom(data) {
@@ -71,36 +72,35 @@ export default function BookBrowsePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-24">
+    <div className="min-h-screen bg-[#F8F6F0] text-zinc-900 pb-24 font-sans">
       {/* Header Banner */}
-      <div className="bg-white border-b border-slate-200 pt-10 pb-8 shadow-xs">
+      <div className="bg-[#FAF8F3] border-b border-[#E4DDCF] pt-8 pb-6 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold mb-2.5 border border-purple-200">
-              <Sparkles className="h-3.5 w-3.5 text-purple-600" />
-              <span>0% Commission • Student-to-Student Exchange</span>
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+              <BookOpen className="h-3.5 w-3.5 text-purple-900" />
+              <span>STUDENT DESK · PEER-TO-PEER ACADEMIC EXCHANGE</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
-              <BookOpen className="h-8 w-8 text-purple-600" />
-              <span>Used Books Exchange</span>
+            <h1 className="font-serif text-3xl sm:text-4xl font-normal text-zinc-950 tracking-tight">
+              Used Textbooks Exchange
             </h1>
-            <p className="text-slate-500 mt-1 text-xs sm:text-sm max-w-xl">
-              Buy and sell engineering textbooks, exam preparation guides, and reference manuals directly with peers across campus.
+            <p className="text-zinc-600 mt-1 text-xs sm:text-sm max-w-xl font-sans">
+              Buy and sell engineering course texts, examination preparation sets, and reference manuals directly with campus peers.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             {user?.role === 'student' ? (
               <Link to="/books/new">
-                <Button variant="blue" className="flex items-center gap-2 py-2.5 px-5 rounded-2xl font-bold shadow-xs">
-                  <Plus className="h-4 w-4" />
+                <Button variant="primary" size="md" className="flex items-center gap-1.5 text-xs font-semibold">
+                  <Plus className="h-3.5 w-3.5" />
                   <span>List a Book for Sale</span>
                 </Button>
               </Link>
             ) : !user ? (
               <Link to="/login">
-                <Button variant="blue" className="flex items-center gap-2 py-2.5 px-5 rounded-2xl font-bold shadow-xs">
-                  <Plus className="h-4 w-4" />
+                <Button variant="primary" size="md" className="flex items-center gap-1.5 text-xs font-semibold">
+                  <Plus className="h-3.5 w-3.5" />
                   <span>Sign In to Sell Books</span>
                 </Button>
               </Link>
@@ -117,23 +117,23 @@ export default function BookBrowsePage() {
         )}
 
         {/* Filter Card */}
-        <form onSubmit={onSubmit} className="bg-white rounded-3xl border border-slate-200 p-4 mb-8 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 items-center">
+        <form onSubmit={onSubmit} className="bg-white rounded-lg border border-[#E4DDCF] p-3.5 mb-8 shadow-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2.5 items-center">
             <div className="lg:col-span-2 relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
               <input
                 name="search"
                 value={filters.search}
                 onChange={updateFilter}
                 placeholder="Search title, author, course code..."
-                className="w-full rounded-2xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50 transition"
+                className="w-full rounded border border-[#E4DDCF] pl-9 pr-3 py-1.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-blue-900 bg-[#FAF8F3] font-sans"
               />
             </div>
             <select
               name="condition"
               value={filters.condition}
               onChange={updateFilter}
-              className="rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
+              className="rounded border border-[#E4DDCF] px-2.5 py-1.5 text-xs text-zinc-800 bg-[#FAF8F3] focus:outline-none focus:border-blue-900 cursor-pointer font-sans"
             >
               <option value="">Any Condition</option>
               {CONDITIONS.map(([value, label]) => (
@@ -149,8 +149,8 @@ export default function BookBrowsePage() {
               type="number"
               min="0"
               step="0.01"
-              placeholder="Min Price (₹)"
-              className="rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50"
+              placeholder="Min Rate (₹)"
+              className="rounded border border-[#E4DDCF] px-2.5 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-blue-900 bg-[#FAF8F3] font-mono"
             />
             <div className="flex gap-2">
               <input
@@ -160,10 +160,10 @@ export default function BookBrowsePage() {
                 type="number"
                 min="0"
                 step="0.01"
-                placeholder="Max Price (₹)"
-                className="min-w-0 flex-1 rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-slate-50"
+                placeholder="Max Rate (₹)"
+                className="min-w-0 flex-1 rounded border border-[#E4DDCF] px-2.5 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-blue-900 bg-[#FAF8F3] font-mono"
               />
-              <Button type="submit" variant="blue" className="font-bold px-5 py-2.5 rounded-2xl text-xs sm:text-sm">
+              <Button type="submit" variant="primary" size="sm" className="text-xs font-semibold px-4">
                 Filter
               </Button>
             </div>
@@ -172,13 +172,13 @@ export default function BookBrowsePage() {
 
         {/* Results */}
         {loading ? (
-          <LoadingSpinner message="Scanning textbook catalog..." />
+          <LoadingSpinner message="Scanning textbook registry..." />
         ) : books.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center shadow-sm">
+          <div className="bg-white rounded-lg border border-[#E4DDCF] p-10 text-center shadow-xs">
             <EmptyState
-              icon={<BookOpen className="mx-auto h-12 w-12 text-slate-300" />}
+              icon={<BookOpen className="mx-auto h-8 w-8 text-zinc-400" />}
               title="No course books found"
-              message="Try broadening your search term or adjusting your price filters."
+              message="Try broadening your search term or adjusting your condition and rate filters."
             />
           </div>
         ) : (
@@ -188,46 +188,46 @@ export default function BookBrowsePage() {
                 <Link
                   key={book.id}
                   to={`/books/${book.id}`}
-                  className="bg-white rounded-3xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col group"
+                  className="bg-white rounded-lg border border-[#E4DDCF] hover:border-zinc-400 transition-colors shadow-xs overflow-hidden flex flex-col group"
                 >
-                  <div className="relative aspect-[4/3] bg-slate-50 overflow-hidden">
+                  <div className="relative aspect-[4/3] bg-[#FAF8F3] overflow-hidden border-b border-[#E4DDCF]">
                     <SafeImage
                       src={book.image_url}
                       alt={book.title}
                       domain="book"
                       category="book"
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="h-full w-full object-cover group-hover:scale-102 transition-transform duration-200"
                     />
-                    <span className="absolute top-3 left-3 z-10 text-[10px] font-bold px-2.5 py-1 rounded-md bg-white/95 text-purple-700 border border-purple-200 uppercase tracking-wider shadow-xs">
+                    <span className="absolute top-2.5 left-2.5 z-10 text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-white text-purple-900 border border-purple-300 uppercase tracking-wider shadow-xs">
                       {book.condition?.replace('_', ' ')}
                     </span>
                   </div>
 
-                  <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div className="p-4 flex-1 flex flex-col justify-between">
                     <div>
-                      <h2 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 text-sm leading-snug">
+                      <h2 className="font-serif text-sm font-bold text-zinc-950 group-hover:text-blue-900 transition-colors line-clamp-2 leading-snug">
                         {book.title}
                       </h2>
-                      <p className="text-xs text-slate-500 line-clamp-1 mt-1 mb-2">
+                      <p className="text-xs font-mono text-zinc-500 line-clamp-1 mt-1 mb-2">
                         {book.author ? `by ${book.author}` : 'Author unspecified'}
                       </p>
 
                       {book.subject && (
-                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-medium mb-2.5">
+                        <span className="inline-block px-2 py-0.5 rounded border border-[#E4DDCF] bg-[#FAF8F3] text-zinc-700 text-[10px] font-mono mb-2">
                           {book.subject}
                         </span>
                       )}
                     </div>
 
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-auto">
+                    <div className="pt-3 border-t border-[#E4DDCF] flex items-center justify-between mt-auto">
                       <div>
-                        <span className="text-[10px] text-slate-400 block uppercase font-bold">Student Price</span>
-                        <span className="text-base font-extrabold text-slate-900 font-mono">
+                        <span className="text-[9px] font-mono text-zinc-400 block uppercase font-bold">Peer Price</span>
+                        <span className="text-sm font-bold text-zinc-950 font-mono">
                           {money(book.price)}
                         </span>
                       </div>
-                      <span className="text-xs font-semibold text-purple-600 group-hover:underline">
-                        View Details →
+                      <span className="text-xs font-mono text-blue-900 group-hover:underline">
+                        Details →
                       </span>
                     </div>
                   </div>
@@ -237,7 +237,7 @@ export default function BookBrowsePage() {
 
             {/* Pagination */}
             {(next || previous) && (
-              <div className="mt-12 flex items-center justify-between border-t border-slate-200 pt-6">
+              <div className="mt-10 flex items-center justify-between border-t border-[#E4DDCF] pt-6 font-mono text-xs">
                 <Button
                   variant="outline"
                   size="sm"
@@ -245,12 +245,12 @@ export default function BookBrowsePage() {
                   disabled={!previous}
                   className="gap-1.5"
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  Previous Folio
                 </Button>
 
-                <span className="text-xs font-mono font-semibold text-slate-500">
-                  Page {page}
+                <span className="text-xs font-semibold text-zinc-600">
+                  Folio {page}
                 </span>
 
                 <Button
@@ -260,8 +260,8 @@ export default function BookBrowsePage() {
                   disabled={!next}
                   className="gap-1.5"
                 >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
+                  Next Folio
+                  <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
             )}

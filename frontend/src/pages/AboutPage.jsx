@@ -1,6 +1,7 @@
 /**
  * Campus Commons - Platform Architecture & Engineering Overview
- * Deep-dive into technical architecture, four domains, and platform mission.
+ * University Central Exchange Technical Overview & Architectural Charter:
+ * Concurrency controls, database row-locks, role isolation, and academic clearinghouse principles.
  */
 
 import { Link } from 'react-router-dom';
@@ -11,6 +12,7 @@ import {
   Database,
   Code2,
   Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import Button from '../components/shared/Button';
 
@@ -18,114 +20,104 @@ export default function AboutPage() {
   const pillars = [
     {
       icon: Layers,
-      title: 'Unified Campus Engine',
+      title: 'Unified Clearinghouse Engine',
       description:
-        'Rather than maintaining fragmented silos for dining, stationery, and dorm logistics, our clearinghouse unifies listings, orders, atomic inventory, and verification into one integrated platform.',
+        'Rather than maintaining fragmented silos for dining, stationery, and dorm logistics, our clearinghouse unifies listings, orders, atomic inventory, and token verification into one coherent campus service platform.',
     },
     {
       icon: Zap,
-      title: 'Atomic Stock Protection',
+      title: 'Atomic Concession Stock Locks',
       description:
-        'High lunch break traffic creates heavy concurrency. Database row-level locks ensure that meal portions and course textbook listings cannot be double-booked or oversold.',
+        'High lunch rush periods create heavy concurrency. Database row-level locks ensure that hot meal portions, examination blue books, and course textbook reservations cannot be double-booked or oversold.',
     },
     {
       icon: Database,
-      title: 'Immutable Audit Trail',
+      title: 'Immutable Ledger Audit Trail',
       description:
-        'Every checkout preserves an immutable price snapshot and timeline audit log. Every status change from preparation to pickup is permanently recorded.',
+        'Every checkout preserves an immutable rate snapshot and timeline audit log. Every status change from kitchen prep to physical 4-digit PIN counter pickup is permanently recorded.',
     },
     {
       icon: ShieldCheck,
-      title: 'Role-Based Governance',
+      title: 'Strict Role-Based Governance',
       description:
-        'Strict permissions separate Students, Campus Merchants, Residence Wardens, and SuperAdmins, ensuring end-to-end data isolation and security.',
+        'Rigorous access boundaries partition Students, Merchant Concessionaires, Residence Wardens, and SuperAdmins, ensuring end-to-end data integrity and role-specific workflows.',
     },
   ];
 
   const techStack = [
-    { name: 'Django 5.0 & DRF', role: 'Enterprise Python backend & REST API' },
-    { name: 'PostgreSQL 16', role: 'ACID transactional database with row-level locks' },
-    { name: 'React 18 & Vite', role: 'Fast, modular single-page interface' },
-    { name: 'Tailwind CSS', role: 'Design token architecture with accessible contrast' },
-    { name: 'Zustand & Axios', role: 'Client state management & JWT lifecycle' },
+    { name: 'Django 5.0 & DRF', role: 'Enterprise Python backend & robust transactional REST API' },
+    { name: 'PostgreSQL 16', role: 'ACID transactional engine with row-level locks' },
+    { name: 'React 18 & Vite', role: 'Fast, modular single-page campus interface' },
+    { name: 'Tailwind CSS', role: 'University publication design tokens and readable typography' },
+    { name: 'Zustand & Axios', role: 'Client state management & secure JWT lifecycle' },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-24">
-      {/* Header Banner */}
-      <section className="bg-gradient-to-b from-slate-950 via-[#0A1128] to-slate-900 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center space-y-4">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-semibold text-slate-300">
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-            <span>Platform Blueprint</span>
+    <div className="min-h-screen bg-[#F8F6F0] text-zinc-900 pb-24 font-sans">
+      {/* Masthead Banner */}
+      <section className="bg-[#FAF8F3] border-b border-[#E4DDCF] py-14 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center space-y-3">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-500">
+            <Sparkles className="h-3.5 w-3.5 text-zinc-700" />
+            <span>INSTITUTIONAL CHARTER · CLEARINGHOUSE BLUEPRINT</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
-            Architecture &amp; Mission
+          <h1 className="font-serif text-3xl sm:text-5xl font-normal text-zinc-950 tracking-tight">
+            Platform Architecture &amp; Mission
           </h1>
-          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Engineered to streamline campus daily life: eliminating long lunch queues, guaranteeing authentic course stationery, and facilitating trusted peer exchange.
+          <p className="text-xs sm:text-sm text-zinc-600 max-w-2xl mx-auto leading-relaxed font-sans">
+            Engineered to streamline daily campus logistics: eliminating congested canteen queues, guaranteeing authentic coursework supplies, and facilitating trusted peer exchange.
           </p>
         </div>
       </section>
 
       {/* 4 Architectural Pillars */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {pillars.map((pil, idx) => {
             const Icon = pil.icon;
             return (
               <div
                 key={idx}
-                className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition"
+                className="bg-white rounded-lg border border-[#E4DDCF] p-7 shadow-xs hover:border-zinc-400 transition-colors"
               >
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 border border-blue-200">
-                  <Icon className="h-6 w-6" />
+                <div className="w-10 h-10 rounded bg-[#FAF8F3] border border-[#E4DDCF] text-zinc-800 flex items-center justify-center mb-4">
+                  <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">{pil.title}</h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{pil.description}</p>
+                <h3 className="font-serif font-bold text-lg text-zinc-950 mb-1.5">{pil.title}</h3>
+                <p className="text-xs text-zinc-600 leading-relaxed font-sans">{pil.description}</p>
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* Technology Stack Grid */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
-        <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 shadow-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <Code2 className="h-6 w-6 text-blue-600" />
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-              Core Technical Stack
+      {/* Technical Stack Grid */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+        <div className="bg-white rounded-lg border border-[#E4DDCF] p-6 sm:p-8 shadow-xs">
+          <div className="flex items-center gap-2.5 pb-4 mb-6 border-b border-[#E4DDCF]">
+            <Code2 className="h-5 w-5 text-zinc-700" />
+            <h2 className="font-serif font-bold text-xl text-zinc-950">
+              Core Technical Infrastructure
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {techStack.map((tech, idx) => (
-              <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <p className="font-bold text-slate-900 text-sm">{tech.name}</p>
-                <p className="text-xs text-slate-500 mt-1">{tech.role}</p>
+            {techStack.map((tech) => (
+              <div key={tech.name} className="p-4 rounded border border-[#E4DDCF] bg-[#FAF8F3]">
+                <h4 className="font-mono font-bold text-xs text-zinc-950 uppercase">{tech.name}</h4>
+                <p className="text-xs text-zinc-600 mt-1 font-sans">{tech.role}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* CTA Box */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center">
-        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 border border-slate-800">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">Ready to explore?</h2>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto mb-6">
-            Browse live campus listings or create an account to start pre-ordering.
-          </p>
-          <div className="flex justify-center gap-3">
+          <div className="mt-8 pt-6 border-t border-[#E4DDCF] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-zinc-500 font-mono">
+              Campus Clearinghouse v2.4 • Academic Year 2026-2027
+            </p>
             <Link to="/marketplace">
-              <Button variant="blue" size="lg" className="px-6 font-bold">
-                Enter Marketplace
-              </Button>
-            </Link>
-            <Link to="/contact">
-              <Button variant="outline" size="lg" className="px-6 font-bold bg-slate-800 text-white border-slate-700 hover:bg-slate-700">
-                Contact Directory
+              <Button variant="primary" size="sm" className="text-xs font-bold font-mono flex items-center gap-1.5">
+                <span>Explore Concession Catalog</span>
+                <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
           </div>

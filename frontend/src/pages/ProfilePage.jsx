@@ -1,10 +1,11 @@
 /**
- * Campus Commons - Student & User Profile Management
- * Personal account details, room assignments, and password security.
+ * Campus Commons - Student & User Identity Dossier
+ * Digital Campus Identity Card & Account Credentials:
+ * Official contact particulars, residence room assignments, and access security.
  */
 
 import { useEffect, useState } from 'react';
-import { Building2, Mail, Phone, User, KeyRound } from 'lucide-react';
+import { Building2, Mail, Phone, User, KeyRound, Shield } from 'lucide-react';
 import * as authAPI from '../api/auth';
 import useAuthStore from '../store/authStore';
 import Alert from '../components/shared/Alert';
@@ -17,7 +18,7 @@ const errorMessage = (error) => {
   if (data && typeof data === 'object') {
     return Object.values(data).flat().join(' ');
   }
-  return 'We could not save your changes. Please try again.';
+  return 'We could not save your changes. Please verify the entered data.';
 };
 
 export default function ProfilePage() {
@@ -52,7 +53,7 @@ export default function ProfilePage() {
       });
       setUser(updated);
       setEditing(false);
-      setSuccess('Profile details updated successfully.');
+      setSuccess('Identity record updated successfully.');
     } catch (requestError) {
       setError(errorMessage(requestError));
     } finally {
@@ -72,7 +73,7 @@ export default function ProfilePage() {
         new_password_confirmation: password.confirmation,
       });
       setPassword({ old: '', next: '', confirmation: '' });
-      setSuccess('Your password has been changed securely.');
+      setSuccess('Access credentials updated securely.');
     } catch (requestError) {
       setError(errorMessage(requestError));
     } finally {
@@ -81,12 +82,19 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 pb-24 text-slate-900">
+    <div className="min-h-screen bg-[#F8F6F0] text-zinc-900 py-10 pb-24 font-sans">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 pb-6 border-b border-slate-200">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Account &amp; Profile</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Manage your personal contact details, campus address, and security credentials.
+        {/* Masthead */}
+        <div className="mb-8 pb-5 border-b border-[#E4DDCF]">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+            <Shield className="h-3.5 w-3.5 text-zinc-700" />
+            <span>CAMPUS REGISTRY · DIGITAL IDENTITY SLIP</span>
+          </div>
+          <h1 className="font-serif text-3xl sm:text-4xl font-normal text-zinc-950 tracking-tight">
+            Account &amp; Identity Credentials
+          </h1>
+          <p className="text-zinc-600 text-xs sm:text-sm mt-1 font-sans">
+            Manage your verified contact coordinates, hall residence assignment, and authentication password.
           </p>
         </div>
 
@@ -101,96 +109,96 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          {/* User Profile Card */}
-          <div className="md:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-            <div className="flex items-center justify-between pb-6 border-b border-slate-100">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold text-xl shadow-sm">
-                  {user?.name ? user.name[0].toUpperCase() : <User className="h-6 w-6" />}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+          {/* Identity Dossier Card */}
+          <div className="md:col-span-7 bg-white rounded-lg border border-[#E4DDCF] p-6 sm:p-7 shadow-xs">
+            <div className="flex items-center justify-between pb-5 border-b border-[#E4DDCF]">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded bg-zinc-900 text-white flex items-center justify-center font-serif font-bold text-lg">
+                  {user?.name ? user.name[0].toUpperCase() : <User className="h-5 w-5" />}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">{user?.name}</h2>
-                  <p className="text-xs text-slate-400">{user?.email}</p>
-                  <span className="inline-block mt-1 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                    {user?.role}
+                  <h2 className="font-serif font-bold text-lg text-zinc-950">{user?.name}</h2>
+                  <p className="text-xs font-mono text-zinc-500">{user?.email}</p>
+                  <span className="inline-block mt-1 text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-[#E4DDCF] bg-[#FAF8F3] text-zinc-800">
+                    Role: {user?.role}
                   </span>
                 </div>
               </div>
 
               {!editing && (
-                <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-                  Edit Profile
+                <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="text-xs">
+                  Modify Details
                 </Button>
               )}
             </div>
 
             {editing ? (
-              <form onSubmit={saveProfile} className="mt-6 space-y-4">
+              <form onSubmit={saveProfile} className="mt-5 space-y-4">
                 <Input
-                  label="Full Name"
+                  label="Full Official Name"
                   name="name"
                   value={form.name}
                   onChange={updateForm}
                   required
                 />
                 <Input
-                  label="Phone Number"
+                  label="Contact Phone Number"
                   name="phone"
                   value={form.phone}
                   onChange={updateForm}
                   placeholder="+91 98765 43210"
                 />
                 <Input
-                  label="Hostel Room / Block"
+                  label="Residence Room / Hall Block"
                   name="hostel_room"
                   value={form.hostel_room}
                   onChange={updateForm}
                   placeholder="Block B-302"
                 />
                 <div className="flex gap-2 pt-2">
-                  <Button type="submit" variant="blue" loading={saving} disabled={saving} className="font-bold">
+                  <Button type="submit" variant="primary" size="md" loading={saving} disabled={saving} className="text-xs font-bold font-mono">
                     Save Changes
                   </Button>
-                  <Button variant="ghost" onClick={() => setEditing(false)}>
+                  <Button variant="outline" size="md" onClick={() => setEditing(false)} className="text-xs">
                     Cancel
                   </Button>
                 </div>
               </form>
             ) : (
-              <div className="mt-6 space-y-4 text-xs">
-                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                  <Mail className="h-4 w-4 text-slate-400" />
+              <div className="mt-5 space-y-3 text-xs font-sans">
+                <div className="flex items-center gap-3 p-3.5 rounded border border-[#E4DDCF] bg-[#FAF8F3]">
+                  <Mail className="h-4 w-4 text-zinc-500 shrink-0" />
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Campus Email</span>
-                    <span className="font-semibold text-slate-800">{user?.email}</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">Campus Email Address</span>
+                    <span className="font-mono font-semibold text-zinc-900">{user?.email}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                  <Phone className="h-4 w-4 text-slate-400" />
+                <div className="flex items-center gap-3 p-3.5 rounded border border-[#E4DDCF] bg-[#FAF8F3]">
+                  <Phone className="h-4 w-4 text-zinc-500 shrink-0" />
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Phone Contact</span>
-                    <span className="font-semibold text-slate-800">{user?.phone || 'Not provided'}</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">Registered Phone</span>
+                    <span className="font-mono font-semibold text-zinc-900">{user?.phone || 'Not provided'}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                  <Building2 className="h-4 w-4 text-slate-400" />
+                <div className="flex items-center gap-3 p-3.5 rounded border border-[#E4DDCF] bg-[#FAF8F3]">
+                  <Building2 className="h-4 w-4 text-zinc-500 shrink-0" />
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Hostel Room</span>
-                    <span className="font-semibold text-slate-800">{user?.hostel_room || 'Not assigned'}</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">Hostel Room Allocation</span>
+                    <span className="font-mono font-semibold text-zinc-900">{user?.hostel_room || 'Not assigned'}</span>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Change Password Card */}
-          <div className="md:col-span-5 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 mb-6">
-              <KeyRound className="h-5 w-5 text-blue-600" />
-              <h2 className="text-base font-bold text-slate-900">Change Password</h2>
+          {/* Change Password Slip */}
+          <div className="md:col-span-5 bg-white rounded-lg border border-[#E4DDCF] p-6 sm:p-7 shadow-xs">
+            <div className="flex items-center gap-2 pb-4 border-b border-[#E4DDCF] mb-5">
+              <KeyRound className="h-4 w-4 text-zinc-700" />
+              <h2 className="font-serif font-bold text-base text-zinc-950">Update Password</h2>
             </div>
 
             <form onSubmit={savePassword} className="space-y-4">
@@ -222,12 +230,13 @@ export default function ProfilePage() {
               <div className="pt-2">
                 <Button
                   type="submit"
-                  variant="blue"
+                  variant="primary"
+                  size="md"
                   loading={passwordSaving}
                   disabled={passwordSaving || !password.old || !password.next}
-                  className="w-full font-bold py-2.5 rounded-xl shadow-xs"
+                  className="w-full text-xs font-mono font-bold py-2.5"
                 >
-                  Update Password
+                  Update Access Key
                 </Button>
               </div>
             </form>
