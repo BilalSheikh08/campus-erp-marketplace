@@ -119,7 +119,14 @@ export default function ListingCard({ listing }) {
           </div>
 
           {isStudentOrGuest ? (
-            isPurchasable ? (
+            categoryType === 'book' || categoryType === 'books' ? (
+              <Link
+                to={`/books/${id}`}
+                className="text-[10px] font-mono font-medium text-purple-900 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2 py-1 rounded transition-colors"
+              >
+                View &amp; Reserve
+              </Link>
+            ) : isPurchasable ? (
               <button
                 type="button"
                 onClick={handleAddToCart}

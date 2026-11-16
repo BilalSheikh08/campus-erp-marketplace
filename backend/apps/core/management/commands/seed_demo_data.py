@@ -206,7 +206,6 @@ class Command(BaseCommand):
                     "is_available": True,
                 },
             )
-            Inventory.objects.update_or_create(listing=listing, defaults={"quantity": 1})
 
         # 7. Reviews
         self.stdout.write("--> Seeding Reviews and ratings...")

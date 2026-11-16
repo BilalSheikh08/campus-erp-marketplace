@@ -307,6 +307,16 @@ export default function ListingDetailPage() {
                       Ordering Reserved for Students (Staff Inspection Mode)
                     </p>
                   </div>
+                ) : categoryType === 'book' || categoryType === 'books' ? (
+                  <Button
+                    onClick={() => navigate(`/books/${id}`)}
+                    variant="primary"
+                    size="lg"
+                    className="w-full py-3 rounded text-sm font-semibold bg-purple-900 hover:bg-purple-800 text-white flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    <span>Reserve Used Textbook (Student Handoff) ➜</span>
+                  </Button>
                 ) : isPurchasable ? (
                   <Button
                     onClick={handleAddToCart}
