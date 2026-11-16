@@ -139,12 +139,18 @@ class ListingSerializer(serializers.ModelSerializer):
         if inventory is not None:
             return inventory.stock_status
         if instance.category_type == Listing.Category.BOOK:
-            return None
+            book_detail = getattr(instance, "book_detail", None)
+            return "in_stock" if (book_detail and book_detail.is_available) else "out_of_stock"
         return "out_of_stock"
 
     def get_is_purchasable(self, instance):
         inventory = self._get_inventory(instance)
-        return bool(inventory and inventory.is_purchasable)
+        if inventory is not None:
+            return inventory.is_purchasable
+        if instance.category_type == Listing.Category.BOOK:
+            book_detail = getattr(instance, "book_detail", None)
+            return bool(book_detail and book_detail.is_available)
+        return False
 
     @staticmethod
     def _normalize_category(value):

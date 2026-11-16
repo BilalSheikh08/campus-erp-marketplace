@@ -128,7 +128,7 @@ class Command(BaseCommand):
         stationery_items = [
             ("Classmate Pulse Hardbound Notebook (200 Pgs)", "High-quality 70 GSM ruled paper with lay-flat spiral binding and perforated sheets.", 75, "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80", "NB-200-PLS", "pieces"),
             ("Casio FX-991CW Advanced Scientific Calculator", "High-resolution 4-gradation display with 540+ mathematical functions for engineering.", 1290, "https://images.unsplash.com/photo-1611125832047-1d7ad1e8e48f?w=800&q=80", "CALC-FX991", "pieces"),
-            ("Reynolds 0.7mm Ballpoint Pen (Pack of 10)", "Smooth laser-tip fluid ink flow in royal blue, perfect for exam papers.", 95, "https://images.unsplash.com/photo-1585336261026-77cc7c97fca8?w=800&q=80", "PEN-10-BLU", "pack"),
+            ("Reynolds 0.7mm Ballpoint Pen (Pack of 10)", "Smooth laser-tip fluid ink flow in royal blue, perfect for exam papers.", 95, "https://images.unsplash.com/photo-1585776245991-cf89dd7fc73a?w=800&q=80", "PEN-10-BLU", "pack"),
             ("Faber-Castell Pastel Highlighters (Set of 6)", "Water-based quick-drying pastel markers suitable for textbook annotating.", 150, "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=800&q=80", "HL-6-PST", "set"),
         ]
         for title, desc, price, img, sku, unit in stationery_items:
@@ -179,7 +179,7 @@ class Command(BaseCommand):
         # 6. Second-hand Books (Student P2P)
         self.stdout.write("--> Seeding Student Book listings...")
         book_items = [
-            ("Introduction to Algorithms (CLRS) 4th Edition", "Classic MIT textbook. Pristine condition with no pencil markings, includes supplemental CD.", 620, "https://images.unsplash.com/photo-1532012164546-f432f2e3edd4?w=800&q=80", "Thomas H. Cormen", "Computer Science", "4th", "good"),
+            ("Introduction to Algorithms (CLRS) 4th Edition", "Classic MIT textbook. Pristine condition with no pencil markings, includes supplemental CD.", 620, "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&q=80", "Thomas H. Cormen", "Computer Science", "4th", "good"),
             ("Clean Code: Agile Software Craftsmanship", "Essential software engineering best practices handbook. Lightly highlighted on chapter 3.", 450, "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=800&q=80", "Robert C. Martin", "Software Engineering", "1st", "fair"),
             ("Engineering Mechanics: Statics & Dynamics", "Standard engineering syllabus book with solved previous year questions.", 320, "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80", "R. C. Hibbeler", "Mechanical Engineering", "14th", "good"),
         ]
@@ -206,6 +206,7 @@ class Command(BaseCommand):
                     "is_available": True,
                 },
             )
+            Inventory.objects.update_or_create(listing=listing, defaults={"quantity": 1})
 
         # 7. Reviews
         self.stdout.write("--> Seeding Reviews and ratings...")
